@@ -9,7 +9,7 @@ import { fetchConnection, type ConnectionRecord } from '../services/connectionSe
 import { listMessages, markConnectionRead, sendMessage, type ChatMessage } from '../services/chatService'
 import { createReport } from '../services/reportService'
 import { ScreenshotField } from '../components/support/ScreenshotField'
-import type { UploadedImage } from '../services/firebaseStorage'
+import type { UploadedImage } from '../services/screenshotService'
 import type { ReportReason } from '../types'
 
 const MAX_MESSAGE_LENGTH = 2000

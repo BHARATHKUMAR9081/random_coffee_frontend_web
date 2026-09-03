@@ -67,15 +67,9 @@ export function ProfilePhotoField({
               event.target.value = ''
             }}
           />
-          <button
-            type="button"
-            disabled={blocked}
-            onClick={() => inputRef.current?.click()}
-            className="inline-flex min-h-11 w-full items-center justify-center rounded-full bg-navy-900 px-4 text-sm font-semibold text-white hover:bg-navy-800 disabled:opacity-60 sm:w-auto"
-          >
-            {uploading ? 'Uploading…' : value ? 'Change photo' : 'Add photo'}
-          </button>
-          <p className="mt-1.5 text-xs text-navy-900/45">JPEG, PNG, or WebP. 5MB or smaller.</p>
+          <p className="text-xs text-navy-900/45">
+            {uploading ? 'Uploading…' : 'Tap the camera to add or change your photo. JPEG, PNG, or WebP. 5MB or smaller.'}
+          </p>
           {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
         </div>
       </div>

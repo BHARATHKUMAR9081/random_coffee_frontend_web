@@ -100,6 +100,12 @@ export const emptyProfile: BusinessProfile = {
   lookingFor: [],
 }
 
+export const SHORT_DESCRIPTION_MIN = 50
+
+export function isShortDescriptionValid(value: string): boolean {
+  return value.trim().length >= SHORT_DESCRIPTION_MIN
+}
+
 export function isProfileComplete(profile: BusinessProfile): boolean {
   const name = profileDisplayName(profile)
   return Boolean(
@@ -110,6 +116,7 @@ export function isProfileComplete(profile: BusinessProfile): boolean {
       profile.companyName &&
       profile.industry &&
       profile.city &&
+      isShortDescriptionValid(profile.shortDescription) &&
       profile.lookingFor.length > 0 &&
       profile.profilePhotoUrl,
   )

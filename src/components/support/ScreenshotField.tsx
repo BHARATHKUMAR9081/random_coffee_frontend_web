@@ -1,21 +1,20 @@
 import { useState } from 'react'
-import { isFirebaseConfigured, uploadSupportImage, type UploadedImage } from '../../services/firebaseStorage'
+import { ApiError } from '../../services/http'
+import { uploadSupportImage, type UploadedImage } from '../../services/screenshotService'
 
 export function ScreenshotField({
   folder,
-  accountId,
   disabled,
   onUploaded,
 }: {
   folder: 'tickets' | 'reports'
-  accountId: string
+  accountId?: string
   disabled?: boolean
   onUploaded: (image: UploadedImage | null) => void
 }) {
   const [fileName, setFileName] = useState<string | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [uploading, setUploading] = useState(false)
-  const configured = isFirebaseConfigured()
 
   async function handleFile(file: File | undefined) {
     setError(null)
@@ -24,19 +23,15 @@ export function ScreenshotField({
       onUploaded(null)
       return
     }
-    if (!configured) {
-      setError('Screenshot upload is not configured yet. You can still submit without an image.')
-      return
-    }
     setUploading(true)
     try {
-      const uploaded = await uploadSupportImage(file, folder, accountId)
+      const uploaded = await uploadSupportImage(file, folder)
       setFileName(file.name)
       onUploaded(uploaded)
     } catch (err) {
       setFileName(null)
       onUploaded(null)
-      setError(err instanceof Error ? err.message : 'Could not upload that image.')
+      setError(err instanceof ApiError ? err.message : err instanceof Error ? err.message : 'Could not upload that image.')
     } finally {
       setUploading(false)
     }
@@ -55,9 +50,6 @@ export function ScreenshotField({
       {uploading && <p className="mt-1 text-xs text-navy-900/50">Uploading…</p>}
       {fileName && !uploading && <p className="mt-1 text-xs text-green-700">Attached {fileName}</p>}
       {error && <p className="mt-1 text-xs text-red-600">{error}</p>}
-      {!configured && (
-        <p className="mt-1 text-xs text-navy-900/45">Add Firebase keys to enable screenshot upload.</p>
-      )}
     </div>
   )
 }

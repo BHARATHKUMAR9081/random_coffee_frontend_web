@@ -6,7 +6,7 @@ import { SelectField, TextAreaField, TextField } from '../components/ui/Field'
 import { ScreenshotField } from '../components/support/ScreenshotField'
 import { ApiError } from '../services/http'
 import { createTicket, listTickets, type SupportTicket, type TicketCategory } from '../services/ticketService'
-import type { UploadedImage } from '../services/firebaseStorage'
+import type { UploadedImage } from '../services/screenshotService'
 
 const categories: { id: TicketCategory; label: string }[] = [
   { id: 'bug', label: 'Bug' },

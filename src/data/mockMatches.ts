@@ -13,6 +13,7 @@ const pool: MatchedProfile[] = [
     country: 'India',
     preferredLanguages: ['Tamil', 'English'],
     lookingFor: 'Suppliers',
+    shortDescription: 'Trades cotton and finished garments for retailers across South India.',
   },
   {
     name: 'Arun Kumar',
@@ -24,6 +25,7 @@ const pool: MatchedProfile[] = [
     country: 'India',
     preferredLanguages: ['Tamil', 'English'],
     lookingFor: 'Buyers',
+    shortDescription: 'Makes precision auto parts and is looking for OEM buyers.',
   },
   {
     name: 'Divya Shankar',

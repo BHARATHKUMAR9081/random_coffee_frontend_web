@@ -32,6 +32,6 @@ export {
 export { listMessages, markConnectionRead, sendMessage, type ChatMessage } from './chatService'
 export { addTicketComment, createTicket, fetchTicket, listTickets, type SupportTicket } from './ticketService'
 export { createReport, listMyReports, type SafetyReport } from './reportService'
-export { isFirebaseConfigured, uploadSupportImage } from './firebaseStorage'
+export { uploadSupportImage } from './screenshotService'
 export { isAdminSessionActive, loginAdmin, logoutAdmin } from './adminAuthService'
 export { listNotifications, markAllNotificationsRead, markNotificationRead } from './notificationService'

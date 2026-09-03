@@ -9,7 +9,7 @@ import type { MatchCallCredentials } from '../services/matchService'
 import { updateMatchSession } from '../services/matchService'
 import { createReport } from '../services/reportService'
 import { ScreenshotField } from '../components/support/ScreenshotField'
-import type { UploadedImage } from '../services/firebaseStorage'
+import type { UploadedImage } from '../services/screenshotService'
 import { useLiveKitRoom } from '../hooks/useLiveKitRoom'
 import { profileDisplayName, type MatchedProfile, type MatchSessionLog } from '../types'
 
@@ -261,6 +261,9 @@ export function CallRoomPage() {
       <div className="mx-auto max-w-md rounded-2xl border border-navy-900/8 bg-white p-6 text-center text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)]">
         <Avatar src={matched.profilePhotoUrl} name={matched.name} size="xl" className="mx-auto" />
         <h1 className="mt-4 text-xl font-semibold">Matched with {matched.name}</h1>
+        {matched.shortDescription && (
+          <p className="mt-2 text-sm leading-5 text-navy-900/70">{matched.shortDescription}</p>
+        )}
         <p className="mt-1 text-sm text-navy-900/60">
           {matched.companyName} · {matched.businessType}
           {matched.industry ? ` · ${matched.industry}` : ''} · {matched.city}
@@ -294,6 +297,10 @@ export function CallRoomPage() {
               size="xl"
               fallbackClassName="bg-white/10 text-white"
             />
+            <p className="text-sm font-medium text-white">{matched.name}</p>
+            {matched.shortDescription && (
+              <p className="max-w-sm text-sm leading-5 text-white/70">{matched.shortDescription}</p>
+            )}
             <p className="text-sm">
               {status === 'connecting' ? 'Connecting…' : status === 'error' ? error : `Waiting for ${matched.name}…`}
             </p>
@@ -312,6 +319,11 @@ export function CallRoomPage() {
           <p className="truncate text-sm font-semibold sm:text-lg">
             {matched.name} <span className="font-normal text-white/60">· {matched.companyName}</span>
           </p>
+          {matched.shortDescription && (
+            <p className="mt-1 line-clamp-2 max-w-xl text-xs leading-4 text-white/70 sm:text-sm sm:leading-5">
+              {matched.shortDescription}
+            </p>
+          )}
           <div className="mt-1 [&_span]:bg-white/15 [&_span]:text-white">
             <VerificationBadges business={matched.isProfileVerified} identity={matched.isIdentityVerified} />
           </div>

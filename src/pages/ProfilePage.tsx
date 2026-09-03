@@ -9,7 +9,13 @@ import { VerificationBadges } from '../components/ui/VerificationBadges'
 import { IndustrySelect, LanguagePicker, OtherSelect, SelectField, TextAreaField, TextField } from '../components/ui/Field'
 import { COUNTRIES, countryFlag, getCities, getStates } from '../data/locations'
 import { isValidGstin, isValidIndianMobile, normalizeGstin } from '../lib/validation'
-import { isProfileComplete, prepareIdentityImage, validateProfilePhoto } from '../services/profileService'
+import {
+  isProfileComplete,
+  isShortDescriptionValid,
+  prepareIdentityImage,
+  SHORT_DESCRIPTION_MIN,
+  validateProfilePhoto,
+} from '../services/profileService'
 import { asLanguageList, IDENTITY_DOCUMENT_TYPES, type BusinessProfile, type BusinessType, type ConnectionIntent, type IdentityDocumentType } from '../types'
 
 const businessTypes: BusinessType[] = [
@@ -146,8 +152,20 @@ export function ProfilePage() {
       setError('Add a profile photo.')
       return
     }
-    if (!form.firstName || !form.lastName || !form.companyName || !form.businessType || !form.industry.trim() || !form.city || form.preferredLanguages.length === 0 || form.lookingFor.length === 0) {
-      setError('Please fill in your name, company, business type, industry, city, languages, and at least one "looking for" option.')
+    if (
+      !form.firstName ||
+      !form.lastName ||
+      !form.companyName ||
+      !form.businessType ||
+      !form.industry.trim() ||
+      !form.city ||
+      !isShortDescriptionValid(form.shortDescription) ||
+      form.preferredLanguages.length === 0 ||
+      form.lookingFor.length === 0
+    ) {
+      setError(
+        `Please fill in your name, company, business type, industry, city, a short description of at least ${SHORT_DESCRIPTION_MIN} characters, languages, and at least one "looking for" option.`,
+      )
       return
     }
     if (!isValidIndianMobile(form.mobileNumber)) {
@@ -325,13 +343,20 @@ export function ProfilePage() {
             />
           </div>
 
-          <TextAreaField
-            id="shortDescription"
-            label="Short business description"
-            value={form.shortDescription}
-            onChange={(e) => update('shortDescription', e.target.value)}
-            placeholder="What does your business do?"
-          />
+          <div>
+            <TextAreaField
+              id="shortDescription"
+              label="Short business description"
+              required
+              minLength={SHORT_DESCRIPTION_MIN}
+              value={form.shortDescription}
+              onChange={(e) => update('shortDescription', e.target.value)}
+              placeholder="What does your business do? At least 50 characters."
+            />
+            <p className={`mt-1 text-xs ${isShortDescriptionValid(form.shortDescription) ? 'text-navy-900/45' : 'text-navy-900/60'}`}>
+              {form.shortDescription.trim().length}/{SHORT_DESCRIPTION_MIN} characters minimum
+            </p>
+          </div>
 
           <div>
             <p className="mb-2 text-sm font-medium text-navy-900">

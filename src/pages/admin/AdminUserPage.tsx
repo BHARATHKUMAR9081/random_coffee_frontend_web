@@ -265,6 +265,8 @@ export function AdminUserPage() {
                 <TextAreaField
                   id="shortDescription"
                   label="About"
+                  required
+                  minLength={50}
                   value={form.shortDescription}
                   onChange={(e) => update('shortDescription', e.target.value)}
                 />

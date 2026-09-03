@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { AdminRefreshButton } from '../../components/admin/AdminRefreshButton'
 import { Button } from '../../components/ui/Button'
 import { ApiError } from '../../services/http'
+import { resolveMediaUrl } from '../../services/profileService'
 import { addStaffTicketComment, fetchStaffTicket, updateStaffTicket, type StaffTicket } from '../../services/staffService'
 import { formatAdminTime, statusLabel } from './adminFormat'
 
@@ -91,7 +92,7 @@ export function AdminTicketPage() {
         <section className="mt-6 rounded-2xl border border-navy-900/8 bg-white p-6 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)]">
           <p className="whitespace-pre-wrap text-sm">{ticket.body}</p>
           {ticket.imageUrl && (
-            <a href={ticket.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-gold-600 hover:underline">
+            <a href={resolveMediaUrl(ticket.imageUrl) ?? ticket.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-gold-600 hover:underline">
               View screenshot
             </a>
           )}

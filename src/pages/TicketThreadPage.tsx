@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
 import { ApiError } from '../services/http'
+import { resolveMediaUrl } from '../services/profileService'
 import { addTicketComment, fetchTicket, type SupportTicket, type TicketComment } from '../services/ticketService'
 
 function statusLabel(status: string) {
@@ -98,7 +99,7 @@ export function TicketThreadPage() {
           <div className="border-b border-navy-900/10 pb-4">
             <p className="whitespace-pre-wrap text-sm">{ticket.body}</p>
             {ticket.imageUrl && (
-              <a href={ticket.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-gold-600 hover:underline">
+              <a href={resolveMediaUrl(ticket.imageUrl) ?? ticket.imageUrl} target="_blank" rel="noreferrer" className="mt-2 inline-block text-xs font-medium text-gold-600 hover:underline">
                 View screenshot
               </a>
             )}
