@@ -33,20 +33,24 @@ jobs:
           VITE_LIVEKIT_DEMO_ROOM: "randomcoffee"
         run: npm run build
 
-      - name: Copy Build Files to VM
+      - name: Copy Docker Deployment Files to VM
         uses: appleboy/scp-action@v0.1.7
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
-          source: "dist/*"
-          target: "/var/www/randomcoffee"
+          source: "dist,Dockerfile,nginx.conf"
+          target: "/home/ubuntu/randomcoffee-frontend"
 
-      - name: Restart Nginx
+      - name: Deploy Docker Container
         uses: appleboy/ssh-action@v1.0.3
         with:
           host: ${{ secrets.VM_HOST }}
           username: ${{ secrets.VM_USER }}
           key: ${{ secrets.VM_SSH_KEY }}
           script: |
-            sudo systemctl restart nginx
+            cd /home/ubuntu/randomcoffee-frontend
+            sudo docker build -t randomcoffee-frontend:latest .
+            sudo docker rm -f randomcoffee-frontend 2>/dev/null || true
+            sudo systemctl stop nginx 2>/dev/null || true
+            sudo docker run -d --restart unless-stopped --name randomcoffee-frontend -p 3200:3200 randomcoffee-frontend:latest
