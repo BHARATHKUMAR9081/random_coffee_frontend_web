@@ -7,7 +7,6 @@ dist-ssr
 # Secrets — never commit
 .env
 .env.*
-!.env.example
 
 # Logs
 logs
