@@ -28,7 +28,7 @@ jobs:
 
       - name: Build Vite Application
         env:
-          VITE_API_URL: "http://127.0.0.1:8001"
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
           VITE_LIVEKIT_URL: "wss://random-coffee-ruqy8lkz.livekit.cloud"
           VITE_LIVEKIT_DEMO_ROOM: "randomcoffee"
         run: npm run build
