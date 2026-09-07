@@ -52,5 +52,4 @@ jobs:
             cd /home/ubuntu/randomcoffee-frontend
             sudo docker build -t randomcoffee-frontend:latest .
             sudo docker rm -f randomcoffee-frontend 2>/dev/null || true
-            sudo systemctl stop nginx 2>/dev/null || true
             sudo docker run -d --restart unless-stopped --name randomcoffee-frontend -p 3200:3200 randomcoffee-frontend:latest
