@@ -1,6 +1,6 @@
 import type { BusinessType, MatchFilters, MatchedProfile, MatchSessionLog } from '../types'
 import { findFilteredMatch, getRandomMatch } from '../data/mockMatches'
-import { getJson, patchJson, postJson } from './http'
+import { getJson, patchJson, requestJson } from './http'
 import { toQuery, type ListQuery, type PageMeta } from './paging'
 
 export type { MatchedProfile as MockMatchedUser }
@@ -50,17 +50,28 @@ export function requestMatch(filters: {
   preferredLanguages: string[]
   cityScope: MatchFilters['cityScope']
 }): Promise<MatchResult> {
-  return postJson<MatchResult>('/matches/find/', {
-    industry: filters.industry,
-    businessType: filters.businessType,
-    preferredLanguages: filters.preferredLanguages,
-    preferredLanguage: filters.preferredLanguages[0] ?? '',
-    cityScope: filters.cityScope,
+  const payload = {
+    industry: filters.industry ?? '',
+    businessType: filters.businessType ?? '',
+    preferredLanguages: filters.preferredLanguages ?? [],
+    preferredLanguage: (filters.preferredLanguages && filters.preferredLanguages[0]) ?? '',
+    cityScope: filters.cityScope ?? 'anywhere',
+  }
+
+  // Explicitly dispatch matchmaking trigger as POST with JSON body payload
+  return requestJson<MatchResult>('/matches/find/', {
+    method: 'POST',
+    body: payload,
+    auth: true,
   })
 }
 
 export function stopMatching(): Promise<{ ok: boolean; isAvailable: boolean }> {
-  return postJson('/matches/stop/', {})
+  return requestJson<{ ok: boolean; isAvailable: boolean }>('/matches/stop/', {
+    method: 'POST',
+    body: {},
+    auth: true,
+  })
 }
 
 export function fetchMatchSession(sessionId: string): Promise<MatchResult> {

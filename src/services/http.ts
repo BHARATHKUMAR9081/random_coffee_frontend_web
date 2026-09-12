@@ -1,7 +1,11 @@
 function getBaseApiUrl(): string {
   const envUrl = (import.meta.env.VITE_API_URL || '').trim()
   if (envUrl) {
-    return envUrl.replace(/\/+$/, '')
+    let url = envUrl.replace(/\/+$/, '')
+    if (url.startsWith('http://') && !url.includes('localhost') && !url.includes('127.0.0.1')) {
+      url = url.replace(/^http:\/\//, 'https://')
+    }
+    return url
   }
   return import.meta.env.DEV ? 'http://127.0.0.1:8001/api' : ''
 }
@@ -98,10 +102,15 @@ async function refreshAccessToken(): Promise<boolean> {
 
 export async function requestJson<T>(path: string, options: RequestOptions = {}): Promise<T> {
   const { method = 'GET', body, auth = true, retry = true } = options
+  let httpMethod = (method || 'GET').toUpperCase()
+  if (body !== undefined && httpMethod === 'GET') {
+    httpMethod = 'POST'
+  }
+
   const headers: Record<string, string> = {
     Accept: 'application/json',
   }
-  if (body !== undefined) {
+  if (body !== undefined || httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH') {
     headers['Content-Type'] = 'application/json'
   }
   const accessToken = auth ? getAccessToken() : null
@@ -112,9 +121,9 @@ export async function requestJson<T>(path: string, options: RequestOptions = {})
   let response: Response
   try {
     response = await fetch(buildUrl(path), {
-      method,
+      method: httpMethod,
       headers,
-      body: body === undefined ? undefined : JSON.stringify(body),
+      body: body === undefined ? (httpMethod === 'POST' || httpMethod === 'PUT' || httpMethod === 'PATCH' ? '{}' : undefined) : JSON.stringify(body),
     })
   } catch (err) {
     throw new ApiError(
