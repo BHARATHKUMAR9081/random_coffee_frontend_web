@@ -1,0 +1,55 @@
+name: CI/CD - Random Coffee Frontend
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Lint
+        run: npm run lint
+
+      - name: Build Vite Application
+        env:
+          VITE_API_URL: ${{ secrets.VITE_API_URL }}
+          VITE_LIVEKIT_URL: "wss://random-coffee-ruqy8lkz.livekit.cloud"
+          VITE_LIVEKIT_DEMO_ROOM: "randomcoffee"
+        run: npm run build
+
+      - name: Copy Docker Deployment Files to VM
+        uses: appleboy/scp-action@v0.1.7
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          source: "dist,Dockerfile,nginx.conf"
+          target: "/home/ubuntu/randomcoffee-frontend"
+
+      - name: Deploy Docker Container
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.VM_HOST }}
+          username: ${{ secrets.VM_USER }}
+          key: ${{ secrets.VM_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/randomcoffee-frontend
+            sudo docker build -t randomcoffee-frontend:latest .
+            sudo docker rm -f randomcoffee-frontend 2>/dev/null || true
+            sudo docker run -d --restart unless-stopped --name randomcoffee-frontend -p 3200:3200 randomcoffee-frontend:latest
