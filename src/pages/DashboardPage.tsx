@@ -88,7 +88,8 @@ export function DashboardPage() {
   const displayName = profileDisplayName(user.profile) || 'Your profile'
   const profileReady = isProfileComplete(user.profile)
   const verified = user.verificationStatus === 'VERIFIED'
-  const canMatch = profileReady && verified
+  // Temporarily allow any user to enter matchmaking queue for MVP testing
+  const canMatch = true
   const [inbox, setInbox] = useState<ConnectionRecord[]>([])
   const [inboxError, setInboxError] = useState<string | null>(null)
   const [tickets, setTickets] = useState<SupportTicket[]>([])

@@ -19,7 +19,7 @@ export {
 export { computeCompletionPercent, emptyProfile, isProfileComplete } from './profileService'
 export { fetchPublicProfile, type PublicBusinessProfile } from './accountService'
 export { fetchCallToken, type CallTokenResponse } from './callService'
-export { findRandomMatch, listMatchSessions, requestMatch, stopMatching, updateMatchSession, type MatchCallCredentials, type MatchResult } from './matchService'
+export { findRandomMatch, listMatchSessions, requestMatch, stopMatching, updateMatchSession, type MatchCallCredentials, type MatchResult, type MatchResponse, type MatchTimeoutResponse } from './matchService'
 export {
   acceptConnection,
   cancelConnection,

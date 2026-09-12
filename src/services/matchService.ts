@@ -20,6 +20,17 @@ export interface MatchResult {
   filters?: MatchSessionLog['filters']
 }
 
+export interface MatchTimeoutResponse {
+  status: 'timeout'
+  message: string
+}
+
+export type MatchResponse = MatchResult | MatchTimeoutResponse
+
+export function isMatchResult(response: MatchResponse): response is MatchResult {
+  return 'connectedUser' in response && response.connectedUser !== undefined
+}
+
 export function findRandomMatch(): MatchedProfile {
   return getRandomMatch()
 }
@@ -49,7 +60,7 @@ export function requestMatch(filters: {
   businessType: BusinessType | ''
   preferredLanguages: string[]
   cityScope: MatchFilters['cityScope']
-}): Promise<MatchResult> {
+}): Promise<MatchResponse> {
   const payload = {
     industry: filters.industry ?? '',
     businessType: filters.businessType ?? '',
@@ -59,7 +70,7 @@ export function requestMatch(filters: {
   }
 
   // Explicitly dispatch matchmaking trigger as POST with JSON body payload
-  return requestJson<MatchResult>('/matches/find/', {
+  return requestJson<MatchResponse>('/matches/find/', {
     method: 'POST',
     body: payload,
     auth: true,
