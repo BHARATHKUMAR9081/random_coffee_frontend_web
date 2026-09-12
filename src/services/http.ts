@@ -1,6 +1,12 @@
-export const API_URL = (
-  import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://127.0.0.1:8001' : '')
-).replace(/\/+$/, '')
+function getBaseApiUrl(): string {
+  const envUrl = (import.meta.env.VITE_API_URL || '').trim()
+  if (envUrl) {
+    return envUrl.replace(/\/+$/, '')
+  }
+  return import.meta.env.DEV ? 'http://127.0.0.1:8001/api' : ''
+}
+
+export const API_URL = getBaseApiUrl()
 
 import { cacheTokens, clearCachedAuth, getAccessToken, getRefreshToken } from '../store/authAccessors'
 
@@ -38,8 +44,18 @@ async function readError(response: Response): Promise<string> {
 }
 
 export function buildUrl(path: string): string {
-  const normalizedPath = path.startsWith('/') ? path : `/${path}`
-  const base = `${API_URL}${normalizedPath}`
+  let cleanPath = path.startsWith('/') ? path : `/${path}`
+
+  // Prevent duplicate /api/api/ paths:
+  // If base API_URL already ends with '/api' and cleanPath starts with '/api/', strip leading '/api'
+  if (API_URL.endsWith('/api') && cleanPath.startsWith('/api/')) {
+    cleanPath = cleanPath.slice(4)
+  } else if (!API_URL.endsWith('/api') && !cleanPath.startsWith('/api/') && API_URL !== '') {
+    // If base API_URL does not end with '/api' and cleanPath does not have '/api/', prepend it
+    cleanPath = `/api${cleanPath}`
+  }
+
+  const base = `${API_URL}${cleanPath}`
   // When communicating over ngrok tunnels, append ngrok-skip-browser-warning so ngrok never intercepts API GET requests with an HTML warning
   if (API_URL.includes('ngrok')) {
     const sep = base.includes('?') ? '&' : '?'
@@ -56,7 +72,7 @@ async function refreshAccessToken(): Promise<boolean> {
     const refreshToken = getRefreshToken()
     if (!refreshToken) return false
     try {
-      const response = await fetch(buildUrl('/api/accounts/refresh/'), {
+      const response = await fetch(buildUrl('/accounts/refresh/'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
         body: JSON.stringify({ refreshToken }),

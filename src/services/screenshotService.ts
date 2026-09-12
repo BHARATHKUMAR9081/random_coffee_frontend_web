@@ -9,5 +9,5 @@ export async function uploadSupportImage(file: File, folder: 'tickets' | 'report
   const body = new FormData()
   body.append('image', file)
   body.append('folder', folder)
-  return postForm<UploadedImage>('/api/support/screenshots/', body)
+  return postForm<UploadedImage>('/support/screenshots/', body)
 }

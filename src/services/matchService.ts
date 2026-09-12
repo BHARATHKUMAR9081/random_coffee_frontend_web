@@ -50,7 +50,7 @@ export function requestMatch(filters: {
   preferredLanguages: string[]
   cityScope: MatchFilters['cityScope']
 }): Promise<MatchResult> {
-  return postJson<MatchResult>('/api/matches/find/', {
+  return postJson<MatchResult>('/matches/find/', {
     industry: filters.industry,
     businessType: filters.businessType,
     preferredLanguages: filters.preferredLanguages,
@@ -60,15 +60,15 @@ export function requestMatch(filters: {
 }
 
 export function stopMatching(): Promise<{ ok: boolean; isAvailable: boolean }> {
-  return postJson('/api/matches/stop/', {})
+  return postJson('/matches/stop/', {})
 }
 
 export function fetchMatchSession(sessionId: string): Promise<MatchResult> {
-  return getJson<MatchResult>(`/api/matches/sessions/${sessionId}/`)
+  return getJson<MatchResult>(`/matches/sessions/${sessionId}/`)
 }
 
 export function listMatchSessions(query?: ListQuery): Promise<{ sessions: MatchResult[] } & PageMeta> {
-  return getJson(`/api/matches/sessions/${toQuery(query)}`)
+  return getJson(`/matches/sessions/${toQuery(query)}`)
 }
 
 export function updateMatchSession(
@@ -82,5 +82,5 @@ export function updateMatchSession(
     status?: string
   },
 ): Promise<MatchResult> {
-  return patchJson<MatchResult>(`/api/matches/sessions/${sessionId}/`, payload)
+  return patchJson<MatchResult>(`/matches/sessions/${sessionId}/`, payload)
 }

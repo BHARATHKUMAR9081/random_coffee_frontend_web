@@ -55,5 +55,5 @@ export interface PlanCatalog {
 }
 
 export function fetchPlanCatalog(): Promise<PlanCatalog> {
-  return getJson<PlanCatalog>('/api/accounts/plans/')
+  return getJson<PlanCatalog>('/accounts/plans/')
 }

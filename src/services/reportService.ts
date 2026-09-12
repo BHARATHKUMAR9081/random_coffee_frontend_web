@@ -21,7 +21,7 @@ export interface SafetyReport {
 }
 
 export function listMyReports(query?: ListQuery): Promise<{ reports: SafetyReport[] } & Partial<PageMeta>> {
-  return getJson(`/api/reports/${toQuery(query)}`)
+  return getJson(`/reports/${toQuery(query)}`)
 }
 
 export function createReport(payload: {
@@ -34,5 +34,5 @@ export function createReport(payload: {
   imageUrl?: string
   imagePath?: string
 }): Promise<SafetyReport> {
-  return postJson('/api/reports/', payload)
+  return postJson('/reports/', payload)
 }

@@ -77,7 +77,7 @@ export function registerAccount(payload: {
   privacyPolicyAccepted: boolean
 }): Promise<AuthSession> {
   return postJson<AuthSession>(
-    '/api/accounts/register/',
+    '/accounts/register/',
     {
       ...payload,
       guidelinesAccepted: payload.termsAccepted,
@@ -89,11 +89,11 @@ export function registerAccount(payload: {
 }
 
 export function loginAccount(email: string, password: string): Promise<AuthSession> {
-  return postJson<AuthSession>('/api/accounts/login/', { email, password }, false)
+  return postJson<AuthSession>('/accounts/login/', { email, password }, false)
 }
 
 export function fetchCurrentUser(): Promise<UserPayload> {
-  return getJson<UserPayload>('/api/accounts/me/')
+  return getJson<UserPayload>('/accounts/me/')
 }
 
 export interface ActivityLogEntry {
@@ -104,7 +104,7 @@ export interface ActivityLogEntry {
 }
 
 export function listActivityLog(query?: ListQuery): Promise<{ activity: ActivityLogEntry[] } & PageMeta> {
-  return getJson(`/api/accounts/activity/${toQuery(query)}`)
+  return getJson(`/accounts/activity/${toQuery(query)}`)
 }
 
 export interface UsageSummary {
@@ -132,21 +132,21 @@ export interface UsageLogEntry {
 }
 
 export function listUsageLog(query?: ListQuery): Promise<{ usage: UsageSummary; usageLogs: UsageLogEntry[] } & PageMeta> {
-  return getJson(`/api/accounts/usage/${toQuery(query)}`)
+  return getJson(`/accounts/usage/${toQuery(query)}`)
 }
 
 export function saveAccountProfile(profile: BusinessProfile): Promise<UserPayload> {
-  return putJson<UserPayload>('/api/accounts/profile/', profile)
+  return putJson<UserPayload>('/accounts/profile/', profile)
 }
 
 export function uploadAccountProfilePhoto(file: File): Promise<UserPayload> {
   const body = new FormData()
   body.append('photo', file)
-  return postForm<UserPayload>('/api/accounts/profile/photo/', body)
+  return postForm<UserPayload>('/accounts/profile/photo/', body)
 }
 
 export function verifyAccountBusiness(idNumber: string, idType: string): Promise<UserPayload> {
-  return postJson<UserPayload>('/api/accounts/profile/verify/', { idNumber, idType }, true)
+  return postJson<UserPayload>('/accounts/profile/verify/', { idNumber, idType }, true)
 }
 
 export function verifyAccountIdentity(
@@ -158,7 +158,7 @@ export function verifyAccountIdentity(
   body.append('selfie', selfie)
   body.append('document', document)
   body.append('documentType', documentType)
-  return postForm<UserPayload>('/api/accounts/profile/identity/verify/', body)
+  return postForm<UserPayload>('/accounts/profile/identity/verify/', body)
 }
 
 export interface CallIdentityCheck {
@@ -172,29 +172,29 @@ export interface CallIdentityCheck {
 export function checkCallIdentity(frame: Blob): Promise<CallIdentityCheck> {
   const body = new FormData()
   body.append('frame', frame, 'frame.jpg')
-  return postForm<CallIdentityCheck>('/api/accounts/profile/identity/check/', body)
+  return postForm<CallIdentityCheck>('/accounts/profile/identity/check/', body)
 }
 
 export function changeAccountPlan(planId: PlanId, billing?: BillingInfo): Promise<UserPayload> {
-  return patchJson<UserPayload>('/api/accounts/plan/', billing ? { planId, billing } : { planId })
+  return patchJson<UserPayload>('/accounts/plan/', billing ? { planId, billing } : { planId })
 }
 
 export function fetchAccountBilling(): Promise<{ billing: BillingInfo }> {
-  return getJson<{ billing: BillingInfo }>('/api/accounts/billing/')
+  return getJson<{ billing: BillingInfo }>('/accounts/billing/')
 }
 
 export function saveAccountBilling(billing: BillingInfo): Promise<UserPayload> {
-  return putJson<UserPayload>('/api/accounts/billing/', billing)
+  return putJson<UserPayload>('/accounts/billing/', billing)
 }
 
 export function logoutAccount(): Promise<{ ok: boolean }> {
-  return postJson('/api/accounts/logout/', {})
+  return postJson('/accounts/logout/', {})
 }
 
 export function changeAccountPassword(oldPassword: string, newPassword: string): Promise<{ ok: boolean }> {
-  return postJson('/api/accounts/password/', { oldPassword, newPassword })
+  return postJson('/accounts/password/', { oldPassword, newPassword })
 }
 
 export function deleteOwnAccount(password: string): Promise<{ ok: boolean }> {
-  return postJson('/api/accounts/delete/', { password })
+  return postJson('/accounts/delete/', { password })
 }
