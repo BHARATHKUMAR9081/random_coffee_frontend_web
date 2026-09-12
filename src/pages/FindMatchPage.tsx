@@ -81,31 +81,50 @@ export function FindMatchPage() {
       }
 
       // Infinite requeue loop: continuously re-fire if backend returns status: 'timeout'
+      let consecutiveErrors = 0
       while (requestIdRef.current === requestId) {
-        const result = await requestMatch({
-          industry: filters.industry.trim(),
-          businessType: filters.businessTypes[0] ?? '',
-          preferredLanguages: filters.preferredLanguages,
-          cityScope: filters.cityScope,
-        })
-        if (requestIdRef.current !== requestId) return
-
-        if ('status' in result && result.status === 'timeout') {
-          // Peer not found in this check; pause 1s on client then re-check
-          await new Promise((resolve) => setTimeout(resolve, 1000))
-          continue
-        }
-
-        if ('connectedUser' in result && result.connectedUser) {
-          navigate('/call', {
-            state: {
-              matched: result.connectedUser,
-              user: result.user,
-              connectedUser: result.connectedUser,
-              session: result.session,
-              call: result.call,
-            },
+        try {
+          const result = await requestMatch({
+            industry: filters.industry.trim(),
+            businessType: filters.businessTypes[0] ?? '',
+            preferredLanguages: filters.preferredLanguages,
+            cityScope: filters.cityScope,
           })
+          if (requestIdRef.current !== requestId) return
+
+          // Reset transient error counter on successful response
+          consecutiveErrors = 0
+
+          if ('status' in result && result.status === 'timeout') {
+            // Peer not found in this check; pause 1s on client then re-check
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            continue
+          }
+
+          if ('connectedUser' in result && result.connectedUser) {
+            navigate('/call', {
+              state: {
+                matched: result.connectedUser,
+                user: result.user,
+                connectedUser: result.connectedUser,
+                session: result.session,
+                call: result.call,
+              },
+            })
+            return
+          }
+        } catch (err) {
+          if (requestIdRef.current !== requestId) return
+          // If server returns a transient error (502/503/504 during deployment or brief network glitch),
+          // retry up to 5 times instead of aborting the queue
+          consecutiveErrors += 1
+          if (consecutiveErrors <= 5 && (err instanceof ApiError && (err.status >= 500 || err.status === 0))) {
+            console.warn(`[Matchmaking] Transient server error (${err.status}), retrying (${consecutiveErrors}/5)...`)
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+            continue
+          }
+          setStatus('idle')
+          setError(err instanceof ApiError ? err.message : 'Could not find a match. Try again.')
           return
         }
       }
