@@ -91,7 +91,8 @@ export function FindMatchPage() {
         if (requestIdRef.current !== requestId) return
 
         if ('status' in result && result.status === 'timeout') {
-          // Backend 20-second polling cycle finished without a match; immediately re-fire next request
+          // Peer not found in this check; pause 1s on client then re-check
+          await new Promise((resolve) => setTimeout(resolve, 1000))
           continue
         }
 
