@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react'
 import { resolveMediaUrl } from '../../services/profileService'
 
 function initials(name: string) {
@@ -27,10 +28,23 @@ export function Avatar({
   className?: string
   fallbackClassName?: string
 }) {
+  const [failed, setFailed] = useState(false)
   const url = resolveMediaUrl(src)
   const frame = `${sizeClasses[size]} rounded-full ${className}`
-  if (url) {
-    return <img src={url} alt="" className={`${frame} object-cover`} />
+
+  useEffect(() => {
+    setFailed(false)
+  }, [url])
+
+  if (url && !failed) {
+    return (
+      <img
+        src={url}
+        alt=""
+        className={`${frame} object-cover`}
+        onError={() => setFailed(true)}
+      />
+    )
   }
   return (
     <div className={`flex items-center justify-center font-semibold ${frame} ${fallbackClassName}`}>

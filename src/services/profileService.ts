@@ -77,8 +77,13 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   ) {
     return url
   }
-  if (url.startsWith('/')) return `${API_URL}${url}`
-  return url
+  let path = url.startsWith('/') ? url : `/${url}`
+  if (API_URL.endsWith('/api') && path.startsWith('/api/')) {
+    path = path.slice(4)
+  } else if (!API_URL.endsWith('/api') && !path.startsWith('/api/')) {
+    path = `/api${path}`
+  }
+  return `${API_URL}${path}`
 }
 
 export const emptyProfile: BusinessProfile = {

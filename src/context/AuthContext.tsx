@@ -8,6 +8,7 @@ import {
   identityVerifiedLocal,
   loginDemo as loginDemoAction,
   loginThunk,
+  loginWithLinkedInThunk,
   planChangedLocal,
   profileSavedLocal,
   registerThunk,
@@ -41,6 +42,7 @@ interface AuthContextValue {
     details: { firstName: string; lastName: string; termsAccepted: boolean; refundPolicyAccepted: boolean; privacyPolicyAccepted: boolean },
   ) => Promise<AuthResult>
   login: (email: string, password: string) => Promise<AuthResult>
+  loginWithLinkedIn: (code: string, redirectUri?: string) => Promise<AuthResult>
   loginDemo: () => void
   logout: () => void
   saveProfile: (profile: BusinessProfile) => Promise<AuthResult>
@@ -123,6 +125,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { success: true }
         } catch (error) {
           return { success: false, error: thunkError(error, 'Could not sign in.') }
+        }
+      },
+      loginWithLinkedIn: async (code, redirectUri) => {
+        try {
+          await dispatch(loginWithLinkedInThunk({ code, redirectUri })).unwrap()
+          return { success: true }
+        } catch (error) {
+          return { success: false, error: thunkError(error, 'Could not sign in with LinkedIn.') }
         }
       },
       loginDemo: () => {

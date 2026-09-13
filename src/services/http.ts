@@ -193,8 +193,8 @@ export function postJson<T>(path: string, body: unknown, auth = true): Promise<T
   return requestJson<T>(path, { method: 'POST', body, auth })
 }
 
-export function getJson<T>(path: string): Promise<T> {
-  return requestJson<T>(path, { method: 'GET', auth: true })
+export function getJson<T>(path: string, auth = true): Promise<T> {
+  return requestJson<T>(path, { method: 'GET', auth })
 }
 
 export function putJson<T>(path: string, body: unknown): Promise<T> {

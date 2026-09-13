@@ -12,6 +12,7 @@ import { TicketThreadPage } from './pages/TicketThreadPage'
 import { FindMatchPage } from './pages/FindMatchPage'
 import { LandingPage } from './pages/LandingPage'
 import { LoginPage } from './pages/LoginPage'
+import { LinkedInCallbackPage } from './pages/LinkedInCallbackPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PostCallFeedbackPage } from './pages/PostCallFeedbackPage'
 import { PricingPage } from './pages/PricingPage'
@@ -182,6 +183,7 @@ export default function App() {
       <Route path="/admin/*" element={<AdminApp />} />
       <Route path="/login" element={<LoginPage />} />
       <Route path="/register" element={<RegisterPage />} />
+      <Route path="/auth/linkedin/callback" element={<LinkedInCallbackPage />} />
       <Route path="/*" element={<ShellRoutes />} />
     </Routes>
   )

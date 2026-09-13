@@ -92,6 +92,19 @@ export function loginAccount(email: string, password: string): Promise<AuthSessi
   return postJson<AuthSession>('/accounts/login/', { email, password }, false)
 }
 
+export function getLinkedInAuthUrl(redirectUri?: string): Promise<{ url: string; state: string }> {
+  const query = redirectUri ? `?redirectUri=${encodeURIComponent(redirectUri)}` : ''
+  return getJson<{ url: string; state: string }>(`/accounts/linkedin/url/${query}`, false)
+}
+
+export function loginWithLinkedIn(code: string, redirectUri?: string): Promise<AuthSession> {
+  return postJson<AuthSession>(
+    '/accounts/linkedin/callback/',
+    { code, redirectUri: redirectUri || `${window.location.origin}/auth/linkedin/callback` },
+    false,
+  )
+}
+
 export function fetchCurrentUser(): Promise<UserPayload> {
   return getJson<UserPayload>('/accounts/me/')
 }

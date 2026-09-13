@@ -5,6 +5,7 @@ import {
   changeAccountPlan,
   fetchCurrentUser,
   loginAccount,
+  loginWithLinkedIn,
   registerAccount,
   saveAccountBilling,
   saveAccountProfile,
@@ -160,6 +161,17 @@ export const loginThunk = createAsyncThunk(
       return await loginAccount(payload.email, payload.password)
     } catch (error) {
       return rejectWithValue(rejectMessage(error, 'Could not sign in.'))
+    }
+  },
+)
+
+export const loginWithLinkedInThunk = createAsyncThunk(
+  'auth/loginWithLinkedIn',
+  async (payload: { code: string; redirectUri?: string }, { rejectWithValue }) => {
+    try {
+      return await loginWithLinkedIn(payload.code, payload.redirectUri)
+    } catch (error) {
+      return rejectWithValue(rejectMessage(error, 'Could not sign in with LinkedIn.'))
     }
   },
 )
@@ -367,6 +379,17 @@ const authSlice = createSlice({
       .addCase(loginThunk.rejected, (state, action) => {
         state.status = 'idle'
         state.error = (action.payload as string | undefined) ?? 'Could not sign in.'
+      })
+      .addCase(loginWithLinkedInThunk.pending, (state) => {
+        state.status = 'loading'
+        state.error = null
+      })
+      .addCase(loginWithLinkedInThunk.fulfilled, (state, action) => {
+        applySession(state, action.payload)
+      })
+      .addCase(loginWithLinkedInThunk.rejected, (state, action) => {
+        state.status = 'idle'
+        state.error = (action.payload as string | undefined) ?? 'Could not sign in with LinkedIn.'
       })
       .addCase(hydrateAuth.fulfilled, (state, action) => {
         if (action.payload) applyUserPayload(state, action.payload)
