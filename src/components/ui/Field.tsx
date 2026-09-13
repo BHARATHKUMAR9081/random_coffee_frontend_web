@@ -6,13 +6,14 @@ interface FieldWrapperProps {
   label: string
   htmlFor: string
   required?: boolean
+  compact?: boolean
   children: ReactNode
 }
 
-export function FieldWrapper({ label, htmlFor, required, children }: FieldWrapperProps) {
+export function FieldWrapper({ label, htmlFor, required, compact, children }: FieldWrapperProps) {
   return (
-    <div className="flex flex-col gap-1.5">
-      <label htmlFor={htmlFor} className="text-sm font-medium text-navy-900">
+    <div className={`flex flex-col ${compact ? 'gap-1' : 'gap-1.5'}`}>
+      <label htmlFor={htmlFor} className={`${compact ? 'text-xs font-semibold' : 'text-sm font-medium'} text-navy-900`}>
         {label}
         {required && <span className="text-gold-500"> *</span>}
       </label>
@@ -24,14 +25,19 @@ export function FieldWrapper({ label, htmlFor, required, children }: FieldWrappe
 const inputClasses =
   'w-full min-h-11 rounded-xl border border-navy-900/10 bg-navy-950/[0.03] px-3.5 py-2.5 text-base text-navy-950 placeholder:text-navy-900/35 transition-shadow focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold-500/40 sm:text-sm'
 
+const compactInputClasses =
+  'w-full h-9 min-h-9 rounded-lg border border-navy-900/10 bg-navy-950/[0.03] px-3 py-1.5 text-xs text-navy-950 placeholder:text-navy-900/35 transition-shadow focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold-500/40 sm:text-sm'
+
 export function TextField({
   label,
   required,
+  compact,
+  className = '',
   ...props
-}: InputHTMLAttributes<HTMLInputElement> & { label: string; id: string; required?: boolean }) {
+}: InputHTMLAttributes<HTMLInputElement> & { label: string; id: string; required?: boolean; compact?: boolean }) {
   return (
-    <FieldWrapper label={label} htmlFor={props.id} required={required}>
-      <input className={inputClasses} required={required} {...props} />
+    <FieldWrapper label={label} htmlFor={props.id} required={required} compact={compact}>
+      <input className={`${compact ? compactInputClasses : inputClasses} ${className}`.trim()} required={required} {...props} />
     </FieldWrapper>
   )
 }
@@ -89,12 +95,18 @@ export function TextAreaField({
 export function SelectField({
   label,
   required,
+  compact,
   children,
+  className = '',
   ...props
-}: SelectHTMLAttributes<HTMLSelectElement> & { label: string; id: string; required?: boolean }) {
+}: SelectHTMLAttributes<HTMLSelectElement> & { label: string; id: string; required?: boolean; compact?: boolean }) {
   return (
-    <FieldWrapper label={label} htmlFor={props.id} required={required}>
-      <select className={inputClasses} required={required} {...props}>
+    <FieldWrapper label={label} htmlFor={props.id} required={required} compact={compact}>
+      <select
+        className={`${compact ? compactInputClasses : inputClasses} ${className}`.trim()}
+        required={required}
+        {...props}
+      >
         {children}
       </select>
     </FieldWrapper>
@@ -105,6 +117,7 @@ export function OtherSelect({
   id,
   label,
   required,
+  compact,
   value,
   onChange,
   options,
@@ -115,6 +128,7 @@ export function OtherSelect({
   id: string
   label: string
   required?: boolean
+  compact?: boolean
   value: string
   onChange: (value: string) => void
   options: readonly string[]
@@ -128,11 +142,12 @@ export function OtherSelect({
   const selected = showCustom ? 'Other' : value
 
   return (
-    <div className={showCustom ? 'flex flex-col gap-3 sm:col-span-2' : undefined}>
+    <div className={showCustom ? 'flex flex-col gap-2 sm:col-span-2' : undefined}>
       <SelectField
         id={id}
         label={label}
         required={required}
+        compact={compact}
         value={selected}
         onChange={(e) => {
           const next = e.target.value
@@ -158,6 +173,7 @@ export function OtherSelect({
           id={`${id}Custom`}
           label={customLabel}
           required={required}
+          compact={compact}
           placeholder={`Enter ${label.toLowerCase()}`}
           value={isPreset ? '' : value}
           onChange={(e) => onChange(e.target.value)}
@@ -171,6 +187,7 @@ export function IndustrySelect({
   id,
   label,
   required,
+  compact,
   value,
   onChange,
   emptyLabel = 'Select industry',
@@ -178,6 +195,7 @@ export function IndustrySelect({
   id: string
   label: string
   required?: boolean
+  compact?: boolean
   value: string
   onChange: (value: string) => void
   emptyLabel?: string
@@ -187,6 +205,7 @@ export function IndustrySelect({
       id={id}
       label={label}
       required={required}
+      compact={compact}
       value={value}
       onChange={onChange}
       options={INDUSTRY_PRESETS}
