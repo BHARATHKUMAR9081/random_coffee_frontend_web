@@ -6,7 +6,7 @@ import { ProfilePhotoField } from '../components/ui/ProfilePhotoField'
 import { IdentitySelfieField } from '../components/ui/IdentitySelfieField'
 import { ProfileStepper } from '../components/ui/ProfileStepper'
 import { VerificationBadges } from '../components/ui/VerificationBadges'
-import { IndustrySelect, LanguagePicker, OtherSelect, SelectField, TextAreaField, TextField } from '../components/ui/Field'
+import { IndustrySelect, OtherSelect, SelectField, TextAreaField, TextField } from '../components/ui/Field'
 import { COUNTRIES, countryFlag, getCities, getStates } from '../data/locations'
 import { isValidGstin, isValidIndianMobile, normalizeGstin } from '../lib/validation'
 import {
@@ -16,7 +16,7 @@ import {
   SHORT_DESCRIPTION_MIN,
   validateProfilePhoto,
 } from '../services/profileService'
-import { asLanguageList, IDENTITY_DOCUMENT_TYPES, NON_BUSINESS_TYPES, type BusinessProfile, type BusinessType, type ConnectionIntent, type IdentityDocumentType } from '../types'
+import { IDENTITY_DOCUMENT_TYPES, NON_BUSINESS_TYPES, type BusinessProfile, type BusinessType, type ConnectionIntent, type IdentityDocumentType } from '../types'
 
 const businessTypes: BusinessType[] = [
   'Business Owner',
@@ -168,11 +168,10 @@ export function ProfilePage() {
       !form.industry.trim() ||
       !form.city ||
       !isShortDescriptionValid(form.shortDescription) ||
-      form.preferredLanguages.length === 0 ||
       form.lookingFor.length === 0
     ) {
       setError(
-        `Please fill in your name, ${formIsNonBusiness ? '' : 'company, '}business type, industry, city, a short description of at least ${SHORT_DESCRIPTION_MIN} characters, languages, and at least one "looking for" option.`,
+        `Please fill in your name, ${formIsNonBusiness ? '' : 'company, '}business type, industry, city, a short description of at least ${SHORT_DESCRIPTION_MIN} characters, and at least one "looking for" option.`,
       )
       return
     }
@@ -184,6 +183,7 @@ export function ProfilePage() {
     setIsSaving(true)
     const saved = await saveProfile({
       ...form,
+      preferredLanguages: form.preferredLanguages && form.preferredLanguages.length > 0 ? form.preferredLanguages : ['English'],
       fullName: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
     })
     setIsSaving(false)
@@ -318,43 +318,39 @@ export function ProfilePage() {
               value={form.industry}
               onChange={(value) => update('industry', value)}
             />
-            <OtherSelect
-              id="country"
-              label="Country"
-              value={form.country}
-              options={COUNTRIES.map((country) => country.name)}
-              optionLabel={(name) => `${countryFlag(name)} ${name}`.trim()}
-              emptyLabel="Select country"
-              customLabel="Custom country"
-              onChange={(country) => setForm((prev) => ({ ...prev, country, state: '', city: '' }))}
-            />
-            <OtherSelect
-              key={`state-${form.country}`}
-              id="state"
-              label="State"
-              value={form.state}
-              options={getStates(form.country)}
-              emptyLabel="Select state"
-              customLabel="Custom state"
-              onChange={(state) => setForm((prev) => ({ ...prev, state, city: '' }))}
-            />
-            <OtherSelect
-              key={`city-${form.country}-${form.state}`}
-              id="city"
-              label="City"
-              required
-              value={form.city}
-              options={getCities(form.country, form.state)}
-              emptyLabel="Select city"
-              customLabel="Custom city"
-              onChange={(city) => update('city', city)}
-            />
-            <LanguagePicker
-              label="Preferred languages"
-              required
-              values={asLanguageList(form.preferredLanguages)}
-              onChange={(values) => update('preferredLanguages', values)}
-            />
+            <div className="grid gap-4 sm:col-span-2 sm:grid-cols-3">
+              <OtherSelect
+                id="country"
+                label="Country"
+                value={form.country}
+                options={COUNTRIES.map((country) => country.name)}
+                optionLabel={(name) => `${countryFlag(name)} ${name}`.trim()}
+                emptyLabel="Select country"
+                customLabel="Custom country"
+                onChange={(country) => setForm((prev) => ({ ...prev, country, state: '', city: '' }))}
+              />
+              <OtherSelect
+                key={`state-${form.country}`}
+                id="state"
+                label="State"
+                value={form.state}
+                options={getStates(form.country)}
+                emptyLabel="Select state"
+                customLabel="Custom state"
+                onChange={(state) => setForm((prev) => ({ ...prev, state, city: '' }))}
+              />
+              <OtherSelect
+                key={`city-${form.country}-${form.state}`}
+                id="city"
+                label="City"
+                required
+                value={form.city}
+                options={getCities(form.country, form.state)}
+                emptyLabel="Select city"
+                customLabel="Custom city"
+                onChange={(city) => update('city', city)}
+              />
+            </div>
           </div>
 
           <div>

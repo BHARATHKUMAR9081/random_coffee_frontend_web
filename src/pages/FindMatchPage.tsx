@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { IndustrySelect, LanguagePicker, SelectField } from '../components/ui/Field'
+import { IndustrySelect, SelectField } from '../components/ui/Field'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/http'
 import { findDemoMatch, requestMatch, stopMatching } from '../services/matchService'
@@ -147,7 +147,7 @@ export function FindMatchPage() {
     <div className="mx-auto max-w-xl">
       <h1 className="text-2xl font-semibold text-navy-950">Find a business match</h1>
       <p className="mt-1 text-sm text-navy-900/55">
-        Filter by industry, location, business type, and language, then start a 1:1 video call.
+        Filter by industry, location, and business type, then start a 1:1 video call.
       </p>
 
       <div className="mt-6 rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
@@ -161,11 +161,6 @@ export function FindMatchPage() {
               onChange={(value) => setFilters((f) => ({ ...f, industry: value }))}
             />
           </div>
-          <LanguagePicker
-            label="Languages"
-            values={filters.preferredLanguages}
-            onChange={(values) => setFilters((f) => ({ ...f, preferredLanguages: values }))}
-          />
           <SelectField
             id="businessTypeFilter"
             label="Business type I want to meet"
