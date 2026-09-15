@@ -33,6 +33,10 @@ export function AppShell({ children }: { children: ReactNode }) {
     }
   }, [menuOpen])
 
+  if (!isLoggedIn && location.pathname === '/') {
+    return <>{children}</>
+  }
+
   return (
     <div className="min-h-dvh bg-cream-50 text-navy-950">
       <header className="sticky top-0 z-40 border-b border-navy-900/10 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
