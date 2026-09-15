@@ -2,11 +2,9 @@ import { Link } from 'react-router-dom'
 import { SweepingRibbons3D } from './SweepingRibbons3D'
 import { ScrollReveal } from './ScrollReveal'
 
-interface BottomCtaSectionProps {
-  onDemoClick: () => void
-}
+interface BottomCtaSectionProps {}
 
-export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
+export function BottomCtaSection({}: BottomCtaSectionProps = {}) {
   return (
     <section className="relative z-20 bg-[#06080F] text-white pt-10 sm:pt-14 lg:pt-16 pb-6 sm:pb-8 px-6 sm:px-12 lg:px-16 overflow-hidden">
       {/* Ambient Deep Glow in Top-Right Background */}
@@ -27,11 +25,11 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
               </div>
 
               <h2 className="font-display font-light text-2xl sm:text-4xl lg:text-[2.65rem] text-white tracking-[-0.025em] leading-[1.12]">
-                Start verified 1:1 coffee chats today or talk to our enterprise team.
+                Start verified 1:1 coffee chats today.
               </h2>
 
               <p className="text-xs sm:text-sm text-zinc-400 font-sans max-w-xl leading-relaxed">
-                Connect with verified founders, tier-1 angel investors, and enterprise decision-makers for focused 2-minute video chats — zero cold emails, zero spam, pure serendipity.
+                Connect with verified founders, angel investors, and business leaders for focused 2-minute video chats — zero cold emails, zero spam, pure serendipity.
               </p>
 
               <div className="pt-1 flex flex-wrap items-center gap-3.5">
@@ -41,13 +39,12 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
                 >
                   GET STARTED
                 </Link>
-                <button
-                  type="button"
-                  onClick={onDemoClick}
-                  className="px-6 py-3 text-xs font-mono font-semibold tracking-wider uppercase text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 rounded-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                <Link
+                  to="/login"
+                  className="px-6 py-3 text-xs font-mono font-semibold tracking-wider uppercase text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/15 rounded-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5"
                 >
-                  BOOK A DEMO
-                </button>
+                  SIGN IN
+                </Link>
               </div>
 
               <div className="flex items-center gap-4 text-[11.5px] text-zinc-400 pt-1 font-sans">
@@ -104,7 +101,7 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
                 </div>
 
                 <p className="text-[11.5px] text-zinc-400 font-sans leading-relaxed">
-                  The deterministic matchmaking infrastructure for verified founders, enterprise buyers, and angel investors.
+                  The deterministic matchmaking infrastructure for verified founders, angel investors, and business leaders.
                 </p>
               </div>
 

@@ -4,7 +4,7 @@ import { Button } from '../components/ui/Button'
 import { IndustrySelect, SelectField } from '../components/ui/Field'
 import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/http'
-import { findDemoMatch, requestMatch, stopMatching } from '../services/matchService'
+import { requestMatch, stopMatching } from '../services/matchService'
 import { asLanguageList, type BusinessType, type MatchFilters } from '../types'
 
 const businessTypes: BusinessType[] = [
@@ -60,26 +60,6 @@ export function FindMatchPage() {
     setStatus('waiting')
 
     try {
-      if (user.id === 'demo') {
-        const matched = findDemoMatch(
-          {
-            industry: filters.industry.trim(),
-            businessType: filters.businessTypes[0] ?? '',
-            preferredLanguages: filters.preferredLanguages,
-            cityScope: filters.cityScope,
-          },
-          user.profile,
-        )
-        if (requestIdRef.current !== requestId) return
-        if (!matched) {
-          setStatus('idle')
-          setError('No one online matches your filters right now. Try again or widen your filters.')
-          return
-        }
-        navigate('/call', { state: { matched } })
-        return
-      }
-
       // Infinite requeue loop: continuously re-fire if backend returns status: 'timeout'
       let consecutiveErrors = 0
       while (requestIdRef.current === requestId) {
@@ -115,8 +95,6 @@ export function FindMatchPage() {
           }
         } catch (err) {
           if (requestIdRef.current !== requestId) return
-          // If server returns a transient error (502/503/504 during deployment or brief network glitch),
-          // retry up to 5 times instead of aborting the queue
           consecutiveErrors += 1
           if (consecutiveErrors <= 5 && (err instanceof ApiError && (err.status >= 500 || err.status === 0))) {
             console.warn(`[Matchmaking] Transient server error (${err.status}), retrying (${consecutiveErrors}/5)...`)
@@ -138,9 +116,7 @@ export function FindMatchPage() {
   function leaveQueue() {
     requestIdRef.current += 1
     setStatus('idle')
-    if (user.id !== 'demo') {
-      void stopMatching().catch(() => undefined)
-    }
+    void stopMatching().catch(() => undefined)
   }
 
   return (

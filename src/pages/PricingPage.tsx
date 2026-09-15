@@ -111,11 +111,6 @@ export function PricingPage() {
     setError(null)
     setSaving(true)
     try {
-      if (user.id === 'demo') {
-        const ok = await applyPlan(pendingPlan, payload)
-        if (ok) setPendingPlan(null)
-        return
-      }
       const order = await createPlanOrder(pendingPlan, payload)
       const confirmation = await openRazorpayCheckout(order)
       await dispatch(verifyPaymentThunk(confirmation)).unwrap()

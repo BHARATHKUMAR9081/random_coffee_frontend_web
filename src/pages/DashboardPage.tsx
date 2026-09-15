@@ -97,35 +97,20 @@ export function DashboardPage() {
   const [connectError, setConnectError] = useState<string | null>(null)
   const [resolvedAccountIds, setResolvedAccountIds] = useState<Record<string, string>>({})
   const [remoteActivity, setRemoteActivity] = useState<CallHistoryEntry[]>([])
-  const [usage, setUsage] = useState<UsageSummary | null>(
-    user.id === 'demo'
-      ? { creditsRemaining: 50, creditsLimit: 50, creditsPeriod: 'lifetime', periodStart: null, connectionCost: 1, receiverCost: 1 }
-      : null,
-  )
+  const [usage, setUsage] = useState<UsageSummary | null>(null)
 
   async function refreshConnections() {
-    if (user.id === 'demo') {
-      setInbox([])
-      return
-    }
     const data = await listConnections()
     setInbox(data.connections)
     setInboxError(null)
   }
 
   async function refreshUsage() {
-    if (user.id === 'demo') return
     const data = await listUsageLog()
     setUsage(data.usage)
   }
 
   useEffect(() => {
-    if (user.id === 'demo') {
-      setInbox([])
-      setTickets([])
-      setRemoteActivity([])
-      return
-    }
     void refreshConnections().catch((err) => {
       setInboxError(err instanceof ApiError ? err.message : 'Could not load messages.')
     })
@@ -162,7 +147,6 @@ export function DashboardPage() {
   }, [user.id])
 
   useEffect(() => {
-    if (user.id === 'demo') return
     const missing = callHistory.filter((entry) => !entry.matchedAccountId && !resolvedAccountIds[entry.id])
     missing.forEach((entry) => {
       void fetchMatchSession(entry.id)
@@ -173,7 +157,7 @@ export function DashboardPage() {
         })
         .catch(() => undefined)
     })
-  }, [callHistory, resolvedAccountIds, user.id])
+  }, [callHistory, resolvedAccountIds])
 
   async function requestConnect(entry: CallHistoryEntry) {
     const accountId =
@@ -187,7 +171,6 @@ export function DashboardPage() {
     setBusyId(entry.id)
     setConnectError(null)
     try {
-      if (user.id === 'demo') return
       await sendConnectionRequest(accountId, entry.matchSessionId)
       await Promise.all([refreshConnections(), refreshUsage()])
     } catch (err) {
@@ -363,7 +346,7 @@ export function DashboardPage() {
                       ) : (
                         <Button
                           size="sm"
-                          disabled={busyId === entry.id || !canRequest || user.id === 'demo'}
+                          disabled={busyId === entry.id || !canRequest}
                           title={!canRequest ? 'This match has no account id' : undefined}
                           onClick={() => void requestConnect(entry)}
                         >
@@ -388,9 +371,7 @@ export function DashboardPage() {
               See all
             </Link>
           </div>
-          {user.id === 'demo' ? (
-            <p className="mt-3 text-xs text-navy-900/50">Sign in with a real account to see chats here.</p>
-          ) : inboxError ? (
+          {inboxError ? (
             <div className="mt-3 flex items-center justify-between gap-2">
               <p className="text-xs text-red-600">{inboxError}</p>
               <button
@@ -440,9 +421,7 @@ export function DashboardPage() {
               Open support
             </Link>
           </div>
-          {user.id === 'demo' ? (
-            <p className="mt-3 text-xs text-navy-900/50">Sign in with a real account to file tickets.</p>
-          ) : tickets.length === 0 ? (
+          {tickets.length === 0 ? (
             <p className="mt-3 text-xs text-navy-900/50">No tickets yet. Ask RandomCoffee from Support.</p>
           ) : (
             <ul className="mt-3 divide-y divide-navy-900/10">

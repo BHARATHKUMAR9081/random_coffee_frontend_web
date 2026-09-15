@@ -140,7 +140,7 @@ export function CallRoomPage() {
   const [identityWarning, setIdentityWarning] = useState<string | null>(null)
   const identityCheckedRef = useRef(false)
 
-  const displayName = profileDisplayName(user.profile) || 'Demo user'
+  const displayName = profileDisplayName(user.profile) || 'User'
   const {
     remoteVideoRef,
     localVideoRef,
@@ -175,7 +175,7 @@ export function CallRoomPage() {
   useEffect(() => {
     if (!permissionsGranted || status !== 'connected') return
     if (secondsLeft <= 0) {
-      void leaveAndGo('/call/feedback', 'completed')
+      void leaveAndGo('/call/feedback', 'timeout')
       return
     }
     const timer = setTimeout(() => setSecondsLeft((s) => s - 1), 1000)
@@ -184,7 +184,7 @@ export function CallRoomPage() {
   }, [permissionsGranted, status, secondsLeft])
 
   useEffect(() => {
-    if (user.id === 'demo' || !user.isIdentityVerified) return
+    if (!user.isIdentityVerified) return
     if (!permissionsGranted || status !== 'connected' || !cameraOn) return
     if (identityCheckedRef.current) return
     identityCheckedRef.current = true
@@ -213,7 +213,7 @@ export function CallRoomPage() {
     return () => {
       cancelled = true
     }
-  }, [cameraOn, localVideoRef, permissionsGranted, status, user.id, user.isIdentityVerified])
+  }, [cameraOn, localVideoRef, permissionsGranted, status, user.isIdentityVerified])
 
   async function leaveAndGo(path: string, endedReason: string) {
     const durationSeconds = permissionsGranted ? Math.max(0, CALL_DURATION_SECONDS - secondsLeft) : 0
@@ -224,9 +224,7 @@ export function CallRoomPage() {
         // Keep hanging up even if the session log update fails.
       }
     }
-    if (user.id !== 'demo') {
-      void stopMatching().catch(() => undefined)
-    }
+    void stopMatching().catch(() => undefined)
     await disconnect()
     navigate(
       path,
@@ -245,7 +243,7 @@ export function CallRoomPage() {
   }
 
   async function submitReport(reason: string) {
-    if (user.id !== 'demo' && matched?.accountId) {
+    if (matched?.accountId) {
       try {
         await createReport({
           reportedId: matched.accountId,

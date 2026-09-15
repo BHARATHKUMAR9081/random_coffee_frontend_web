@@ -1,22 +1,15 @@
 import { createContext, useContext, useEffect, useMemo, type ReactNode } from 'react'
 import {
   callHistoryAdded,
-  billingSavedLocal,
   changePlanThunk,
   clearAuth,
   hydrateAuth,
-  identityVerifiedLocal,
-  loginDemo as loginDemoAction,
   loginThunk,
   loginWithLinkedInThunk,
-  planChangedLocal,
-  profileSavedLocal,
   registerThunk,
   saveBillingThunk,
   saveProfileThunk,
   uploadProfilePhotoThunk,
-  verifiedLocal,
-  verifyBusinessId,
   verifyBusinessThunk,
   verifyIdentityThunk,
 } from '../store/authSlice'
@@ -43,7 +36,6 @@ interface AuthContextValue {
   ) => Promise<AuthResult>
   login: (email: string, password: string) => Promise<AuthResult>
   loginWithLinkedIn: (code: string, redirectUri?: string) => Promise<AuthResult>
-  loginDemo: () => void
   logout: () => void
   saveProfile: (profile: BusinessProfile) => Promise<AuthResult>
   uploadProfilePhoto: (file: File) => Promise<AuthResult>
@@ -98,7 +90,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
 
     return {
-      isLoggedIn: auth.sessionKind !== 'anonymous' && Boolean(auth.account),
+      isLoggedIn: auth.sessionKind === 'api' && Boolean(auth.account && auth.account.id !== 'demo'),
       user,
       callHistory: auth.callHistory,
       register: async (email, password, details) => {
@@ -135,9 +127,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           return { success: false, error: thunkError(error, 'Could not sign in with LinkedIn.') }
         }
       },
-      loginDemo: () => {
-        dispatch(loginDemoAction())
-      },
       logout: () => {
         if (auth.sessionKind === 'api') {
           void logoutAccount().catch(() => undefined)
@@ -145,10 +134,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dispatch(clearAuth())
       },
       saveProfile: async (profile) => {
-        if (auth.sessionKind === 'demo') {
-          dispatch(profileSavedLocal(profile))
-          return { success: true }
-        }
         try {
           await dispatch(saveProfileThunk(profile)).unwrap()
           return { success: true }
@@ -157,11 +142,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       uploadProfilePhoto: async (file) => {
-        if (auth.sessionKind === 'demo') {
-          const profilePhotoUrl = URL.createObjectURL(file)
-          dispatch(profileSavedLocal({ ...auth.profile, profilePhotoUrl }))
-          return { success: true, profilePhotoUrl }
-        }
         try {
           const payload = await dispatch(uploadProfilePhotoThunk(file)).unwrap()
           return { success: true, profilePhotoUrl: payload.profile.profilePhotoUrl ?? null }
@@ -170,11 +150,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       verifyBusiness: async (businessIdNumber, idType = 'GSTIN') => {
-        if (auth.sessionKind === 'demo') {
-          const result = verifyBusinessId(businessIdNumber)
-          dispatch(verifiedLocal({ idNumber: businessIdNumber, status: result.status }))
-          return result
-        }
         try {
           const payload = await dispatch(verifyBusinessThunk({ idNumber: businessIdNumber, idType })).unwrap()
           const status = payload.profile.verification?.status ?? 'UNVERIFIED'
@@ -188,10 +163,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       verifyIdentity: async (selfie, document, documentType) => {
-        if (auth.sessionKind === 'demo') {
-          dispatch(identityVerifiedLocal())
-          return { success: true }
-        }
         try {
           await dispatch(verifyIdentityThunk({ selfie, document, documentType })).unwrap()
           return { success: true }
@@ -203,11 +174,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         dispatch(callHistoryAdded(entry))
       },
       changePlan: async (planId, billing) => {
-        if (auth.sessionKind === 'demo') {
-          if (billing) dispatch(billingSavedLocal(billing))
-          dispatch(planChangedLocal(planId))
-          return { success: true }
-        }
         try {
           await dispatch(changePlanThunk({ planId, billing })).unwrap()
           return { success: true }
@@ -216,10 +182,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         }
       },
       saveBilling: async (billing) => {
-        if (auth.sessionKind === 'demo') {
-          dispatch(billingSavedLocal(billing))
-          return { success: true }
-        }
         try {
           await dispatch(saveBillingThunk(billing)).unwrap()
           return { success: true }

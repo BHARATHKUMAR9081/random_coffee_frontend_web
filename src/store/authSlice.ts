@@ -1,5 +1,4 @@
 import { createAsyncThunk, createSlice, type PayloadAction } from '@reduxjs/toolkit'
-import { createDemoAccountRecord } from '../data/demoAccount'
 import { ApiError } from '../services/http'
 import {
   changeAccountPlan,
@@ -17,12 +16,12 @@ import {
   type SessionProfile,
   type UserPayload,
 } from '../services/authService'
-import { billingFromProfile, emptyBilling } from '../services/billing'
+import { emptyBilling } from '../services/billing'
 import { verifyPlanPayment, type RazorpaySuccess } from '../services/paymentService'
 import { emptyProfile, verifyBusinessId } from '../services/profileService'
 import { asLanguageList, type BillingInfo, type BusinessProfile, type CallHistoryEntry, type IdentityDocumentType, type IdentityVerification, type PlanId, type VerificationStatus } from '../types'
 
-export type SessionKind = 'anonymous' | 'api' | 'demo'
+export type SessionKind = 'anonymous' | 'api'
 
 export interface AuthState {
   sessionKind: SessionKind
@@ -178,6 +177,9 @@ export const loginWithLinkedInThunk = createAsyncThunk(
 
 export const hydrateAuth = createAsyncThunk('auth/hydrate', async (_, { getState, rejectWithValue }) => {
   const { auth } = getState() as { auth: AuthState }
+  if ((auth as unknown as { sessionKind?: string }).sessionKind === 'demo' || auth.account?.id === 'demo') {
+    return rejectWithValue('Demo mode is disabled.')
+  }
   if (auth.sessionKind !== 'api' || !auth.refreshToken) return null
   try {
     return await fetchCurrentUser()
@@ -279,51 +281,6 @@ const authSlice = createSlice({
     clearAuth() {
       return initialState
     },
-    loginDemo(state) {
-      const demo = createDemoAccountRecord()
-      state.sessionKind = 'demo'
-      state.accessToken = null
-      state.refreshToken = null
-      state.account = {
-        id: 'demo',
-        firstName: demo.profile.firstName,
-        lastName: demo.profile.lastName,
-        email: demo.profile.email,
-        plan: { id: demo.planId, started_at: null },
-        isActive: true,
-        isLogin: true,
-        lastLogin: new Date().toISOString(),
-        isAvailable: false,
-        termsAccepted: true,
-        refundPolicyAccepted: true,
-        privacyPolicyAccepted: true,
-        createdAt: null,
-      }
-      state.profile = demo.profile
-      state.isProfileVerified = demo.verificationStatus === 'VERIFIED'
-      state.isIdentityVerified = false
-      state.identitySelfieUrl = null
-      state.identityVerification = {
-        status: 'UNVERIFIED',
-        document_type: '',
-        verified_at: null,
-        similarity: null,
-        name_on_id: '',
-        failed_reason: null,
-      }
-      state.verificationStatus = demo.verificationStatus
-      state.businessIdNumber = demo.businessIdNumber
-      state.planId = demo.planId
-      state.billing = billingFromProfile(demo.profile, {
-        legalName: demo.profile.fullName,
-        gstin: demo.businessIdNumber,
-        addressLine: '12 Avinashi Road',
-        pincode: '641014',
-      })
-      state.callHistory = demo.callHistory
-      state.status = 'idle'
-      state.error = null
-    },
     profileSavedLocal(state, action: PayloadAction<BusinessProfile>) {
       state.profile = action.payload
     },
@@ -422,7 +379,6 @@ const authSlice = createSlice({
 export const {
   setTokens,
   clearAuth,
-  loginDemo,
   profileSavedLocal,
   verifiedLocal,
   identityVerifiedLocal,

@@ -37,7 +37,7 @@ const FEATURES = [
       { label: 'TOP HUBS', value: '8 Cities' },
       { label: 'GLOBAL LATENCY', value: '<50ms' },
     ],
-    footnote: 'Ultra-low latency mesh routing connects global founders with tier-1 enterprise partners.',
+    footnote: 'Ultra-low latency mesh routing connects global founders with tier-1 strategic partners.',
   },
   {
     num: '03',

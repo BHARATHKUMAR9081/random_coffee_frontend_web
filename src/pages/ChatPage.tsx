@@ -63,10 +63,6 @@ export function ChatPage() {
       return
     }
     const id = connectionId
-    if (user.id === 'demo') {
-      setLoading(false)
-      return
-    }
 
     let cancelled = false
 
@@ -86,66 +82,43 @@ export function ChatPage() {
         setError(null)
         void markConnectionRead(id)
       } catch (err) {
-        if (!cancelled) {
-          setError(err instanceof ApiError ? err.message : 'Could not load this chat.')
-        }
+        if (cancelled) return
+        setError(err instanceof ApiError ? err.message : 'Could not open chat thread.')
       } finally {
         if (!cancelled) setLoading(false)
       }
     }
 
-    async function poll() {
-      // If connection is still pending, poll the connection status until peer accepts
-      if (!connectionRef.current || connectionRef.current.status !== 'accepted') {
-        try {
-          const row = await fetchConnection(id)
-          if (cancelled) return
-          setConnection(row)
-          if (row.status === 'accepted') {
-            setError(null)
-            const data = await listMessages(id)
+    setLoading(true)
+    setError(null)
+    void loadThread()
+
+    const interval = window.setInterval(() => {
+      void fetchConnection(id).then((row) => {
+        if (cancelled) return
+        setConnection(row)
+        if (row.status === 'accepted') {
+          void listMessages(id).then((data) => {
             if (!cancelled) {
               setMessages(data.messages)
               void markConnectionRead(id)
             }
-          }
-        } catch {
-          // Keep polling
+          })
         }
-        return
-      }
+      })
+    }, 4000)
 
-      const lastId = messagesRef.current.at(-1)?.id
-      try {
-        const data = await listMessages(id, lastId)
-        if (cancelled || data.messages.length === 0) return
-        setMessages((prev) => {
-          const known = new Set(prev.map((row) => row.id))
-          const incoming = data.messages.filter((row) => !known.has(row.id))
-          return incoming.length ? [...prev, ...incoming] : prev
-        })
-        if (data.messages.some((row) => !row.mine)) {
-          void markConnectionRead(id)
-        }
-      } catch {
-        // Keep the open thread; the next poll retries.
-      }
-    }
-
-    void loadThread()
-    const timer = window.setInterval(() => void poll(), 2000)
     return () => {
       cancelled = true
-      window.clearInterval(timer)
+      window.clearInterval(interval)
     }
-  }, [connectionId, navigate, user.id])
+  }, [connectionId, navigate])
 
   async function handleAccept() {
     if (!connectionId) return
     try {
-      const updated = await acceptConnection(connectionId)
-      setConnection(updated)
-      setError(null)
+      const row = await acceptConnection(connectionId)
+      setConnection(row)
       const data = await listMessages(connectionId)
       setMessages(data.messages)
       void markConnectionRead(connectionId)
@@ -156,7 +129,7 @@ export function ChatPage() {
 
   async function handleSend(event: React.FormEvent) {
     event.preventDefault()
-    if (!connectionId || user.id === 'demo') return
+    if (!connectionId) return
     const body = draft.trim()
     if (!body) return
     setSending(true)
@@ -174,7 +147,7 @@ export function ChatPage() {
 
   async function submitChatReport(reason: ReportReason) {
     const reportedId = connection?.otherUser.accountId
-    if (!connectionId || !reportedId || user.id === 'demo') {
+    if (!connectionId || !reportedId) {
       setReportError('This chat has no account id to report.')
       return
     }
@@ -240,18 +213,12 @@ export function ChatPage() {
           )}
           </div>
         </div>
-        {connection?.status === 'accepted' && user.id !== 'demo' && (
+        {connection?.status === 'accepted' && (
           <Button variant="secondary" className="shrink-0 !px-3 !py-2 text-xs sm:!px-5 sm:text-sm" onClick={() => setReportOpen(true)}>
             Report
           </Button>
         )}
       </div>
-
-      {user.id === 'demo' && (
-        <p className="rounded-2xl border border-navy-900/10 bg-white px-4 py-3 text-sm text-navy-900/70">
-          Demo mode does not open real chats. Sign in with an account to message a connection.
-        </p>
-      )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
 
@@ -311,13 +278,13 @@ export function ChatPage() {
                   event.currentTarget.form?.requestSubmit()
                 }
               }}
-              disabled={user.id === 'demo' || sending || connection?.status !== 'accepted'}
+              disabled={sending || connection?.status !== 'accepted'}
               rows={2}
               maxLength={MAX_MESSAGE_LENGTH}
               placeholder={connection?.status === 'accepted' ? 'Write a message' : 'Chat is locked until they accept'}
               className="min-h-12 w-full resize-none rounded-xl border border-navy-900/15 px-3 py-2 text-base focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 disabled:bg-navy-900/5 sm:text-sm"
             />
-            <Button type="submit" className="shrink-0" disabled={user.id === 'demo' || sending || !draft.trim() || connection?.status !== 'accepted'}>
+            <Button type="submit" className="shrink-0" disabled={sending || !draft.trim() || connection?.status !== 'accepted'}>
               {sending ? 'Sending…' : 'Send'}
             </Button>
           </div>
