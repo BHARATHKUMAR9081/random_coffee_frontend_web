@@ -41,8 +41,9 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-dvh bg-cream-50 text-navy-950">
       <header className="sticky top-0 z-40 border-b border-navy-900/10 bg-white/95 pt-[env(safe-area-inset-top)] backdrop-blur">
         <div className={`mx-auto flex items-center justify-between gap-3 px-4 py-3 ${isLoggedIn ? 'max-w-6xl' : 'max-w-5xl'}`}>
-          <Link to={isLoggedIn ? '/dashboard' : '/'} className="min-w-0 shrink-0 font-semibold text-navy-950">
-            <span className="text-gold-500">Random</span>Coffee
+          <Link to={isLoggedIn ? '/dashboard' : '/'} className="min-w-0 shrink-0 font-semibold text-navy-950 flex items-center gap-2">
+            <img src="/brand-logo.jpg" alt="RandomCoffee" className="h-7 w-7 rounded-lg object-cover shadow-sm" />
+            <span><span className="text-gold-500">Random</span>Coffee</span>
           </Link>
           {isLoggedIn && (
             <div className="flex min-w-0 items-center gap-1 sm:gap-3">

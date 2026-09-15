@@ -81,11 +81,14 @@ export function AdminShell({ children }: { children?: ReactNode }) {
   return (
     <div className="flex h-dvh overflow-hidden bg-cream-50 text-navy-950">
       <aside className="hidden h-full w-64 shrink-0 flex-col overflow-hidden border-r border-navy-900/10 bg-white lg:flex">
-        <Link to="/admin" className="shrink-0 border-b border-navy-900/10 px-5 py-4 font-semibold">
-          <span className="text-gold-500">Random</span>Coffee
-          <span className="mt-1 block text-[11px] font-medium uppercase tracking-wide text-navy-900/40">
-            {isSuper ? 'Super admin' : 'Staff'}
-          </span>
+        <Link to="/admin" className="shrink-0 border-b border-navy-900/10 px-5 py-4 font-semibold flex items-center gap-3">
+          <img src="/brand-logo.jpg" alt="RandomCoffee" className="h-8 w-8 rounded-xl object-cover shadow-sm" />
+          <div>
+            <div><span className="text-gold-500">Random</span>Coffee</div>
+            <span className="text-[11px] font-medium uppercase tracking-wide text-navy-900/40">
+              {isSuper ? 'Super admin' : 'Staff'}
+            </span>
+          </div>
         </Link>
         <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain px-3 py-4">
           <NavItems isSuper={isSuper} openTickets={openTickets} />
@@ -101,8 +104,9 @@ export function AdminShell({ children }: { children?: ReactNode }) {
 
       <div className="flex min-h-0 min-w-0 flex-1 flex-col overflow-hidden">
         <header className="flex shrink-0 items-center justify-between border-b border-navy-900/10 bg-white px-4 py-3 lg:hidden">
-          <Link to="/admin" className="font-semibold">
-            <span className="text-gold-500">Random</span>Coffee
+          <Link to="/admin" className="font-semibold flex items-center gap-2">
+            <img src="/brand-logo.jpg" alt="RandomCoffee" className="h-7 w-7 rounded-lg object-cover shadow-sm" />
+            <span><span className="text-gold-500">Random</span>Coffee</span>
           </Link>
           <button
             type="button"
