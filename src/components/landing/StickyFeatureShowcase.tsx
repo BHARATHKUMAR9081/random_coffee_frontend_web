@@ -58,9 +58,21 @@ const FEATURES = [
 
 function BenchmarkPanel() {
   return (
-    <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
+    <div className="relative w-full h-[520px] sm:h-[540px] rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
+      {/* Top Status Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans shrink-0">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+          Sub-Second Match Engine
+        </div>
+        <div className="flex items-center gap-3 text-slate-400 text-[11px]">
+          <span>Benchmark: 1,420 Execs Tested</span>
+          <span className="hidden sm:inline text-emerald-400 font-medium">• Latency: 18.4s</span>
+        </div>
+      </div>
+
       {/* Main Center Display Stage */}
-      <div className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-1 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div className="relative w-full flex-1 my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3 sm:p-3.5 flex flex-col justify-between min-h-0">
         {/* Subtle Background Grid */}
         <div className="absolute inset-0 pointer-events-none opacity-20">
           <div className="absolute left-1/4 top-0 bottom-0 border-r border-dashed border-slate-700" />
@@ -73,9 +85,9 @@ function BenchmarkPanel() {
         <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
         {/* Hero Row: RandomCoffee Deterministic Speed */}
-        <div className="relative z-10 rounded-xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 p-3 sm:p-4">
-          <div className="flex items-center justify-between mb-2.5">
-            <div className="flex items-center gap-2.5">
+        <div className="relative z-10 rounded-xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 p-2.5 sm:p-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
               <span className="text-amber-300 font-display font-medium text-xs sm:text-sm tracking-tight">
                 RandomCoffee Deterministic Engine
@@ -85,15 +97,15 @@ function BenchmarkPanel() {
               </span>
             </div>
             <div className="text-right">
-              <span className="text-amber-400 font-display font-semibold text-xl sm:text-2xl tracking-tight">
+              <span className="text-amber-400 font-display font-semibold text-lg sm:text-xl tracking-tight">
                 18.4s
               </span>
-              <span className="text-slate-400 text-[10px] font-sans block">Median time to partner</span>
+              <span className="text-slate-400 text-[9.5px] font-sans block">Median time to partner</span>
             </div>
           </div>
 
           {/* Animated Glowing Progress Bar */}
-          <div className="relative h-2.5 w-full bg-slate-950 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
+          <div className="relative h-2 w-full bg-slate-950 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
             <div
               className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-200 rounded-full transition-all duration-700 relative shadow-[0_0_16px_rgba(245,158,11,0.8)]"
               style={{ width: '16%' }}
@@ -104,7 +116,7 @@ function BenchmarkPanel() {
         </div>
 
         {/* Comparison Channel Rows */}
-        <div className="relative z-10 space-y-2.5 my-auto">
+        <div className="relative z-10 space-y-1.5 my-auto">
           {[
             {
               channel: 'LinkedIn Cold InMail',
@@ -127,16 +139,16 @@ function BenchmarkPanel() {
           ].map((row) => (
             <div
               key={row.channel}
-              className="p-2 sm:p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
             >
               <div className="flex flex-wrap items-center justify-between text-xs font-sans mb-1 gap-1">
-                <span className="text-slate-200 font-medium">{row.channel}</span>
+                <span className="text-slate-200 font-medium text-[11px] sm:text-xs">{row.channel}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 text-[11px]">{row.note}</span>
-                  <span className="text-slate-200 font-semibold">{row.stat}</span>
+                  <span className="text-slate-400 text-[10px] sm:text-[11px]">{row.note}</span>
+                  <span className="text-slate-200 font-semibold text-[11px] sm:text-xs">{row.stat}</span>
                 </div>
               </div>
-              <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/80">
+              <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/80">
                 <div
                   className="h-full bg-slate-600/70 rounded-full transition-all duration-500"
                   style={{ width: row.width }}
@@ -147,24 +159,24 @@ function BenchmarkPanel() {
         </div>
 
         {/* Bottom Metrics HUD Strip inside center stage */}
-        <div className="relative z-10 grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/70 text-center">
-          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
-            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">184 Hrs</div>
-            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Saved / Exec / Yr</div>
+        <div className="relative z-10 grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-800/70 text-center">
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">184 Hrs</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Saved / Exec / Yr</div>
           </div>
-          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
-            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">0%</div>
-            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Cold Outreach Waste</div>
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">0%</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Cold Outreach Waste</div>
           </div>
-          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
-            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">94.2%</div>
-            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Pipeline Conversion</div>
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">94.2%</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Pipeline Conversion</div>
           </div>
         </div>
       </div>
 
       {/* Bottom Details Drawer */}
-      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans shrink-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-amber-400 font-semibold">Audited ROI</span>
           <span className="text-slate-600">·</span>
@@ -206,9 +218,9 @@ function VideoPanel() {
   }
 
   return (
-    <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
+    <div className="relative w-full h-[520px] sm:h-[540px] rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
       {/* Top Status Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans shrink-0">
         <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
           Encrypted 1:1 Executive Room
@@ -223,7 +235,7 @@ function VideoPanel() {
       </div>
 
       {/* Main Center Display Stage */}
-      <div className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3 sm:p-4 flex flex-col justify-between">
+      <div className="relative w-full flex-1 my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3 sm:p-4 flex flex-col justify-between min-h-0">
         {/* Center HUD Latency Watermark */}
         <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-slate-800 font-sans text-[10px] text-slate-400 flex items-center gap-1.5 shadow-md">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
@@ -231,7 +243,7 @@ function VideoPanel() {
         </div>
 
         {/* Video Feeds Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 pt-6 pb-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 flex-1 pt-6 pb-2 min-h-0">
           {/* Stream 1: Founder (You) */}
           <div className="relative rounded-xl bg-gradient-to-b from-slate-900/90 to-slate-950 border border-amber-500/30 p-3.5 sm:p-4 flex flex-col justify-between shadow-lg overflow-hidden group">
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
@@ -354,7 +366,7 @@ function VideoPanel() {
         </div>
 
         {/* Interactive Mutual Card Exchange Bar */}
-        <div className="relative z-10 pt-2 border-t border-slate-800/80 flex items-center justify-between font-sans">
+        <div className="relative z-10 pt-2 border-t border-slate-800/80 flex items-center justify-between font-sans shrink-0">
           <div className="text-xs text-slate-300">
             {exchanged
               ? '✓ Cards exchanged! Direct LinkedIn, email & WhatsApp unlocked.'
@@ -375,7 +387,7 @@ function VideoPanel() {
       </div>
 
       {/* Bottom Details Drawer */}
-      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans shrink-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-amber-400 font-semibold">Double-Blind Exchange</span>
           <span className="text-slate-600">·</span>
@@ -772,7 +784,7 @@ export function StickyFeatureShowcase() {
                 </div>
 
                 {/* RIGHT COLUMN — visual panel changes via AnimatePresence with 3D perspective rotational tilt */}
-                <div style={{ perspective: 1200 }}>
+                <div className="w-full h-[520px] sm:h-[540px]" style={{ perspective: 1200 }}>
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`panel-${activeStep}`}
@@ -798,6 +810,7 @@ export function StickyFeatureShowcase() {
                         rotateY: shouldReduceMotion ? 0 : 3,
                       }}
                       transition={PANEL_TRANSITION}
+                      className="w-full h-full"
                       style={{
                         transformStyle: 'preserve-3d',
                         willChange: 'transform, opacity',
