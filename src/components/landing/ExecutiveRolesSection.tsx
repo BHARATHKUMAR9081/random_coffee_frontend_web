@@ -160,18 +160,19 @@ export function ExecutiveRolesSection() {
     setPageIndex(idx)
   }
 
-  // Downward slide out on exit while next card enters and scales from the back stack
+  // Downward slide out on exit while next card enters and scales from the back stack with butter smooth motion
   const heroCardVariants: {
-    enter: { x: number; y: number; scale: number; opacity: number; filter: string; zIndex: number }
-    center: { x: number; y: number; scale: number; opacity: number; filter: string; zIndex: number; transition: { duration: number; ease: [number, number, number, number] } }
-    exit: { x: number; y: number; scale: number; opacity: number; zIndex: number; transition: { duration: number; ease: [number, number, number, number] } }
+    enter: { x: number; y: number; scale: number; opacity: number; filter: string; rotateZ: number; zIndex: number }
+    center: { x: number; y: number; scale: number; opacity: number; filter: string; rotateZ: number; zIndex: number; transition: { duration: number; ease: [number, number, number, number] } }
+    exit: { x: number; y: number; scale: number; opacity: number; filter: string; rotateZ: number; zIndex: number; transition: { duration: number; ease: [number, number, number, number] } }
   } = {
     enter: {
       x: 0,
-      y: -24,
+      y: -38,
       scale: 0.91,
-      opacity: 0.4,
-      filter: 'blur(1px)',
+      opacity: 0,
+      filter: 'blur(4px)',
+      rotateZ: -1.2,
       zIndex: 1,
     },
     center: {
@@ -180,20 +181,23 @@ export function ExecutiveRolesSection() {
       scale: 1,
       opacity: 1,
       filter: 'blur(0px)',
+      rotateZ: 0,
       zIndex: 10,
       transition: {
-        duration: 0.42,
-        ease: [0.16, 1, 0.3, 1],
+        duration: 0.72,
+        ease: [0.16, 1, 0.3, 1], // Luxury Awwwards-grade cubic-bezier
       },
     },
     exit: {
       x: 0,
-      y: 130, // Slides smoothly downward!
-      scale: 0.96,
+      y: 120, // Slides smoothly downward like drawing a card from deck
+      scale: 0.94,
       opacity: 0,
+      filter: 'blur(2px)',
+      rotateZ: 1.8,
       zIndex: 20,
       transition: {
-        duration: 0.36,
+        duration: 0.65,
         ease: [0.16, 1, 0.3, 1],
       },
     },
@@ -252,7 +256,7 @@ export function ExecutiveRolesSection() {
                     <motion.div
                       layoutId="active-role-tabline"
                       className="absolute bottom-0 inset-x-0 h-0.5 bg-amber-500 shadow-[0_1px_6px_rgba(245,158,11,0.5)] rounded-full"
-                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                      transition={{ type: 'spring', stiffness: 240, damping: 26 }}
                     />
                   )}
                 </button>
@@ -272,17 +276,17 @@ export function ExecutiveRolesSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={`top-right-${activeStory.id}`}
-                initial={{ opacity: 0, scale: 0.94, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94, y: 10 }}
-                transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.92, y: -16, filter: 'blur(3px)' }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.92, y: 16, filter: 'blur(3px)' }}
+                transition={{ duration: 0.65, delay: 0.02, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full rounded-2xl bg-white p-2 shadow-[0_12px_32px_rgba(0,0,0,0.07)] border border-slate-200/90 group hover:scale-104 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-[185px] rounded-xl overflow-hidden bg-slate-100">
                   <img
                     src={activeStory.satellites.topRight.img}
                     alt={activeStory.satellites.topRight.alt}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded bg-[#FFE600] text-black font-sans font-medium text-[10.5px] shadow-sm">
                     {activeStory.satellites.topRight.tag}
@@ -299,17 +303,17 @@ export function ExecutiveRolesSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={`mid-left-${activeStory.id}`}
-                initial={{ opacity: 0, scale: 0.94, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94, y: 10 }}
-                transition={{ duration: 0.32, delay: 0.04, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.92, y: -16, filter: 'blur(3px)' }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.92, y: 16, filter: 'blur(3px)' }}
+                transition={{ duration: 0.65, delay: 0.08, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full rounded-2xl bg-white p-2 shadow-[0_10px_28px_rgba(0,0,0,0.07)] border border-slate-200/90 group hover:scale-105 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-[145px] rounded-xl overflow-hidden bg-slate-100">
                   <img
                     src={activeStory.satellites.midLeft.img}
                     alt={activeStory.satellites.midLeft.alt}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded bg-[#FFE600] text-black font-sans font-medium text-[10px] shadow-sm">
                     {activeStory.satellites.midLeft.tag}
@@ -326,17 +330,17 @@ export function ExecutiveRolesSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={`bottom-right-${activeStory.id}`}
-                initial={{ opacity: 0, scale: 0.94, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94, y: 10 }}
-                transition={{ duration: 0.32, delay: 0.07, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.92, y: -16, filter: 'blur(3px)' }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.92, y: 16, filter: 'blur(3px)' }}
+                transition={{ duration: 0.65, delay: 0.14, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full rounded-2xl bg-white p-2 shadow-[0_10px_28px_rgba(0,0,0,0.07)] border border-slate-200/90 group hover:scale-105 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-[155px] rounded-xl overflow-hidden bg-slate-100">
                   <img
                     src={activeStory.satellites.bottomRight.img}
                     alt={activeStory.satellites.bottomRight.alt}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded bg-[#FFE600] text-black font-sans font-medium text-[10px] shadow-sm">
                     {activeStory.satellites.bottomRight.tag}
@@ -353,17 +357,17 @@ export function ExecutiveRolesSection() {
             <AnimatePresence mode="wait">
               <motion.div
                 key={`bottom-left-${activeStory.id}`}
-                initial={{ opacity: 0, scale: 0.94, y: -10 }}
-                animate={{ opacity: 1, scale: 1, y: 0 }}
-                exit={{ opacity: 0, scale: 0.94, y: 10 }}
-                transition={{ duration: 0.32, delay: 0.1, ease: [0.22, 1, 0.36, 1] }}
+                initial={{ opacity: 0, scale: 0.92, y: -16, filter: 'blur(3px)' }}
+                animate={{ opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' }}
+                exit={{ opacity: 0, scale: 0.92, y: 16, filter: 'blur(3px)' }}
+                transition={{ duration: 0.65, delay: 0.20, ease: [0.16, 1, 0.3, 1] }}
                 className="w-full rounded-2xl bg-white p-2 shadow-[0_10px_28px_rgba(0,0,0,0.07)] border border-slate-200/90 group hover:scale-105 hover:shadow-xl transition-all duration-300"
               >
                 <div className="relative w-full h-[155px] rounded-xl overflow-hidden bg-slate-100">
                   <img
                     src={activeStory.satellites.bottomLeft.img}
                     alt={activeStory.satellites.bottomLeft.alt}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                   />
                   <div className="absolute top-2 left-2 px-2.5 py-0.5 rounded bg-[#FFE600] text-black font-sans font-medium text-[10px] shadow-sm">
                     {activeStory.satellites.bottomLeft.tag}
