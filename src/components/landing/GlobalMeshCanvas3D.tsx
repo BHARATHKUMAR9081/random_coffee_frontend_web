@@ -267,15 +267,15 @@ export function GlobalMeshCanvas3D() {
 
   return (
     <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
-      {/* Top Telemetry Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 font-mono text-[10px]">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold tracking-wider">
+      {/* Top Status Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-          CAPACITY : 3,500+ VERIFIED
+          3,500+ Verified Leaders
         </div>
-        <div className="flex items-center gap-3 text-slate-400 text-[10px] tracking-widest">
-          <span>REGIONS : US-EAST, EU-WEST, ME-CENTRAL, AP-SOUTH</span>
-          <span className="hidden sm:inline text-emerald-400/90 font-semibold">• MESH SYNC: 14ms</span>
+        <div className="flex items-center gap-3 text-slate-400 text-[11px]">
+          <span>Global Hubs: US, EU, ME & Asia</span>
+          <span className="hidden sm:inline text-emerald-400 font-medium">• Mesh Latency: 14ms</span>
         </div>
       </div>
 
@@ -303,7 +303,7 @@ export function GlobalMeshCanvas3D() {
         {/* Dynamic Curved Arcs, Photons, and Radar Ripple Canvas */}
         <canvas ref={canvasRef} className="absolute inset-0 w-full h-full pointer-events-none z-[5]" />
 
-        {/* Global Hub Floating Badges matching Cerebrium screenshot */}
+        {/* Global Hub Floating Badges */}
         {GLOBAL_HUBS.map((hub) => {
           const isSelected = activeHub.id === hub.id
           const isHovered = hoveredHub?.id === hub.id
@@ -317,7 +317,7 @@ export function GlobalMeshCanvas3D() {
               onMouseEnter={() => setHoveredHub(hub)}
               onMouseLeave={() => setHoveredHub(null)}
               style={{ left: `${hub.x}%`, top: `${hub.y}%` }}
-              className={`absolute -translate-x-1/2 -translate-y-1/2 px-2.5 py-0.5 rounded-md text-[10px] font-mono font-bold tracking-tight transition-all duration-200 z-10 flex items-center gap-1.5 cursor-pointer shadow-lg ${
+              className={`absolute -translate-x-1/2 -translate-y-1/2 px-2.5 py-0.5 rounded-md text-[11px] font-sans font-semibold tracking-tight transition-all duration-200 z-10 flex items-center gap-1.5 cursor-pointer shadow-lg ${
                 isActive
                   ? 'bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 scale-110 shadow-[0_0_20px_rgba(245,158,11,0.6)] ring-2 ring-white/70'
                   : 'bg-slate-950/90 hover:bg-slate-900 text-amber-300 border border-amber-500/30 hover:border-amber-400/60 hover:scale-105'
@@ -335,13 +335,13 @@ export function GlobalMeshCanvas3D() {
       </div>
 
       {/* Bottom Hub Details Telemetry Drawer */}
-      <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[11px] font-mono">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-amber-400 font-bold">{activeHub.name}</span>
-          <span className="text-slate-500 font-medium">[{activeHub.region}]</span>
-          <span className="text-slate-300 font-sans text-[11px]">{activeHub.role}</span>
+          <span className="text-amber-400 font-display font-medium text-sm">{activeHub.name}</span>
+          <span className="text-slate-400 text-xs font-normal">({activeHub.region})</span>
+          <span className="text-slate-300 text-xs font-normal">{activeHub.role}</span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-semibold shrink-0">
+        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
           Avg Match Speed: 14.2s
         </div>

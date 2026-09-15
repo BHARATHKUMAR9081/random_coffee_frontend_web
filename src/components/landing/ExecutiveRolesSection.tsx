@@ -353,23 +353,23 @@ export function ExecutiveRolesSection() {
                   />
 
                   {/* Left vertical brand label running up the side (Melius style) */}
-                  <div className="absolute top-1/2 left-2.5 -translate-y-1/2 -rotate-90 origin-left text-[8px] font-mono tracking-[0.25em] text-white/80 uppercase pointer-events-none select-none">
+                  <div className="absolute top-1/2 left-2.5 -translate-y-1/2 -rotate-90 origin-left text-[8.5px] font-sans font-semibold tracking-[0.2em] text-white/80 uppercase pointer-events-none select-none">
                     RANDOMCOFFEE
                   </div>
 
                   {/* In-Call HUD Overlays: Meeting status tag */}
-                  <div className="absolute top-2.5 left-2.5 px-2 py-0.5 rounded bg-black/50 border border-white/20 backdrop-blur-md text-[9.5px] font-mono text-emerald-400 font-semibold flex items-center gap-1.5 shadow-md">
+                  <div className="absolute top-2.5 left-2.5 px-2.5 py-0.5 rounded-full bg-black/60 border border-white/20 backdrop-blur-md text-[10px] font-sans text-emerald-400 font-medium flex items-center gap-1.5 shadow-md">
                     <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                    <span>1:1 MEETING IN PROGRESS</span>
+                    <span>1:1 Meeting in Progress</span>
                   </div>
                 </div>
 
                 {/* Bottom Editorial Copy */}
                 <div className="p-4 sm:p-5 text-left bg-white">
-                  <h3 className="font-serif text-2xl sm:text-[26px] text-slate-900 tracking-tight leading-tight mb-1.5">
+                  <h3 className="font-display font-medium text-2xl sm:text-[26px] text-slate-900 tracking-[-0.02em] leading-tight mb-1.5">
                     {activeStory.title}
                   </h3>
-                  <p className="text-slate-600 text-xs sm:text-[12.5px] leading-relaxed font-sans line-clamp-3">
+                  <p className="text-slate-600 text-xs sm:text-[13px] leading-relaxed font-sans line-clamp-3">
                     {activeStory.description}
                   </p>
                 </div>

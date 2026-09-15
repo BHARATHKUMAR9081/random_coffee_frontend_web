@@ -21,9 +21,9 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 sm:gap-14 items-center pb-20 sm:pb-28">
             {/* Left Column (Cols 1-7): Monumental Headline, Copy & Actions */}
             <div className="lg:col-span-7 flex flex-col items-start text-left space-y-6">
-              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] font-mono tracking-widest text-gold-400 uppercase">
+              <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/[0.04] border border-white/10 text-[11px] font-sans font-medium tracking-wider text-gold-400 uppercase">
                 <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-ping" />
-                DETERMINISTIC DEAL FLOW
+                Deterministic Deal Flow
               </div>
 
               <h2 className="font-display font-light text-3xl sm:text-5xl lg:text-6xl text-white tracking-[-0.025em] leading-[1.08]">
@@ -50,7 +50,7 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
                 </button>
               </div>
 
-              <div className="flex items-center gap-4 text-xs text-zinc-500 pt-2 font-mono">
+              <div className="flex items-center gap-4 text-xs text-zinc-400 pt-2 font-sans">
                 <span className="flex items-center gap-1.5">
                   <span className="text-emerald-400">✓</span> No credit card required
                 </span>
@@ -67,18 +67,18 @@ export function BottomCtaSection({ onDemoClick }: BottomCtaSectionProps) {
               <div className="absolute inset-0 bg-radial from-amber-500/10 via-transparent to-transparent opacity-60 pointer-events-none" />
 
               {/* Top badge inside 3D card */}
-              <div className="absolute top-4 left-5 flex items-center gap-2 font-mono text-[10px] text-zinc-400 tracking-wider uppercase z-10 pointer-events-none">
+              <div className="absolute top-4 left-5 flex items-center gap-2 font-sans text-[11px] font-medium text-zinc-400 tracking-wider uppercase z-10 pointer-events-none">
                 <span className="h-2 w-2 rounded-full bg-gold-400 shadow-[0_0_8px_#d4af37]" />
-                ORBITAL MATCH PROTOCOL
+                Orbital Match Protocol
               </div>
 
               {/* 3D Gyro Engine Canvas */}
               <SweepingRibbons3D />
 
               {/* Bottom stats inside 3D card */}
-              <div className="absolute bottom-4 inset-x-5 flex items-center justify-between font-mono text-[10px] text-zinc-500 border-t border-white/[0.06] pt-2 z-10 pointer-events-none">
+              <div className="absolute bottom-4 inset-x-5 flex items-center justify-between font-sans text-xs text-zinc-400 border-t border-white/[0.06] pt-2 z-10 pointer-events-none">
                 <span>Latency: 18ms</span>
-                <span className="text-gold-400">Deterministic Pair</span>
+                <span className="text-gold-400 font-medium">Deterministic Pair</span>
               </div>
             </div>
           </div>
