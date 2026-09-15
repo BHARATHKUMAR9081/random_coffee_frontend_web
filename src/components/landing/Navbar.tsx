@@ -14,8 +14,10 @@ const HOW_IT_WORKS_PREVIEW = {
   stats: '18.4s median time · 94.2% conversion',
 }
 
+type NavMode = 'hero' | 'curved' | 'footer'
+
 export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
-  const [isScrolled, setIsScrolled] = useState(false)
+  const [navMode, setNavMode] = useState<NavMode>('hero')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showHowItWorksPreview, setShowHowItWorksPreview] = useState(false)
   const leaveTimer = useRef<number | null>(null)
@@ -24,12 +26,31 @@ export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
 
   useEffect(() => {
     function handleScroll() {
-      if (window.scrollY > 24) {
-        setIsScrolled(true)
-      } else {
-        setIsScrolled(false)
+      const scrollY = window.scrollY
+      const capabilitiesEl =
+        document.getElementById('capabilities-section') ||
+        document.getElementById('mobile-feature-0')
+      const rolesEl = document.getElementById('executive-roles')
+
+      if (!capabilitiesEl || !rolesEl) {
+        setNavMode(scrollY > 40 ? 'curved' : 'hero')
+        return
       }
-      setShowHowItWorksPreview(false)
+
+      const capRect = capabilitiesEl.getBoundingClientRect()
+      const rolesRect = rolesEl.getBoundingClientRect()
+
+      // When How It Works enters the screen (top <= 90px)
+      // and until Roles section leaves the screen (bottom >= 70px):
+      if (capRect.top <= 90 && rolesRect.bottom >= 70) {
+        setNavMode('curved')
+      } else if (rolesRect.bottom < 70) {
+        // Scrolled down past Roles into Footer section:
+        setNavMode('footer')
+      } else {
+        // At starting Hero section:
+        setNavMode('hero')
+      }
     }
 
     window.addEventListener('scroll', handleScroll, { passive: true })
@@ -68,70 +89,140 @@ export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
     }, 200)
   }
 
+  const isCurved = navMode === 'curved'
+
   return (
     <header
-      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
-        isScrolled
-          ? 'bg-[#06080F]/80 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-3.5'
-          : 'bg-transparent border-b border-transparent py-5 sm:py-6'
+      className={`fixed top-0 left-0 right-0 z-50 transition-all duration-500 ease-out ${
+        isCurved
+          ? 'pointer-events-none pt-3 sm:pt-4 px-3 sm:px-6'
+          : navMode === 'footer'
+          ? 'bg-[#06080F]/85 backdrop-blur-xl border-b border-white/[0.08] shadow-[0_10px_30px_rgba(0,0,0,0.5)] py-3.5 px-6 sm:px-12 pointer-events-auto'
+          : 'bg-transparent py-5 sm:py-6 px-6 sm:px-12 pointer-events-auto'
       }`}
     >
-      <div className="px-6 sm:px-12 flex items-center justify-between w-full max-w-7xl mx-auto relative">
+      <div
+        className={`mx-auto transition-all duration-500 ease-out flex items-center justify-between relative ${
+          isCurved
+            ? 'max-w-6xl pointer-events-auto py-2 sm:py-2.5 px-4 sm:px-6'
+            : 'w-full max-w-7xl pointer-events-auto py-0 px-0'
+        }`}
+      >
+        {/* Floating Curved Glass Capsule Backdrop (Visible only when in Curved Dock mode) */}
+        <div
+          className={`absolute inset-0 rounded-full transition-opacity duration-500 pointer-events-none overflow-hidden ${
+            isCurved
+              ? 'opacity-100 border border-white/[0.14] bg-[#080C16]/90 backdrop-blur-2xl shadow-[0_16px_50px_rgba(0,0,0,0.7),0_0_24px_rgba(245,158,11,0.12)]'
+              : 'opacity-0'
+          }`}
+        >
+          {/* Ambient Top Glow Line inside the capsule */}
+          <div className="absolute inset-x-12 top-0 h-[1px] bg-gradient-to-r from-transparent via-amber-400/50 to-transparent pointer-events-none" />
+          <div className="absolute inset-x-28 -top-8 h-12 bg-amber-500/15 blur-xl pointer-events-none rounded-full" />
+        </div>
+
         {/* Left: Brand Logo & Title */}
-        <Link to="/" className="flex items-center gap-2.5 group">
-          <img
-            src="/brand-logo.jpg"
-            alt="RandomCoffee"
-            className="h-8 w-8 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] object-cover group-hover:scale-105 transition"
-          />
-          <span className="font-display font-medium text-base tracking-tight text-white">
-            Random<span className="text-gold-400">Coffee</span>
+        <Link to="/" className="flex items-center gap-2.5 group relative z-10">
+          <div className="relative">
+            <img
+              src="/brand-logo.jpg"
+              alt="RandomCoffee"
+              className={`object-cover transition-all duration-300 ${
+                isCurved
+                  ? 'h-7 w-7 sm:h-8 sm:w-8 rounded-xl shadow-[0_0_16px_rgba(212,175,55,0.45)] group-hover:scale-105'
+                  : 'h-8 w-8 rounded-lg shadow-[0_0_15px_rgba(212,175,55,0.4)] group-hover:scale-105'
+              }`}
+            />
+            {isCurved && (
+              <span className="absolute -bottom-0.5 -right-0.5 h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_6px_#10b981] ring-2 ring-[#080C16]" />
+            )}
+          </div>
+          <span className="font-display font-medium text-sm sm:text-base tracking-tight text-white flex items-center gap-1.5">
+            Random<span className={isCurved ? 'text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500' : 'text-gold-400'}>Coffee</span>
+            {isCurved && (
+              <span className="hidden lg:inline-flex text-[9px] font-mono px-1.5 py-0.5 rounded-full bg-amber-400/15 border border-amber-400/30 text-amber-300 font-semibold tracking-wider">
+                LIVE
+              </span>
+            )}
           </span>
         </Link>
 
-        {/* Center: Cerebrium Floating Glass Pill Bar */}
+        {/* Center: Navigation Pill Bar */}
         <div
-          className="relative hidden md:block"
+          className="relative hidden md:block z-10"
           onMouseLeave={handleMouseLeave}
         >
-          <nav className="flex items-center gap-6 text-[11px] font-tech tracking-[0.18em] text-zinc-300 glass-pill px-7 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
-            {/* PLATFORM directly links to /login */}
-            <Link
-              to="/login"
-              className="hover:text-gold-400 transition-colors uppercase"
-            >
-              PLATFORM
-            </Link>
-            <span className="text-zinc-600">·</span>
-
-            {/* HOW IT WORKS opens preview on hover and scrolls to midsection on click */}
-            <button
-              type="button"
-              onMouseEnter={handleMouseEnter}
-              onClick={() => handleSectionClick('how-it-works')}
-              className={`hover:text-gold-400 transition-colors uppercase cursor-pointer ${
-                showHowItWorksPreview ? 'text-gold-400' : ''
-              }`}
-            >
-              HOW IT WORKS
-            </button>
-            <span className="text-zinc-600">·</span>
-
-            {/* ROLES scrolls to the targeted introductions section */}
-            <button
-              type="button"
-              onClick={() => handleSectionClick('roles')}
-              className="hover:text-gold-400 transition-colors uppercase cursor-pointer"
-            >
-              ROLES
-            </button>
-            <span className="text-zinc-600">·</span>
-
-            <Link to="/pricing" className="hover:text-gold-400 transition-colors uppercase">
-              PRICING
-            </Link>
-            <span className="text-gold-400/80 font-tech select-none">::</span>
-          </nav>
+          {isCurved ? (
+            <nav className="flex items-center gap-1 p-1 rounded-full bg-white/[0.03] border border-white/[0.06] text-[11px] font-mono tracking-wider text-zinc-300 shadow-inner">
+              <Link
+                to="/login"
+                className="px-3.5 py-1 rounded-full hover:text-amber-300 hover:bg-white/[0.06] transition-all uppercase"
+              >
+                PLATFORM
+              </Link>
+              <span className="text-zinc-600 select-none text-[10px]">·</span>
+              <button
+                type="button"
+                onMouseEnter={handleMouseEnter}
+                onClick={() => handleSectionClick('how-it-works')}
+                className={`px-3.5 py-1 rounded-full hover:text-amber-300 hover:bg-white/[0.06] transition-all uppercase cursor-pointer flex items-center gap-1.5 ${
+                  showHowItWorksPreview ? 'text-amber-300 bg-white/[0.08] shadow-[0_0_12px_rgba(245,158,11,0.25)]' : ''
+                }`}
+              >
+                <span>HOW IT WORKS</span>
+                <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+              </button>
+              <span className="text-zinc-600 select-none text-[10px]">·</span>
+              <button
+                type="button"
+                onClick={() => handleSectionClick('roles')}
+                className="px-3.5 py-1 rounded-full hover:text-amber-300 hover:bg-white/[0.06] transition-all uppercase cursor-pointer"
+              >
+                ROLES
+              </button>
+              <span className="text-zinc-600 select-none text-[10px]">·</span>
+              <Link
+                to="/pricing"
+                className="px-3.5 py-1 rounded-full hover:text-amber-300 hover:bg-white/[0.06] transition-all uppercase"
+              >
+                PRICING
+              </Link>
+              <span className="ml-1 mr-0.5 flex items-center gap-1 text-[9px] font-mono px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 select-none">
+                <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-ping" />
+                ACTIVE
+              </span>
+            </nav>
+          ) : (
+            <nav className="flex items-center gap-6 text-[11px] font-tech tracking-[0.18em] text-zinc-300 glass-pill px-7 py-2.5 rounded-full shadow-[0_10px_30px_rgba(0,0,0,0.5)]">
+              <Link to="/login" className="hover:text-gold-400 transition-colors uppercase">
+                PLATFORM
+              </Link>
+              <span className="text-zinc-600">·</span>
+              <button
+                type="button"
+                onMouseEnter={handleMouseEnter}
+                onClick={() => handleSectionClick('how-it-works')}
+                className={`hover:text-gold-400 transition-colors uppercase cursor-pointer ${
+                  showHowItWorksPreview ? 'text-gold-400' : ''
+                }`}
+              >
+                HOW IT WORKS
+              </button>
+              <span className="text-zinc-600">·</span>
+              <button
+                type="button"
+                onClick={() => handleSectionClick('roles')}
+                className="hover:text-gold-400 transition-colors uppercase cursor-pointer"
+              >
+                ROLES
+              </button>
+              <span className="text-zinc-600">·</span>
+              <Link to="/pricing" className="hover:text-gold-400 transition-colors uppercase">
+                PRICING
+              </Link>
+              <span className="text-gold-400/80 font-tech select-none">::</span>
+            </nav>
+          )}
 
           {/* Non-Intrusive Floating Preview Flyout for HOW IT WORKS */}
           {showHowItWorksPreview && (
@@ -173,23 +264,36 @@ export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
         </div>
 
         {/* Right: Dual Action Buttons */}
-        <div className="flex items-center gap-2.5">
+        <div className="flex items-center gap-2 sm:gap-2.5 z-10">
           <Link
             to="/login"
-            className="hidden sm:inline-flex items-center px-4 py-1.5 text-xs font-tech font-medium tracking-wider text-zinc-200 bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 rounded-sm transition"
+            className={
+              isCurved
+                ? 'hidden sm:inline-flex items-center px-4 py-1.5 text-xs font-mono font-medium tracking-wider text-zinc-200 hover:text-white bg-white/[0.04] hover:bg-white/[0.09] border border-white/10 hover:border-amber-400/40 rounded-full transition-all duration-300 shadow-sm'
+                : 'hidden sm:inline-flex items-center px-4 py-1.5 text-xs font-tech font-medium tracking-wider text-zinc-200 bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 rounded-sm transition'
+            }
           >
             LOG IN
           </Link>
           <Link
             to="/register"
-            className="px-4 py-1.5 text-xs font-tech font-bold tracking-wider text-black bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.65)] transition-all transform hover:-translate-y-0.5"
+            className={
+              isCurved
+                ? 'group px-4.5 py-1.5 text-xs font-mono font-bold tracking-wider text-black bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 hover:from-amber-100 hover:via-gold-300 hover:to-amber-400 rounded-full shadow-[0_0_20px_rgba(212,175,55,0.45)] hover:shadow-[0_0_30px_rgba(212,175,55,0.7)] transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.98] flex items-center gap-1.5'
+                : 'px-4 py-1.5 text-xs font-tech font-bold tracking-wider text-black bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.65)] transition-all transform hover:-translate-y-0.5'
+            }
           >
-            SIGN UP
+            <span>SIGN UP</span>
+            {isCurved && (
+              <span className="text-xs transition-transform duration-200 group-hover:translate-x-0.5">→</span>
+            )}
           </Link>
           <button
             type="button"
             onClick={() => setMobileMenuOpen((o) => !o)}
-            className="md:hidden p-1.5 text-zinc-400 hover:text-white cursor-pointer"
+            className={`md:hidden p-1.5 text-zinc-400 hover:text-white cursor-pointer transition ${
+              isCurved ? 'rounded-full hover:bg-white/10' : ''
+            }`}
             aria-label="Toggle navigation"
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="w-5 h-5">

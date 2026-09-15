@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
+import { InteractiveDotGrid } from './InteractiveDotGrid'
 
 interface SatelliteCardData {
   tag: string
@@ -202,13 +203,68 @@ export function ExecutiveRolesSection() {
     <section
       id="executive-roles"
       className="relative z-30 w-full min-h-screen min-h-[100dvh] overflow-hidden flex flex-col justify-center items-center py-6 sm:py-10 px-4 sm:px-6 lg:px-12 rounded-b-[3.5rem] border-b border-slate-200 shadow-[0_25px_60px_rgba(0,0,0,0.06)]"
-      style={{ backgroundColor: '#F8FAFC' }}
+      style={{ backgroundColor: '#FFFFFF' }}
     >
+      {/* Interactive Separating Dot Grid Canvas on White */}
+      <InteractiveDotGrid
+        dotColor="rgba(30, 41, 59, 0.16)"
+        glowColor="rgba(217, 119, 6, 0.95)"
+      />
+
+      {/* Warm Orange Gradient Flare on Right Side (mirroring How It Works) */}
+      <div className="absolute top-1/4 -right-32 w-96 h-96 bg-amber-300/30 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute bottom-1/4 -left-32 w-80 h-80 bg-orange-100/30 rounded-full blur-3xl pointer-events-none" />
+
       <div className="max-w-6xl mx-auto w-full relative z-10 flex flex-col items-center justify-center my-auto">
+        {/* ================================================================= */}
+        {/* SECTION SEPARATION: EDITORIAL HEADING & TABLINES                  */}
+        {/* ================================================================= */}
+        <div className="w-full mb-3 sm:mb-5 pb-3 sm:pb-3.5 border-b border-slate-200/90 flex flex-col sm:flex-row sm:items-end justify-between gap-3">
+          <div>
+            <div className="flex items-center gap-2 mb-1">
+              <span className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b] inline-block" />
+              <span className="font-sans text-[11px] font-semibold tracking-wider text-amber-700 uppercase">
+                EXECUTIVE ROLES
+              </span>
+            </div>
+            <h2 className="font-display font-medium text-xl sm:text-2xl text-slate-900 tracking-tight leading-snug">
+              Curated introductions built for your exact role
+            </h2>
+          </div>
+
+          {/* Tablines: Role tabs directly on the separation line */}
+          <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto pb-0.5 -mb-3 sm:mb-0">
+            {ROLE_STORIES.map((role, idx) => {
+              const isSelected = pageIndex === idx
+              return (
+                <button
+                  key={role.id}
+                  type="button"
+                  onClick={() => handleTabSelect(idx)}
+                  className={`relative px-3.5 sm:px-4 py-2 text-xs font-sans transition-all cursor-pointer whitespace-nowrap ${
+                    isSelected
+                      ? 'text-amber-700 font-semibold'
+                      : 'text-slate-500 hover:text-slate-900 font-medium'
+                  }`}
+                >
+                  <span>{role.label}</span>
+                  {isSelected && (
+                    <motion.div
+                      layoutId="active-role-tabline"
+                      className="absolute bottom-0 inset-x-0 h-0.5 bg-amber-500 shadow-[0_1px_6px_rgba(245,158,11,0.5)] rounded-full"
+                      transition={{ type: 'spring', stiffness: 380, damping: 32 }}
+                    />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </div>
+
         {/* ================================================================= */}
         {/* CANVAS WORKSPACE: SCREEN-FILL VIEWPORT-ACCESSIBLE MOODBOARD       */}
         {/* ================================================================= */}
-        <div className="relative w-full min-h-[520px] sm:min-h-[560px] lg:min-h-[600px] flex items-center justify-center">
+        <div className="relative w-full min-h-[500px] sm:min-h-[540px] lg:min-h-[570px] flex items-center justify-center">
           {/* ───────────────────────────────────────────────────────────── */}
           {/* SATELLITE 1: TOP-RIGHT (Compact Large: w-[205px] h-[195px])    */}
           {/* ───────────────────────────────────────────────────────────── */}
@@ -398,31 +454,6 @@ export function ExecutiveRolesSection() {
               </div>
             </div>
           ))}
-        </div>
-
-        {/* ================================================================= */}
-        {/* BOTTOM SWITCHER TABS (Exact Melius style, directly in viewport)   */}
-        {/* ================================================================= */}
-        <div className="flex items-center justify-center pt-3 sm:pt-4 w-full">
-          <div className="inline-flex items-center p-1 rounded-xl bg-white/95 border border-slate-200/90 shadow-sm max-w-full overflow-x-auto gap-0.5">
-            {ROLE_STORIES.map((role, idx) => {
-              const isSelected = pageIndex === idx
-              return (
-                <button
-                  key={role.id}
-                  type="button"
-                  onClick={() => handleTabSelect(idx)}
-                  className={`px-3.5 sm:px-4 py-1.5 rounded-lg text-xs font-sans transition-all cursor-pointer whitespace-nowrap ${
-                    isSelected
-                      ? 'bg-[#FF4A22] text-white font-medium shadow-sm'
-                      : 'text-slate-600 hover:text-slate-900 font-normal hover:bg-slate-50'
-                  }`}
-                >
-                  {role.label}
-                </button>
-              )
-            })}
-          </div>
         </div>
       </div>
     </section>
