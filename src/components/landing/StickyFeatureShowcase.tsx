@@ -8,6 +8,7 @@ import {
   type Transition,
 } from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
+import { InteractiveDotGrid } from './InteractiveDotGrid'
 
 // ─── Feature data ─────────────────────────────────────────────────────────────
 
@@ -404,14 +405,23 @@ const PANEL_TRANSITION: Transition = { duration: 0.4, ease: EASE }
 
 function MobileLayout() {
   return (
-    <section className="md:hidden bg-[#F8FAFC] text-slate-900 shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.6)] border-t border-slate-800/80 rounded-t-[2.5rem] px-6 sm:px-10 pt-12 pb-20">
-      <div className="mb-8 pb-6 border-b border-slate-200">
-        <span className="font-sans text-[11px] font-semibold tracking-wider text-slate-500 uppercase">WHY RANDOMCOFFEE</span>
+    <section className="md:hidden relative bg-white text-slate-900 shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200 rounded-t-[3.5rem] px-6 sm:px-10 pt-12 pb-20 overflow-hidden">
+      {/* Interactive Separating Dot Grid Canvas on White */}
+      <InteractiveDotGrid
+        dotColor="rgba(30, 41, 59, 0.16)"
+        glowColor="rgba(217, 119, 6, 0.95)"
+      />
+
+      {/* Subtle Warm Amber Ambient Glow */}
+      <div className="absolute top-0 right-0 w-80 h-80 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+
+      <div className="relative z-10 mb-8 pb-6 border-b border-slate-200">
+        <span className="font-sans text-[11px] font-semibold tracking-wider text-amber-700 uppercase">WHY RANDOMCOFFEE</span>
         <h2 className="font-display font-medium text-2xl text-slate-900 mt-2 leading-tight">
           Executive speed without the networking complexity
         </h2>
       </div>
-      <div className="space-y-14">
+      <div className="relative z-10 space-y-14">
         {FEATURES.map((f, idx) => {
           const Panel = PANELS[idx]
           return (
@@ -426,7 +436,7 @@ function MobileLayout() {
             >
               <div className="flex items-center gap-2.5">
                 <span className="font-sans text-xs font-semibold px-2.5 py-1 rounded bg-amber-500 text-black">{f.num} / 03</span>
-                <span className="font-sans text-xs tracking-wider uppercase text-amber-600 font-semibold">{f.tag}</span>
+                <span className="font-sans text-xs tracking-wider uppercase text-amber-700 font-semibold">{f.tag}</span>
               </div>
               <h3 className="font-display font-semibold text-2xl text-slate-900 leading-tight">{f.title}</h3>
               <p className="text-sm text-slate-600 leading-relaxed font-sans">{f.desc}</p>
@@ -453,19 +463,66 @@ export function StickyFeatureShowcase() {
   const [activeStep, setActiveStep] = useState(0)
   const shouldReduceMotion = useReducedMotion()
 
-  // sectionRef goes on the OUTER 450vh element — this provides the scroll timeline
+  // sectionRef goes on the OUTER 480vh element — generous runway prevents early unpinning
   const sectionRef = useRef<HTMLElement>(null)
+  const lastProgress = useRef(0)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
   })
 
-  // Map 0→1 into 3 equal stages (0–0.33, 0.33–0.66, 0.66–1.0)
+  // Bidirectional Scroll-Lock Hysteresis constants:
+  // Requires the user to exert intentional scroll effort to move past steps 01, 02, and 03
+  const LOCK_HYSTERESIS_DOWN = 0.035
+  const LOCK_HYSTERESIS_UP = 0.035
+
+  // Baseline boundary thresholds:
+  // Step 0 -> 1 baseline: 0.333
+  // Step 1 -> 2 baseline: 0.666
+  const THRESHOLD_01_DOWN = 0.333 + LOCK_HYSTERESIS_DOWN // ~0.368
+  const THRESHOLD_12_DOWN = 0.666 + LOCK_HYSTERESIS_DOWN // ~0.701
+  const THRESHOLD_12_UP = 0.666 - LOCK_HYSTERESIS_UP // ~0.631
+  const THRESHOLD_01_UP = 0.333 - LOCK_HYSTERESIS_UP // ~0.298
+
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    const next = Math.min(2, Math.floor(v * 3))
+    const isScrollingUp = v < lastProgress.current
+    lastProgress.current = v
+
+    let next = activeStep
+    if (isScrollingUp) {
+      // Scrolling UP: holds previous state until crossing reverse hysteresis boundary
+      if (v < THRESHOLD_01_UP) {
+        next = 0
+      } else if (v < THRESHOLD_12_UP) {
+        next = 1
+      } else {
+        next = 2
+      }
+    } else {
+      // Scrolling DOWN: holds current state until crossing forward hysteresis boundary
+      if (v >= THRESHOLD_12_DOWN) {
+        next = 2
+      } else if (v >= THRESHOLD_01_DOWN) {
+        next = 1
+      } else {
+        next = 0
+      }
+    }
     setActiveStep(prev => (prev !== next ? next : prev))
   })
+
+  function scrollToStep(i: number) {
+    if (!sectionRef.current) return
+    const rect = sectionRef.current.getBoundingClientRect()
+    const scrollTop = window.scrollY + rect.top
+    const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
+    const targetPercent = i === 0 ? 0.16 : i === 1 ? 0.50 : 0.84
+    window.scrollTo({
+      top: scrollTop + targetPercent * scrollableHeight,
+      behavior: 'smooth',
+    })
+  }
 
   const feat = FEATURES[activeStep]
   const Panel = PANELS[activeStep]
@@ -476,42 +533,38 @@ export function StickyFeatureShowcase() {
       <MobileLayout />
 
       {/* ── Desktop layout ── */}
-      {/*
-        STRUCTURE:
-          <section .scroll-story-section>   ← 450vh, position:relative
-            <div .scroll-story-screen>      ← sticky top:0, height:100vh, overflow:hidden
-              <div .scroll-story-inner>     ← flex align-items:center, height:100%
-                content...
-              </div>
-            </div>
-          </section>
-
-        The section ref tracks scroll. The screen stays pinned.
-        No transform, no overflow:hidden on ancestors.
-      */}
       <section
         ref={sectionRef}
         id="capabilities-section"
         className="scroll-story-section hidden md:block"
         style={{
           position: 'relative',
-          height: '350vh',
+          height: '480vh',
           width: '100%',
-          backgroundColor: '#F8FAFC',
+          backgroundColor: 'transparent',
         }}
       >
         <div
-          className="scroll-story-screen text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.6)] border-t border-slate-800/80"
+          className="scroll-story-screen text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200"
           style={{
             position: 'sticky',
             top: 0,
             height: '100vh',
             width: '100%',
             overflow: 'hidden',
-            backgroundColor: '#F8FAFC',
+            backgroundColor: '#FFFFFF',
             zIndex: 30,
           }}
         >
+          {/* Subtle Warm Ambient Glow behind the dots */}
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-orange-100/35 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Interactive Separating Dot Grid Canvas on White */}
+          <InteractiveDotGrid
+            dotColor="rgba(30, 41, 59, 0.16)"
+            glowColor="rgba(217, 119, 6, 0.95)"
+          />
 
           <div
             className="scroll-story-inner"
@@ -536,12 +589,12 @@ export function StickyFeatureShowcase() {
                 justifyContent: 'space-between',
                 paddingBottom: '0.85rem',
                 marginBottom: '1.25rem',
-                borderBottom: '1px solid rgba(148,163,184,0.25)',
+                borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
               }}>
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
                     <span style={{ height: 7, width: 7, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b', display: 'inline-block' }} />
-                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: '#64748b', textTransform: 'uppercase' }}>
+                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: '#b45309', textTransform: 'uppercase' }}>
                       WHY RANDOMCOFFEE
                     </span>
                   </div>
@@ -553,7 +606,25 @@ export function StickyFeatureShowcase() {
                 {/* Progress indicator: 01 02 03 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
                   {FEATURES.map((f, i) => (
-                    <div key={f.num} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, opacity: i === activeStep ? 1 : 0.25, transition: 'opacity 0.3s' }}>
+                    <button
+                      key={f.num}
+                      type="button"
+                      onClick={() => scrollToStep(i)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 3,
+                        opacity: i === activeStep ? 1 : 0.4,
+                        transition: 'opacity 0.3s, transform 0.2s',
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px 6px',
+                        cursor: 'pointer',
+                      }}
+                      className="hover:scale-105"
+                      aria-label={`Jump to step ${f.num}: ${f.subtitle}`}
+                    >
                       <span style={{
                         fontFamily: 'var(--font-display)',
                         fontSize: 13,
@@ -564,11 +635,11 @@ export function StickyFeatureShowcase() {
                         {f.num}
                       </span>
                       <span style={{
-                        height: 2,
+                        height: 2.5,
                         width: i === activeStep ? 24 : 8,
                         borderRadius: 99,
-                        background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#cbd5e1',
-                        transition: 'all 0.5s',
+                        background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#e2e8f0',
+                        transition: 'all 0.4s',
                         display: 'block',
                       }} />
                       <span style={{
@@ -576,13 +647,13 @@ export function StickyFeatureShowcase() {
                         fontSize: 9,
                         fontWeight: 500,
                         letterSpacing: '0.06em',
-                        color: '#94a3b8',
+                        color: '#64748b',
                         textTransform: 'uppercase',
                         display: i === activeStep ? 'block' : 'none',
                       }}>
                         {f.subtitle}
                       </span>
-                    </div>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -667,7 +738,7 @@ export function StickyFeatureShowcase() {
                             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
                               {m.value}
                             </div>
-                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
+                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
                               {m.label}
                             </div>
                           </div>
@@ -687,28 +758,50 @@ export function StickyFeatureShowcase() {
                             height: 2.5,
                             width: i === activeStep ? 22 : i < activeStep ? 12 : 5,
                             borderRadius: 99,
-                            background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#cbd5e1',
+                            background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#e2e8f0',
                             transition: 'all 0.5s',
                             display: 'inline-block',
                           }} />
                         ))}
                         <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
-                          {activeStep + 1} / 3 — scroll ↓
+                          {activeStep === 2 ? '3 / 3 — explore room' : `${activeStep + 1} / 3 — scroll ↓`}
                         </span>
                       </div>
                     </motion.div>
                   </AnimatePresence>
                 </div>
 
-                {/* RIGHT COLUMN — visual panel changes via AnimatePresence */}
-                <div>
+                {/* RIGHT COLUMN — visual panel changes via AnimatePresence with 3D perspective rotational tilt */}
+                <div style={{ perspective: 1200 }}>
                   <AnimatePresence mode="wait">
                     <motion.div
                       key={`panel-${activeStep}`}
-                      initial={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.97, y: shouldReduceMotion ? 0 : 16 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: shouldReduceMotion ? 1 : 0.97, y: shouldReduceMotion ? 0 : -16 }}
+                      initial={{
+                        opacity: 0,
+                        scale: shouldReduceMotion ? 1 : 0.96,
+                        y: shouldReduceMotion ? 0 : 20,
+                        rotateX: shouldReduceMotion ? 0 : 4,
+                        rotateY: shouldReduceMotion ? 0 : -3,
+                      }}
+                      animate={{
+                        opacity: 1,
+                        scale: 1,
+                        y: 0,
+                        rotateX: 0,
+                        rotateY: 0,
+                      }}
+                      exit={{
+                        opacity: 0,
+                        scale: shouldReduceMotion ? 1 : 0.96,
+                        y: shouldReduceMotion ? 0 : -20,
+                        rotateX: shouldReduceMotion ? 0 : -4,
+                        rotateY: shouldReduceMotion ? 0 : 3,
+                      }}
                       transition={PANEL_TRANSITION}
+                      style={{
+                        transformStyle: 'preserve-3d',
+                        willChange: 'transform, opacity',
+                      }}
                     >
                       <Panel />
                     </motion.div>
