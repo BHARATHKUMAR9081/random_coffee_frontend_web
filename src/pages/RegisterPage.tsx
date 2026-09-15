@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { AuthSplitLayout } from '../components/layout/AuthSplitLayout'
 import { Button } from '../components/ui/Button'
+import { LinkedInButton } from '../components/ui/LinkedInButton'
 import { TextField, PasswordField } from '../components/ui/Field'
 import { useAuth } from '../context/AuthContext'
 import { isValidEmail } from '../lib/validation'
@@ -24,8 +25,8 @@ export function RegisterPage() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
 
-    if (!firstName.trim() || !lastName.trim()) {
-      setError('Enter your first and last name.')
+    if (!firstName.trim() || !lastName.trim() || !email.trim() || !password) {
+      setError('Fill out all fields.')
       return
     }
     if (!isValidEmail(email)) {
@@ -68,7 +69,17 @@ export function RegisterPage() {
         <h1 className="text-2xl font-semibold text-navy-950">Create your account</h1>
         <p className="mt-1 text-sm text-navy-900/55">Then complete your profile from the dashboard to get verified.</p>
 
-        <form onSubmit={handleSubmit} className="mt-8 flex flex-col gap-4">
+        <div className="mt-8 flex flex-col gap-5">
+          <LinkedInButton label="Sign up with LinkedIn" />
+
+          <div className="relative flex items-center justify-center">
+            <div className="w-full border-t border-navy-900/10" />
+            <span className="bg-white px-3 text-xs font-medium text-navy-900/40 uppercase tracking-wider">
+              or register with email
+            </span>
+          </div>
+
+          <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
             <TextField
               id="firstName"
@@ -135,6 +146,7 @@ export function RegisterPage() {
             </Link>
           </p>
         </form>
+        </div>
       </div>
     </AuthSplitLayout>
   )

@@ -35,7 +35,7 @@ export interface PublicProfilePreview {
 }
 
 export function fetchPublicProfile(accountId: string): Promise<{ profile: PublicBusinessProfile }> {
-  return getJson(`/api/accounts/${accountId}/`)
+  return getJson(`/accounts/${accountId}/`)
 }
 
 export function profileFromMatch(user: MatchedProfile): PublicBusinessProfile {

@@ -5,7 +5,7 @@ import { Button } from '../components/ui/Button'
 import { Avatar } from '../components/ui/Avatar'
 import { VerificationBadges } from '../components/ui/VerificationBadges'
 import { ApiError } from '../services/http'
-import { fetchConnection, type ConnectionRecord } from '../services/connectionService'
+import { acceptConnection, fetchConnection, type ConnectionRecord } from '../services/connectionService'
 import { listMessages, markConnectionRead, sendMessage, type ChatMessage } from '../services/chatService'
 import { createReport } from '../services/reportService'
 import { ScreenshotField } from '../components/support/ScreenshotField'
@@ -43,10 +43,15 @@ export function ChatPage() {
   const [reporting, setReporting] = useState(false)
   const bottomRef = useRef<HTMLDivElement | null>(null)
   const messagesRef = useRef<ChatMessage[]>([])
+  const connectionRef = useRef<ConnectionRecord | null>(null)
 
   useEffect(() => {
     messagesRef.current = messages
   }, [messages])
+
+  useEffect(() => {
+    connectionRef.current = connection
+  }, [connection])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -69,13 +74,12 @@ export function ChatPage() {
       try {
         const row = await fetchConnection(id)
         if (cancelled) return
+        setConnection(row)
         if (row.status !== 'accepted') {
-          setError('Chat unlocks after the connection is accepted.')
-          setConnection(row)
+          // Keep thread waiting for peer response without locking on a permanent error
           setLoading(false)
           return
         }
-        setConnection(row)
         const data = await listMessages(id)
         if (cancelled) return
         setMessages(data.messages)
@@ -91,6 +95,26 @@ export function ChatPage() {
     }
 
     async function poll() {
+      // If connection is still pending, poll the connection status until peer accepts
+      if (!connectionRef.current || connectionRef.current.status !== 'accepted') {
+        try {
+          const row = await fetchConnection(id)
+          if (cancelled) return
+          setConnection(row)
+          if (row.status === 'accepted') {
+            setError(null)
+            const data = await listMessages(id)
+            if (!cancelled) {
+              setMessages(data.messages)
+              void markConnectionRead(id)
+            }
+          }
+        } catch {
+          // Keep polling
+        }
+        return
+      }
+
       const lastId = messagesRef.current.at(-1)?.id
       try {
         const data = await listMessages(id, lastId)
@@ -115,6 +139,20 @@ export function ChatPage() {
       window.clearInterval(timer)
     }
   }, [connectionId, navigate, user.id])
+
+  async function handleAccept() {
+    if (!connectionId) return
+    try {
+      const updated = await acceptConnection(connectionId)
+      setConnection(updated)
+      setError(null)
+      const data = await listMessages(connectionId)
+      setMessages(data.messages)
+      void markConnectionRead(connectionId)
+    } catch (err) {
+      setError(err instanceof ApiError ? err.message : 'Could not accept this connection.')
+    }
+  }
 
   async function handleSend(event: React.FormEvent) {
     event.preventDefault()
@@ -216,6 +254,26 @@ export function ChatPage() {
       )}
 
       {error && <p className="text-sm text-red-600">{error}</p>}
+
+      {connection && connection.status !== 'accepted' && (
+        <div className="rounded-2xl border border-gold-500/30 bg-gold-500/10 p-4 text-center text-navy-950">
+          <p className="text-sm font-semibold">
+            {connection.canAccept
+              ? `${otherName} wants to connect with you!`
+              : `Connection request sent to ${otherName}.`}
+          </p>
+          <p className="mt-1 text-xs text-navy-900/65">
+            {connection.canAccept
+              ? 'Click below to accept and start chatting immediately.'
+              : `Chat will unlock automatically as soon as ${otherName} opens this connection.`}
+          </p>
+          {connection.canAccept && (
+            <div className="mt-3 flex justify-center">
+              <Button onClick={() => void handleAccept()}>Accept & Chat</Button>
+            </div>
+          )}
+        </div>
+      )}
 
       <section className="flex min-h-0 flex-1 flex-col rounded-2xl border border-navy-900/8 bg-white text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)]">
         <div className="min-h-0 flex-1 space-y-3 overflow-y-auto px-4 py-4">

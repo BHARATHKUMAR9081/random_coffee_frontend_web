@@ -1,14 +1,28 @@
 export type BusinessType =
+  | 'Business Owner'
   | 'Startup Founder'
+  | 'Aspiring Founder'
+  | 'Co-founder Seeker'
+  | 'Student'
+  | 'Professional'
+  | 'Freelancer'
+  | 'Buyer'
+  | 'Supplier'
+  | 'Service Provider'
   | 'Manufacturer'
   | 'Trader'
   | 'Retailer'
-  | 'Supplier'
-  | 'Buyer'
-  | 'Service Provider'
-  | 'Freelancer'
   | 'Investor'
+  | 'Mentor'
   | 'Other'
+
+export const NON_BUSINESS_TYPES: ReadonlySet<string> = new Set([
+  'Aspiring Founder',
+  'Student',
+  'Co-founder Seeker',
+  'Professional',
+  'Mentor',
+])
 
 export type ConnectionIntent =
   | 'Customers'

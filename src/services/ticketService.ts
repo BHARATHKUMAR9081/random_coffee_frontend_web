@@ -30,7 +30,7 @@ export interface SupportTicket {
 }
 
 export function listTickets(query?: ListQuery): Promise<{ tickets: SupportTicket[] } & PageMeta> {
-  return getJson(`/api/tickets/${toQuery(query)}`)
+  return getJson(`/tickets/${toQuery(query)}`)
 }
 
 export function createTicket(payload: {
@@ -40,13 +40,13 @@ export function createTicket(payload: {
   imageUrl?: string
   imagePath?: string
 }): Promise<SupportTicket> {
-  return postJson('/api/tickets/', payload)
+  return postJson('/tickets/', payload)
 }
 
 export function fetchTicket(ticketId: string): Promise<SupportTicket> {
-  return getJson(`/api/tickets/${ticketId}/`)
+  return getJson(`/tickets/${ticketId}/`)
 }
 
 export function addTicketComment(ticketId: string, body: string): Promise<TicketComment> {
-  return postJson(`/api/tickets/${ticketId}/comments/`, { body })
+  return postJson(`/tickets/${ticketId}/comments/`, { body })
 }

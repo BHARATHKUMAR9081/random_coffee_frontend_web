@@ -133,26 +133,26 @@ export interface StaffAudit {
 
 export function loginStaff(email: string, password: string) {
   return adminPost<{ accessToken: string; refreshToken?: string; admin: StaffAdmin }>(
-    '/api/staff/login/',
+    '/staff/login/',
     { email, password },
     false,
   )
 }
 
 export function fetchStaffOverview() {
-  return adminGet<StaffOverview>('/api/staff/overview/')
+  return adminGet<StaffOverview>('/staff/overview/')
 }
 
 export function listStaffUsers(query?: ListQuery) {
-  return adminGet<{ users: StaffUserRow[] } & PageMeta>(`/api/staff/users/${toQuery(query)}`)
+  return adminGet<{ users: StaffUserRow[] } & PageMeta>(`/staff/users/${toQuery(query)}`)
 }
 
 export function fetchStaffUser(userId: string) {
-  return adminGet<StaffUserDetail>(`/api/staff/users/${userId}/`)
+  return adminGet<StaffUserDetail>(`/staff/users/${userId}/`)
 }
 
 export function updateStaffUser(userId: string, payload: Record<string, unknown>) {
-  return adminPatch<StaffUserDetail>(`/api/staff/users/${userId}/`, payload)
+  return adminPatch<StaffUserDetail>(`/staff/users/${userId}/`, payload)
 }
 
 export function setStaffUserActive(userId: string, isActive: boolean) {
@@ -160,59 +160,59 @@ export function setStaffUserActive(userId: string, isActive: boolean) {
 }
 
 export function listStaffTickets(query?: ListQuery) {
-  return adminGet<{ tickets: StaffTicket[] } & PageMeta>(`/api/staff/tickets/${toQuery(query)}`)
+  return adminGet<{ tickets: StaffTicket[] } & PageMeta>(`/staff/tickets/${toQuery(query)}`)
 }
 
 export function fetchStaffTicket(ticketId: string) {
-  return adminGet<StaffTicket>(`/api/staff/tickets/${ticketId}/`)
+  return adminGet<StaffTicket>(`/staff/tickets/${ticketId}/`)
 }
 
 export function updateStaffTicket(ticketId: string, payload: { status?: string; adminNote?: string }) {
-  return adminPatch<StaffTicket>(`/api/staff/tickets/${ticketId}/`, payload)
+  return adminPatch<StaffTicket>(`/staff/tickets/${ticketId}/`, payload)
 }
 
 export function addStaffTicketComment(ticketId: string, body: string) {
-  return adminPost<TicketComment>(`/api/staff/tickets/${ticketId}/comments/`, { body })
+  return adminPost<TicketComment>(`/staff/tickets/${ticketId}/comments/`, { body })
 }
 
 export function listStaffReports(query?: ListQuery) {
-  return adminGet<{ reports: StaffReport[] } & PageMeta>(`/api/staff/reports/${toQuery(query)}`)
+  return adminGet<{ reports: StaffReport[] } & PageMeta>(`/staff/reports/${toQuery(query)}`)
 }
 
 export function updateStaffReport(reportId: string, payload: { status: string; adminNote?: string }) {
-  return adminPatch<StaffReport>(`/api/staff/reports/${reportId}/`, payload)
+  return adminPatch<StaffReport>(`/staff/reports/${reportId}/`, payload)
 }
 
 export function listStaffSessions(query?: ListQuery) {
-  return adminGet<{ sessions: StaffSession[] } & PageMeta>(`/api/staff/sessions/${toQuery(query)}`)
+  return adminGet<{ sessions: StaffSession[] } & PageMeta>(`/staff/sessions/${toQuery(query)}`)
 }
 
 export function listStaffAdmins(query?: ListQuery) {
-  return adminGet<{ admins: StaffAdmin[] } & PageMeta>(`/api/staff/admins/${toQuery(query)}`)
+  return adminGet<{ admins: StaffAdmin[] } & PageMeta>(`/staff/admins/${toQuery(query)}`)
 }
 
 export function createStaffAdmin(payload: { email: string; name: string; password: string; role: string }) {
-  return adminPost<StaffAdmin>('/api/staff/admins/', payload)
+  return adminPost<StaffAdmin>('/staff/admins/', payload)
 }
 
 export function updateStaffAdmin(adminId: string, payload: { isActive?: boolean; role?: string }) {
-  return adminPatch<StaffAdmin>(`/api/staff/admins/${adminId}/`, payload)
+  return adminPatch<StaffAdmin>(`/staff/admins/${adminId}/`, payload)
 }
 
 export function listStaffAudit(query?: ListQuery) {
-  return adminGet<{ auditLog: StaffAudit[] } & PageMeta>(`/api/staff/audit/${toQuery(query)}`)
+  return adminGet<{ auditLog: StaffAudit[] } & PageMeta>(`/staff/audit/${toQuery(query)}`)
 }
 
 export function listStaffUsage(query?: ListQuery) {
-  return adminGet<{ usageLogs: UsageLogEntry[] } & PageMeta>(`/api/staff/usage/${toQuery(query)}`)
+  return adminGet<{ usageLogs: UsageLogEntry[] } & PageMeta>(`/staff/usage/${toQuery(query)}`)
 }
 
 export function fetchStaffPlanCatalog() {
-  return adminGet<PlanCatalog>('/api/staff/plans/')
+  return adminGet<PlanCatalog>('/staff/plans/')
 }
 
 export function saveStaffPlanCatalog(payload: PlanCatalog) {
-  return adminPut<PlanCatalog>('/api/staff/plans/', payload)
+  return adminPut<PlanCatalog>('/staff/plans/', payload)
 }
 
 export function createStaffPlan(payload: {
@@ -223,28 +223,28 @@ export function createStaffPlan(payload: {
   isFeatured?: boolean
   isActive?: boolean
 }) {
-  return adminPost<CatalogPlan>('/api/staff/plans/create/', payload)
+  return adminPost<CatalogPlan>('/staff/plans/create/', payload)
 }
 
 export function updateStaffPlan(planId: string, payload: Partial<CatalogPlan> & { sortOrder?: number }) {
-  return adminPatch<CatalogPlan>(`/api/staff/plans/${planId}/`, payload)
+  return adminPatch<CatalogPlan>(`/staff/plans/${planId}/`, payload)
 }
 
 export function deleteStaffPlan(planId: string) {
-  return adminDelete<CatalogPlan | { ok: boolean }>(`/api/staff/plans/${planId}/`)
+  return adminDelete<CatalogPlan | { ok: boolean }>(`/staff/plans/${planId}/`)
 }
 
 export function createStaffPlanFeature(payload: { label: string; note?: string }) {
-  return adminPost<PlanCatalog>('/api/staff/plan-features/', payload)
+  return adminPost<PlanCatalog>('/staff/plan-features/', payload)
 }
 
 export function updateStaffPlanFeature(
   featureId: string,
   payload: Partial<Pick<CatalogFeature, 'label' | 'note'>> & { values?: Record<string, string>; sortOrder?: number },
 ) {
-  return adminPatch<PlanCatalog>(`/api/staff/plan-features/${featureId}/`, payload)
+  return adminPatch<PlanCatalog>(`/staff/plan-features/${featureId}/`, payload)
 }
 
 export function deleteStaffPlanFeature(featureId: string) {
-  return adminDelete<PlanCatalog>(`/api/staff/plan-features/${featureId}/`)
+  return adminDelete<PlanCatalog>(`/staff/plan-features/${featureId}/`)
 }

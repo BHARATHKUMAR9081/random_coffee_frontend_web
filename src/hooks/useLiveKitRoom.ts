@@ -8,7 +8,6 @@ import {
   type RemoteTrack,
   type RemoteTrackPublication,
 } from 'livekit-client'
-import { fetchCallToken } from '../services/callService'
 
 export type CallStatus = 'idle' | 'connecting' | 'connected' | 'error'
 
@@ -66,8 +65,25 @@ export function useLiveKitRoom(
     const room = roomRef.current
     roomRef.current = null
     if (room) {
-      await room.disconnect()
+      try {
+        for (const publication of room.localParticipant.trackPublications.values()) {
+          const track = publication.track as LocalTrack | undefined
+          track?.stop()
+        }
+      } catch {
+        // ignore track stop error
+      }
+      try {
+        await room.disconnect()
+      } catch {
+        // ignore disconnect error
+      }
     }
+    if (localVideoRef.current) localVideoRef.current.srcObject = null
+    if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+    if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null
+    setStatus('idle')
+    setRemoteConnected(false)
   }, [])
 
   useEffect(() => {
@@ -103,11 +119,10 @@ export function useLiveKitRoom(
       setStatus('connecting')
       setError(null)
       try {
-        const credentials =
-          prepared?.url && prepared.token
-            ? prepared
-            : await fetchCallToken(`demo-${crypto.randomUUID()}`, displayName)
-        const { url, token } = credentials
+        if (!prepared?.url || !prepared?.token) {
+          throw new Error('Video call credentials not found. Please start a match first.')
+        }
+        const { url, token } = prepared
         if (cancelled) return
 
         await room.connect(url, token)
@@ -117,6 +132,14 @@ export function useLiveKitRoom(
         if (room.remoteParticipants.size > 0) setRemoteConnected(true)
         if (!cancelled) setStatus('connected')
       } catch (err) {
+        try {
+          for (const publication of room.localParticipant.trackPublications.values()) {
+            const track = publication.track as LocalTrack | undefined
+            track?.stop()
+          }
+        } catch {
+          // ignore
+        }
         await room.disconnect()
         if (!cancelled) {
           setStatus('error')
@@ -132,12 +155,21 @@ export function useLiveKitRoom(
       room.off(RoomEvent.TrackSubscribed, onTrackSubscribed)
       room.off(RoomEvent.TrackUnsubscribed, onTrackUnsubscribed)
       room.off(RoomEvent.ParticipantDisconnected, onParticipantDisconnected)
+      try {
+        for (const publication of room.localParticipant.trackPublications.values()) {
+          const track = publication.track as LocalTrack | undefined
+          track?.stop()
+        }
+      } catch {
+        // ignore
+      }
       void room.disconnect()
       roomRef.current = null
-      for (const publication of room.localParticipant.trackPublications.values()) {
-        const track = publication.track as LocalTrack | undefined
-        track?.stop()
-      }
+      if (localVideoRef.current) localVideoRef.current.srcObject = null
+      if (remoteVideoRef.current) remoteVideoRef.current.srcObject = null
+      if (remoteAudioRef.current) remoteAudioRef.current.srcObject = null
+      setStatus('idle')
+      setRemoteConnected(false)
     }
   }, [enabled, displayName, prepared?.url, prepared?.token])
 

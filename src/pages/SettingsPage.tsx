@@ -221,7 +221,12 @@ export function SettingsPage() {
         {usageLoading && usageLogs.length === 0 ? (
           <p className="text-sm text-navy-900/50">Loading credit usage…</p>
         ) : usageError ? (
-          <p className="text-sm text-red-600">{usageError}</p>
+          <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <p>{usageError}</p>
+            <Button size="sm" variant="secondary" onClick={() => void loadUsage(usageMeta.page || 1)}>
+              Retry
+            </Button>
+          </div>
         ) : (
           <UsageLogTable rows={usageLogs} empty="No credits used yet." />
         )}
@@ -266,7 +271,12 @@ export function SettingsPage() {
         {activityLoading && activity.length === 0 ? (
           <p className="text-sm text-navy-900/50">Loading activity…</p>
         ) : activityError ? (
-          <p className="text-sm text-red-600">{activityError}</p>
+          <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-700">
+            <p>{activityError}</p>
+            <Button size="sm" variant="secondary" onClick={() => void loadActivity(activityMeta.page || 1)}>
+              Retry
+            </Button>
+          </div>
         ) : activity.length === 0 ? (
           <p className="text-sm text-navy-900/50">No activity yet.</p>
         ) : (

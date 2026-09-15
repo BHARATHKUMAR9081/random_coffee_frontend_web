@@ -13,13 +13,13 @@ export interface AppNotification {
 }
 
 export function listNotifications(query?: ListQuery): Promise<{ notifications: AppNotification[]; unreadCount: number } & Partial<PageMeta>> {
-  return getJson(`/api/notifications/${toQuery(query)}`)
+  return getJson(`/notifications/${toQuery(query)}`)
 }
 
 export function markNotificationRead(id: string): Promise<AppNotification> {
-  return postJson(`/api/notifications/${id}/read/`, {})
+  return postJson(`/notifications/${id}/read/`, {})
 }
 
 export function markAllNotificationsRead(): Promise<{ ok: boolean; unreadCount: number }> {
-  return postJson('/api/notifications/read-all/', {})
+  return postJson('/notifications/read-all/', {})
 }

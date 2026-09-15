@@ -160,7 +160,18 @@ export function ConnectionsPage() {
         <p className="mt-1 text-sm text-navy-900/55">One person sends a request. Chat unlocks when the other accepts.</p>
       </div>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && (
+        <div className="flex items-center justify-between rounded-xl border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-700">
+          <p>{error}</p>
+          <button
+            type="button"
+            onClick={() => void refresh().catch(() => undefined)}
+            className="font-medium underline hover:text-red-900"
+          >
+            Retry
+          </button>
+        </div>
+      )}
 
       {user.id === 'demo' && (
         <p className="rounded-2xl border border-navy-900/10 bg-white px-4 py-3 text-sm text-navy-900/70">

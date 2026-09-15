@@ -1,51 +1,125 @@
+import { useEffect, useRef } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { Button } from '../components/ui/Button'
 import { useAuth } from '../context/AuthContext'
+import { FullScene3D } from '../components/landing/FullScene3D'
+import { StickyFeatureShowcase } from '../components/landing/StickyFeatureShowcase'
+import { ExecutiveRolesSection } from '../components/landing/ExecutiveRolesSection'
+import { BottomCtaSection } from '../components/landing/BottomCtaSection'
+import { Navbar } from '../components/landing/Navbar'
+import { BackgroundGradients } from '../components/landing/BackgroundGradients'
+import { StaggerContainer, StaggerItem } from '../components/landing/StaggerContainer'
 
 export function LandingPage() {
-  const { loginDemo } = useAuth()
+  const { isLoggedIn, loginDemo } = useAuth()
   const navigate = useNavigate()
+  const heroRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    if (isLoggedIn) {
+      navigate('/dashboard', { replace: true })
+    }
+  }, [isLoggedIn, navigate])
 
   function handleDemo() {
     loginDemo()
     navigate('/dashboard')
   }
 
+  function handleNavigateSection(section: 'how-it-works' | 'roles') {
+    if (section === 'roles') {
+      const el = document.getElementById('executive-roles')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+      }
+      return
+    }
+
+    const isMobile = window.innerWidth < 768
+    if (isMobile) {
+      const el = document.getElementById('mobile-feature-0')
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        return
+      }
+    }
+
+    const sectionEl = document.getElementById('capabilities-section')
+    if (sectionEl) {
+      sectionEl.scrollIntoView({ behavior: 'smooth', block: 'start' })
+    }
+  }
+
   return (
-    <div className="mx-auto flex max-w-lg flex-col items-center gap-6 px-1 py-10 text-center sm:py-16">
-      <h1 className="text-2xl font-semibold text-navy-950 sm:text-3xl">
-        <span className="text-gold-500">Verified</span> business introductions, as fast as making a cup of coffee
-      </h1>
-      <p className="text-navy-900/65">
-        No approval wait. No anonymity. Instant, verified one-to-one video conversations with the right business
-        contacts.
-      </p>
-      <div className="flex w-full flex-col items-stretch gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-center">
-        <Button className="w-full sm:w-auto" onClick={handleDemo}>Try the demo</Button>
-        <Link to="/register">
-          <Button className="w-full" variant="secondary">Create your account</Button>
-        </Link>
-        <Link to="/login">
-          <Button className="w-full" variant="secondary">Sign in</Button>
-        </Link>
+    <div className="min-h-screen w-full bg-[#06080F] text-white selection:bg-gold-500 selection:text-black font-sans relative">
+      {/* Background Movement: Subtle Gradients & Grid Lines driven by CSS transform */}
+      <BackgroundGradients />
+
+      {/* Header: Fixed top navbar with transparent top and blur/border on scroll */}
+      <Navbar onNavigateSection={handleNavigateSection} onDemoClick={handleDemo} />
+
+      {/* ============================================================ */}
+      {/* CHAPTER 1: DARK OBSIDIAN & COFFEE-GOLD 3D REVOLVING GLOBE HERO */}
+      {/* ============================================================ */}
+      <div ref={heroRef} className="h-screen h-[100dvh] relative flex flex-col justify-end overflow-hidden select-none bg-[#06080F]">
+        {/* Full-Screen Three.js Revolving 3D Globe Engine */}
+        <FullScene3D />
+
+        {/* Hero Copy & Headline with Staggered Scroll Animation */}
+        <main className="relative flex flex-col justify-end px-6 sm:px-12 lg:px-16 pb-10 sm:pb-14 z-20 pointer-events-none w-full max-w-7xl mx-auto">
+          <StaggerContainer className="w-full grid items-end gap-x-8 gap-y-10 sm:grid-cols-12" staggerDelay={0.09}>
+            {/* Left Column (Cols 1-7): Monumental Editorial Headline */}
+            <StaggerItem className="sm:col-start-1 sm:col-end-8 text-left pointer-events-auto">
+              <h1 className="font-display font-light text-4xl sm:text-6xl md:text-7xl lg:text-[4.5rem] xl:text-[5.5rem] text-white tracking-[-0.025em] leading-[1.04] select-none">
+                Connect with
+                <br />
+                business leaders within a
+                <br />
+                <span className="text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 font-normal">
+                  cup of coffee
+                </span>
+              </h1>
+            </StaggerItem>
+
+            {/* Right Column (Cols 8-12): Copy & Action Buttons */}
+            <StaggerItem className="sm:col-start-8 sm:col-end-13 lg:col-start-9 lg:col-end-13 flex flex-col gap-6 max-w-[360px] ml-auto text-left pointer-events-auto pb-1">
+              <p className="text-sm sm:text-[15px] text-zinc-300/90 leading-relaxed font-normal">
+                Turn your coffee break into high-value partnerships. RandomCoffee connects verified founders, investors, and enterprise decision-makers for focused 2-minute 1:1 video chats — zero cold outreach, zero spam, pure serendipity.
+              </p>
+
+              <div className="flex items-center gap-3.5">
+                <Link
+                  to="/register"
+                  className="px-6 py-3 text-xs font-mono font-semibold tracking-wider uppercase text-black bg-gradient-to-r from-amber-200 via-gold-400 to-amber-500 rounded-sm shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.65)] transition-all transform hover:-translate-y-0.5"
+                >
+                  TRY IT NOW
+                </Link>
+                <button
+                  type="button"
+                  onClick={handleDemo}
+                  className="px-6 py-3 text-xs font-mono font-medium tracking-wider uppercase text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 rounded-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5 cursor-pointer"
+                >
+                  BOOK A DEMO
+                </button>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
+        </main>
       </div>
-      <div className="flex flex-wrap items-center justify-center gap-x-2 gap-y-1">
-        <Link to="/terms" className="text-xs font-medium text-navy-900/45 hover:text-navy-900 hover:underline">
-          Terms of Service
-        </Link>
-        <span className="text-navy-900/25">·</span>
-        <Link to="/community-guidelines" className="text-xs font-medium text-navy-900/45 hover:text-navy-900 hover:underline">
-          Community Guidelines
-        </Link>
-        <span className="text-navy-900/25">·</span>
-        <Link to="/privacy-policy" className="text-xs font-medium text-navy-900/45 hover:text-navy-900 hover:underline">
-          Privacy Policy
-        </Link>
-        <span className="text-navy-900/25">·</span>
-        <Link to="/refund-policy" className="text-xs font-medium text-navy-900/45 hover:text-navy-900 hover:underline">
-          Refund and Cancellation Policy
-        </Link>
-      </div>
+
+      {/* ============================================================ */}
+      {/* CHAPTER 2: LIGHT ARCHITECTURAL SHOWCASE (Sticky Desktop / Stacked Mobile) */}
+      {/* ============================================================ */}
+      <StickyFeatureShowcase />
+
+      {/* ============================================================ */}
+      {/* CHAPTER 3: TARGETED EXECUTIVE INTRODUCTIONS & ROLES          */}
+      {/* ============================================================ */}
+      <ExecutiveRolesSection />
+
+      {/* ============================================================ */}
+      {/* CHAPTER 4: DARK OBSIDIAN & COFFEE GOLD 3D FINALE & FOOTER    */}
+      {/* ============================================================ */}
+      <BottomCtaSection onDemoClick={handleDemo} />
     </div>
   )
 }

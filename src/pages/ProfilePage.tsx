@@ -6,7 +6,7 @@ import { ProfilePhotoField } from '../components/ui/ProfilePhotoField'
 import { IdentitySelfieField } from '../components/ui/IdentitySelfieField'
 import { ProfileStepper } from '../components/ui/ProfileStepper'
 import { VerificationBadges } from '../components/ui/VerificationBadges'
-import { IndustrySelect, LanguagePicker, OtherSelect, SelectField, TextAreaField, TextField } from '../components/ui/Field'
+import { IndustrySelect, OtherSelect, SelectField, TextField } from '../components/ui/Field'
 import { COUNTRIES, countryFlag, getCities, getStates } from '../data/locations'
 import { isValidGstin, isValidIndianMobile, normalizeGstin } from '../lib/validation'
 import {
@@ -16,18 +16,24 @@ import {
   SHORT_DESCRIPTION_MIN,
   validateProfilePhoto,
 } from '../services/profileService'
-import { asLanguageList, IDENTITY_DOCUMENT_TYPES, type BusinessProfile, type BusinessType, type ConnectionIntent, type IdentityDocumentType } from '../types'
+import { IDENTITY_DOCUMENT_TYPES, NON_BUSINESS_TYPES, type BusinessProfile, type BusinessType, type ConnectionIntent, type IdentityDocumentType } from '../types'
 
 const businessTypes: BusinessType[] = [
+  'Business Owner',
   'Startup Founder',
+  'Aspiring Founder',
+  'Co-founder Seeker',
+  'Student',
+  'Professional',
+  'Freelancer',
+  'Buyer',
+  'Supplier',
+  'Service Provider',
   'Manufacturer',
   'Trader',
   'Retailer',
-  'Supplier',
-  'Buyer',
-  'Service Provider',
-  'Freelancer',
   'Investor',
+  'Mentor',
   'Other',
 ]
 
@@ -62,8 +68,9 @@ export function ProfilePage() {
   const { user, saveProfile, uploadProfilePhoto, verifyBusiness, verifyIdentity } = useAuth()
   const navigate = useNavigate()
   const [searchParams, setSearchParams] = useSearchParams()
+  const isNonBusiness = NON_BUSINESS_TYPES.has(user.profile.businessType)
   const profileComplete = isProfileComplete(user.profile)
-  const businessVerified = user.verificationStatus === 'VERIFIED'
+  const businessVerified = user.verificationStatus === 'VERIFIED' || isNonBusiness
   const defaultStep = startingStep(profileComplete, businessVerified, user.isIdentityVerified)
   const step = parseStep(searchParams.get('step'), defaultStep)
   const [form, setForm] = useState<BusinessProfile>(user.profile)
@@ -152,19 +159,19 @@ export function ProfilePage() {
       setError('Add a profile photo.')
       return
     }
+    const formIsNonBusiness = NON_BUSINESS_TYPES.has(form.businessType)
     if (
       !form.firstName ||
       !form.lastName ||
-      !form.companyName ||
+      (!formIsNonBusiness && !form.companyName) ||
       !form.businessType ||
       !form.industry.trim() ||
       !form.city ||
       !isShortDescriptionValid(form.shortDescription) ||
-      form.preferredLanguages.length === 0 ||
       form.lookingFor.length === 0
     ) {
       setError(
-        `Please fill in your name, company, business type, industry, city, a short description of at least ${SHORT_DESCRIPTION_MIN} characters, languages, and at least one "looking for" option.`,
+        `Please fill in your name, ${formIsNonBusiness ? '' : 'company, '}business type, industry, city, a short description of at least ${SHORT_DESCRIPTION_MIN} characters, and at least one "looking for" option.`,
       )
       return
     }
@@ -176,6 +183,7 @@ export function ProfilePage() {
     setIsSaving(true)
     const saved = await saveProfile({
       ...form,
+      preferredLanguages: form.preferredLanguages && form.preferredLanguages.length > 0 ? form.preferredLanguages : ['English'],
       fullName: `${form.firstName.trim()} ${form.lastName.trim()}`.trim(),
     })
     setIsSaving(false)
@@ -237,157 +245,243 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl">
-      <button
-        type="button"
-        onClick={() => navigate('/dashboard')}
-        className="mb-4 inline-flex items-center gap-1 text-sm font-medium text-navy-900/55 hover:text-navy-950"
-      >
-        ← Back
-      </button>
-      <h1 className="text-xl font-semibold text-navy-950 sm:text-2xl">{titles[step].heading}</h1>
-      <p className="mt-1 text-sm text-navy-900/55">{titles[step].copy}</p>
-      <VerificationBadges className="mt-3" business={businessVerified} identity={user.isIdentityVerified} />
-      <ProfileStepper step={step} />
+    <div className={`mx-auto ${step === 1 ? 'max-w-6xl' : 'max-w-2xl'}`}>
+      {/* Sleek Compact Header */}
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 border-b border-navy-900/8 pb-2.5">
+        <div className="flex items-center gap-3">
+          <button
+            type="button"
+            onClick={() => navigate('/dashboard')}
+            className="inline-flex items-center gap-1 rounded-lg border border-navy-900/10 bg-white px-2.5 py-1 text-xs font-medium text-navy-900/70 shadow-xs hover:bg-navy-900/5 hover:text-navy-950 transition"
+          >
+            ← Back
+          </button>
+          <div>
+            <div className="flex items-center gap-2">
+              <h1 className="text-base font-bold text-navy-950 sm:text-lg">{titles[step].heading}</h1>
+              <VerificationBadges business={businessVerified} identity={user.isIdentityVerified} />
+            </div>
+            <p className="text-xs text-navy-900/55 hidden sm:block">{titles[step].copy}</p>
+          </div>
+        </div>
+        <ProfileStepper step={step} compact />
+      </div>
 
       {step === 1 && (
-        <form onSubmit={handleStepOne} className="mt-6 flex flex-col gap-6 rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
-          <ProfilePhotoField
-            value={form.profilePhotoUrl}
-            name={`${form.firstName} ${form.lastName}`.trim() || user.profile.email || 'You'}
-            uploading={photoUploading}
-            disabled={isSaving}
-            onFile={(file) => void handlePhoto(file)}
-          />
-          <div className="grid gap-4 sm:grid-cols-2">
-            <TextField
-              id="firstName"
-              label="First name"
-              required
-              value={form.firstName}
-              onChange={(e) => update('firstName', e.target.value)}
-            />
-            <TextField
-              id="lastName"
-              label="Last name"
-              required
-              value={form.lastName}
-              onChange={(e) => update('lastName', e.target.value)}
-            />
-            <TextField id="mobileNumber" label="Mobile number" required value={form.mobileNumber} onChange={(e) => update('mobileNumber', e.target.value)} />
-            <TextField id="email" label="Email address" value={form.email} disabled />
-            <TextField id="companyName" label="Company name" required value={form.companyName} onChange={(e) => update('companyName', e.target.value)} />
-            <TextField
-              id="companyWebsite"
-              label="Company website or LinkedIn (optional)"
-              value={form.companyWebsite}
-              onChange={(e) => update('companyWebsite', e.target.value)}
-            />
-            <SelectField
-              id="businessType"
-              label="Business type"
-              required
-              value={form.businessType}
-              onChange={(e) => update('businessType', e.target.value as BusinessType)}
-            >
-              <option value="">Select business type</option>
-              {businessTypes.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
-            </SelectField>
-            <IndustrySelect
-              id="industry"
-              label="Industry / category"
-              required
-              value={form.industry}
-              onChange={(value) => update('industry', value)}
-            />
-            <OtherSelect
-              id="country"
-              label="Country"
-              value={form.country}
-              options={COUNTRIES.map((country) => country.name)}
-              optionLabel={(name) => `${countryFlag(name)} ${name}`.trim()}
-              emptyLabel="Select country"
-              customLabel="Custom country"
-              onChange={(country) => setForm((prev) => ({ ...prev, country, state: '', city: '' }))}
-            />
-            <OtherSelect
-              key={`state-${form.country}`}
-              id="state"
-              label="State"
-              value={form.state}
-              options={getStates(form.country)}
-              emptyLabel="Select state"
-              customLabel="Custom state"
-              onChange={(state) => setForm((prev) => ({ ...prev, state, city: '' }))}
-            />
-            <OtherSelect
-              key={`city-${form.country}-${form.state}`}
-              id="city"
-              label="City"
-              required
-              value={form.city}
-              options={getCities(form.country, form.state)}
-              emptyLabel="Select city"
-              customLabel="Custom city"
-              onChange={(city) => update('city', city)}
-            />
-            <LanguagePicker
-              label="Preferred languages"
-              required
-              values={asLanguageList(form.preferredLanguages)}
-              onChange={(values) => update('preferredLanguages', values)}
-            />
-          </div>
+        <form
+          onSubmit={handleStepOne}
+          className="rounded-2xl border border-navy-900/8 bg-white p-4 sm:p-5 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.12)]"
+        >
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+            {/* Left Column: Personal & Company Details (7 cols) */}
+            <div className="lg:col-span-7 flex flex-col gap-2.5">
+              {/* Row 1: Profile Photo + Names */}
+              <div className="flex items-center gap-3.5">
+                <ProfilePhotoField
+                  value={form.profilePhotoUrl}
+                  name={`${form.firstName} ${form.lastName}`.trim() || user.profile.email || 'You'}
+                  uploading={photoUploading}
+                  disabled={isSaving}
+                  compact
+                  onFile={(file) => void handlePhoto(file)}
+                />
+                <div className="grid flex-1 grid-cols-2 gap-2.5">
+                  <TextField
+                    id="firstName"
+                    label="First name"
+                    required
+                    compact
+                    value={form.firstName}
+                    onChange={(e) => update('firstName', e.target.value)}
+                  />
+                  <TextField
+                    id="lastName"
+                    label="Last name"
+                    required
+                    compact
+                    value={form.lastName}
+                    onChange={(e) => update('lastName', e.target.value)}
+                  />
+                </div>
+              </div>
 
-          <div>
-            <TextAreaField
-              id="shortDescription"
-              label="Short business description"
-              required
-              minLength={SHORT_DESCRIPTION_MIN}
-              value={form.shortDescription}
-              onChange={(e) => update('shortDescription', e.target.value)}
-              placeholder="What does your business do? At least 50 characters."
-            />
-            <p className={`mt-1 text-xs ${isShortDescriptionValid(form.shortDescription) ? 'text-navy-900/45' : 'text-navy-900/60'}`}>
-              {form.shortDescription.trim().length}/{SHORT_DESCRIPTION_MIN} characters minimum
-            </p>
-          </div>
+              {/* Row 2: Mobile & Email */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <TextField
+                  id="mobileNumber"
+                  label="Mobile number"
+                  required
+                  compact
+                  value={form.mobileNumber}
+                  onChange={(e) => update('mobileNumber', e.target.value)}
+                />
+                <TextField
+                  id="email"
+                  label="Email address"
+                  compact
+                  value={form.email}
+                  disabled
+                />
+              </div>
 
-          <div>
-            <p className="mb-2 text-sm font-medium text-navy-900">
-              What are you looking for? <span className="text-gold-500">*</span>
-            </p>
-            <div className="flex flex-wrap gap-2">
-              {connectionIntents.map((intent) => {
-                const active = form.lookingFor.includes(intent)
-                return (
-                  <button
-                    type="button"
-                    key={intent}
-                    onClick={() => toggleIntent(intent)}
-                    className={`rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
-                      active
-                        ? 'border-gold-500 bg-gold-500/15 text-navy-950'
-                        : 'border-navy-900/15 text-navy-900/70 hover:border-navy-900/30'
-                    }`}
-                  >
-                    {intent}
-                  </button>
-                )
-              })}
+              {/* Row 3: Company & Website */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <TextField
+                  id="companyName"
+                  label={NON_BUSINESS_TYPES.has(form.businessType) ? 'Company / Org (optional)' : 'Company name'}
+                  required={!NON_BUSINESS_TYPES.has(form.businessType)}
+                  compact
+                  value={form.companyName}
+                  onChange={(e) => update('companyName', e.target.value)}
+                />
+                <TextField
+                  id="companyWebsite"
+                  label="Website / LinkedIn (opt)"
+                  compact
+                  value={form.companyWebsite}
+                  onChange={(e) => update('companyWebsite', e.target.value)}
+                />
+              </div>
+
+              {/* Row 4: Business Type & Industry */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                <SelectField
+                  id="businessType"
+                  label="Business type"
+                  required
+                  compact
+                  value={form.businessType}
+                  onChange={(e) => update('businessType', e.target.value as BusinessType)}
+                >
+                  <option value="">Select business type</option>
+                  {businessTypes.map((t) => (
+                    <option key={t} value={t}>
+                      {t}
+                    </option>
+                  ))}
+                </SelectField>
+                <IndustrySelect
+                  id="industry"
+                  label="Industry / category"
+                  required
+                  compact
+                  value={form.industry}
+                  onChange={(value) => update('industry', value)}
+                />
+              </div>
+
+              {/* Row 5: Country, State, City */}
+              <div className="grid grid-cols-3 gap-2">
+                <OtherSelect
+                  id="country"
+                  label="Country"
+                  compact
+                  value={form.country}
+                  options={COUNTRIES.map((country) => country.name)}
+                  optionLabel={(name) => `${countryFlag(name)} ${name}`.trim()}
+                  emptyLabel="Country"
+                  customLabel="Custom"
+                  onChange={(country) => setForm((prev) => ({ ...prev, country, state: '', city: '' }))}
+                />
+                <OtherSelect
+                  key={`state-${form.country}`}
+                  id="state"
+                  label="State"
+                  compact
+                  value={form.state}
+                  options={getStates(form.country)}
+                  emptyLabel="State"
+                  customLabel="Custom"
+                  onChange={(state) => setForm((prev) => ({ ...prev, state, city: '' }))}
+                />
+                <OtherSelect
+                  key={`city-${form.country}-${form.state}`}
+                  id="city"
+                  label="City"
+                  required
+                  compact
+                  value={form.city}
+                  options={getCities(form.country, form.state)}
+                  emptyLabel="City"
+                  customLabel="Custom"
+                  onChange={(city) => update('city', city)}
+                />
+              </div>
             </div>
-          </div>
 
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-            <Button type="submit" className="w-full sm:w-auto" disabled={isSaving || photoUploading}>
-              {isSaving ? 'Saving…' : 'Save and continue'}
-            </Button>
+            {/* Right Column (5 cols): Description, Looking For intents, and Action button */}
+            <div className="lg:col-span-5 flex flex-col justify-between self-stretch border-t border-navy-900/8 pt-3 lg:border-t-0 lg:border-l lg:pl-5 lg:pt-0 gap-3">
+              {/* Short business description */}
+              <div>
+                <div className="flex items-center justify-between mb-1">
+                  <label htmlFor="shortDescription" className="text-xs font-semibold text-navy-900">
+                    Short business description <span className="text-gold-500">*</span>
+                  </label>
+                  <span className={`text-[11px] font-medium ${isShortDescriptionValid(form.shortDescription) ? 'text-emerald-600' : 'text-navy-900/50'}`}>
+                    {form.shortDescription.trim().length}/{SHORT_DESCRIPTION_MIN} min
+                  </span>
+                </div>
+                <textarea
+                  id="shortDescription"
+                  rows={3}
+                  required
+                  minLength={SHORT_DESCRIPTION_MIN}
+                  value={form.shortDescription}
+                  onChange={(e) => update('shortDescription', e.target.value)}
+                  placeholder="What does your business do? How do you create value for customers or partners? (min 50 characters)"
+                  className="w-full rounded-xl border border-navy-900/10 bg-navy-950/[0.03] p-2.5 text-xs text-navy-950 placeholder:text-navy-900/35 transition-shadow focus:border-transparent focus:bg-white focus:outline-none focus:ring-2 focus:ring-gold-500/40 resize-none h-20 leading-relaxed"
+                />
+              </div>
+
+              {/* What are you looking for? */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <p className="text-xs font-semibold text-navy-900">
+                    What are you looking for? <span className="text-gold-500">*</span>
+                  </p>
+                  <span className="text-[11px] text-navy-900/45">Select all relevant</span>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {connectionIntents.map((intent) => {
+                    const active = form.lookingFor.includes(intent)
+                    return (
+                      <button
+                        type="button"
+                        key={intent}
+                        onClick={() => toggleIntent(intent)}
+                        className={`rounded-lg border px-2.5 py-1 text-xs font-medium transition-all ${
+                          active
+                            ? 'border-gold-500 bg-gold-500/20 text-navy-950 font-semibold shadow-xs'
+                            : 'border-navy-900/10 bg-navy-900/[0.02] text-navy-900/70 hover:border-navy-900/25 hover:bg-navy-900/5'
+                        }`}
+                      >
+                        {active ? '✓ ' : '+ '}{intent}
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* Submit & Error area */}
+              <div className="pt-1">
+                {error && (
+                  <div className="mb-2 rounded-lg border border-red-200 bg-red-50 p-2 text-xs text-red-700 flex items-start gap-1.5">
+                    <span>⚠️</span>
+                    <span className="flex-1">{error}</span>
+                  </div>
+                )}
+                <Button
+                  type="submit"
+                  className="w-full py-2.5 text-sm font-semibold shadow-md transition-transform active:scale-[0.99]"
+                  disabled={isSaving || photoUploading}
+                >
+                  {isSaving ? 'Saving…' : 'Save and continue →'}
+                </Button>
+                <p className="mt-1 text-center text-[10px] text-navy-900/40">
+                  Profile details are used to match you with relevant connections
+                </p>
+              </div>
+            </div>
           </div>
         </form>
       )}

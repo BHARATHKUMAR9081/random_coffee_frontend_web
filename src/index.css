@@ -13,6 +13,35 @@
   --color-cream-100: #efebe3;
   --color-cream-50: #f7f4ee;
   --font-sans: 'Inter', system-ui, 'Segoe UI', Roboto, sans-serif;
+  --font-display: 'Plus Jakarta Sans', 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+}
+
+.font-display {
+  font-family: var(--font-display);
+}
+
+.font-tech {
+  font-family: var(--font-mono);
+}
+
+.noise-overlay {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)' opacity='0.035'/%3E%3C/svg%3E");
+}
+
+.glass-pill {
+  background: rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.glass-card {
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.035) 0%, rgba(255, 255, 255, 0.01) 100%);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
 }
 
 body {
@@ -20,18 +49,64 @@ body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: var(--color-cream-50);
-  color: var(--color-navy-950);
-  overflow-x: hidden;
+  background-color: #06080F;
+  color: #FFFFFF;
   -webkit-text-size-adjust: 100%;
   text-size-adjust: 100%;
 }
 
-html,
+html {
+  scroll-behavior: smooth;
+}
+
 #root {
-  overflow-x: hidden;
+  min-height: 100vh;
 }
 
 * {
-  scrollbar-color: rgba(15, 33, 56, 0.25) transparent;
+  scrollbar-color: rgba(212, 175, 55, 0.25) transparent;
+}
+
+/* ── Scroll-story pinned section ────────────────────────────────────────── */
+/* The outer section creates 450vh of scroll space.                         */
+/* The sticky screen sits pinned at top: 0 for the full scroll distance.    */
+
+.scroll-story-section {
+  position: relative;
+  height: 450vh;
+  width: 100%;
+  background-color: #F8FAFC;
+}
+
+.scroll-story-screen {
+  position: -webkit-sticky;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+  width: 100%;
+  overflow: hidden;
+  background-color: #F8FAFC;
+}
+
+.scroll-story-inner {
+  height: 100%;
+  width: 100%;
+  display: flex;
+  align-items: center;
+}
+
+/* Mobile: disable sticky, let content stack normally */
+@media (max-width: 767px) {
+  .scroll-story-section {
+    height: auto;
+  }
+  .scroll-story-screen {
+    position: relative;
+    height: auto;
+    overflow: visible;
+  }
+  .scroll-story-inner {
+    display: block;
+    height: auto;
+  }
 }

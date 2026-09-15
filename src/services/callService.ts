@@ -7,5 +7,5 @@ export interface CallTokenResponse {
 }
 
 export function fetchCallToken(identity: string, name: string): Promise<CallTokenResponse> {
-  return postJson<CallTokenResponse>('/api/calls/token/', { identity, name })
+  return postJson<CallTokenResponse>('/calls/token/', { identity, name })
 }

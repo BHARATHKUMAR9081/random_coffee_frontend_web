@@ -23,27 +23,27 @@ export interface ConnectionRecord {
 
 export function listConnections(statusOrQuery?: string | ListQuery): Promise<{ connections: ConnectionRecord[] } & Partial<PageMeta>> {
   if (typeof statusOrQuery === 'string') {
-    return getJson(`/api/connections/${toQuery({ status: statusOrQuery })}`)
+    return getJson(`/connections/${toQuery({ status: statusOrQuery })}`)
   }
-  return getJson(`/api/connections/${toQuery(statusOrQuery)}`)
+  return getJson(`/connections/${toQuery(statusOrQuery)}`)
 }
 
 export function sendConnectionRequest(accountId: string, matchSessionId?: string): Promise<ConnectionRecord> {
-  return postJson('/api/connections/', { accountId, matchSessionId })
+  return postJson('/connections/', { accountId, matchSessionId })
 }
 
 export function acceptConnection(connectionId: string): Promise<ConnectionRecord> {
-  return postJson(`/api/connections/${connectionId}/accept/`, {})
+  return postJson(`/connections/${connectionId}/accept/`, {})
 }
 
 export function declineConnection(connectionId: string): Promise<ConnectionRecord> {
-  return postJson(`/api/connections/${connectionId}/decline/`, {})
+  return postJson(`/connections/${connectionId}/decline/`, {})
 }
 
 export function cancelConnection(connectionId: string): Promise<ConnectionRecord> {
-  return postJson(`/api/connections/${connectionId}/cancel/`, {})
+  return postJson(`/connections/${connectionId}/cancel/`, {})
 }
 
 export function fetchConnection(connectionId: string): Promise<ConnectionRecord> {
-  return getJson(`/api/connections/${connectionId}/`)
+  return getJson(`/connections/${connectionId}/`)
 }

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
@@ -6,6 +6,7 @@ import { ApiError } from '../services/http'
 import {
   acceptConnection,
   declineConnection,
+  fetchConnection,
   sendConnectionRequest,
   type ConnectionRecord,
 } from '../services/connectionService'
@@ -29,6 +30,7 @@ export function PostCallFeedbackPage() {
   const [notes, setNotes] = useState('')
   const [submitted, setSubmitted] = useState(false)
   const [connectStatus, setConnectStatus] = useState<'idle' | 'sending' | 'sent' | 'incoming' | 'connected' | 'skipped' | 'declined'>('idle')
+  const [createdConnection, setCreatedConnection] = useState<ConnectionRecord | null>(null)
   const [incoming, setIncoming] = useState<ConnectionRecord | null>(null)
   const [connectError, setConnectError] = useState<string | null>(null)
 
@@ -51,6 +53,9 @@ export function PostCallFeedbackPage() {
         durationSeconds: locationState?.durationSeconds,
       })
     }
+    if (next === 'NETWORKED') {
+      void sendRequest()
+    }
   }
 
   async function sendRequest() {
@@ -59,28 +64,43 @@ export function PostCallFeedbackPage() {
       return
     }
     if (user.id === 'demo') {
-      setConnectStatus('sent')
+      setConnectStatus('connected')
       return
     }
     setConnectStatus('sending')
     setConnectError(null)
     try {
       const row = await sendConnectionRequest(matched.accountId, session?.id)
-      if (row.status === 'accepted') {
-        setConnectStatus('connected')
-        return
-      }
+      setCreatedConnection(row)
       if (row.canAccept) {
         setIncoming(row)
         setConnectStatus('incoming')
         return
       }
-      setConnectStatus('sent')
+      // Immediately unlock the chat UI for this match
+      setConnectStatus('connected')
     } catch (err) {
       setConnectStatus('idle')
       setConnectError(err instanceof ApiError ? err.message : 'Could not send the connection request.')
     }
   }
+
+  // Poll connection in background so when peer also networks, accepted status syncs automatically
+  useEffect(() => {
+    if (!createdConnection?.id || createdConnection.status === 'accepted') return
+    const id = createdConnection.id
+    const timer = window.setInterval(async () => {
+      try {
+        const updated = await fetchConnection(id)
+        if (updated.status === 'accepted') {
+          setCreatedConnection(updated)
+        }
+      } catch {
+        // Keep existing status on polling error
+      }
+    }, 2500)
+    return () => window.clearInterval(timer)
+  }, [createdConnection?.id, createdConnection?.status])
 
   async function respondToIncoming(action: 'accept' | 'decline') {
     if (!incoming) return
@@ -88,7 +108,8 @@ export function PostCallFeedbackPage() {
     setConnectError(null)
     try {
       if (action === 'accept') {
-        await acceptConnection(incoming.id)
+        const updated = await acceptConnection(incoming.id)
+        setCreatedConnection(updated)
         setConnectStatus('connected')
       } else {
         await declineConnection(incoming.id)
@@ -102,8 +123,13 @@ export function PostCallFeedbackPage() {
 
   function finish() {
     setSubmitted(true)
-    const goToConnections = connectStatus === 'sent' || connectStatus === 'connected' || connectStatus === 'incoming'
-    setTimeout(() => navigate(goToConnections ? '/connections' : '/dashboard'), 600)
+    const connId = createdConnection?.id || incoming?.id
+    if (connId && connectStatus === 'connected') {
+      setTimeout(() => navigate(`/connections/${connId}`), 400)
+    } else {
+      const goToConnections = connectStatus === 'sent' || connectStatus === 'connected' || connectStatus === 'incoming'
+      setTimeout(() => navigate(goToConnections ? '/connections' : '/dashboard'), 400)
+    }
   }
 
   if (!matched) {
@@ -141,20 +167,41 @@ export function PostCallFeedbackPage() {
 
           {tag === 'NETWORKED' && (
             <div className="rounded-xl border border-navy-900/10 p-4">
-              <p className="text-sm font-medium text-navy-900">Send {matched.name} a connection request?</p>
-              <p className="mt-1 text-xs text-navy-900/55">They have to accept before you can chat.</p>
+              <p className="text-sm font-medium text-navy-900">Networking with {matched.name}</p>
               {connectError && <p className="mt-2 text-sm text-red-600">{connectError}</p>}
-              {connectStatus === 'sent' ? (
-                <p className="mt-3 text-sm font-medium text-green-700">Request sent. They can accept it from Connections.</p>
+              {connectStatus === 'sending' ? (
+                <p className="mt-3 text-sm font-medium text-navy-900/60">Connecting with {matched.name} and deducting credit…</p>
               ) : connectStatus === 'connected' ? (
-                <p className="mt-3 text-sm font-medium text-green-700">You are connected. Chat is unlocked.</p>
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="text-sm font-semibold text-green-700">🎉 Connected! Chat is now unlocked.</p>
+                  <Button
+                    type="button"
+                    onClick={() => {
+                      const id = createdConnection?.id || incoming?.id
+                      if (id) {
+                        navigate(`/connections/${id}`)
+                      } else {
+                        navigate('/connections')
+                      }
+                    }}
+                  >
+                    Open Chat Now
+                  </Button>
+                </div>
+              ) : connectStatus === 'sent' ? (
+                <div className="mt-3 flex flex-col gap-2">
+                  <p className="text-sm font-medium text-green-700">Connection request sent! Once {matched.name} confirms, chat will unlock.</p>
+                  <Button variant="secondary" type="button" onClick={() => navigate('/connections')}>
+                    View in Connections
+                  </Button>
+                </div>
               ) : connectStatus === 'declined' ? (
                 <p className="mt-3 text-sm font-medium text-navy-900/70">Request declined.</p>
               ) : connectStatus === 'incoming' ? (
                 <div className="mt-3">
-                  <p className="text-sm text-navy-900">They already sent you a request. Accept to connect.</p>
+                  <p className="text-sm text-navy-900">{matched.name} already sent you a connection request! Accept to connect and chat.</p>
                   <div className="mt-3 flex gap-2">
-                    <Button onClick={() => void respondToIncoming('accept')}>Accept</Button>
+                    <Button onClick={() => void respondToIncoming('accept')}>Accept & Chat</Button>
                     <Button variant="secondary" onClick={() => void respondToIncoming('decline')}>
                       Decline
                     </Button>
@@ -162,8 +209,8 @@ export function PostCallFeedbackPage() {
                 </div>
               ) : (
                 <div className="mt-3 flex gap-2">
-                  <Button onClick={() => void sendRequest()} disabled={connectStatus === 'sending'}>
-                    {connectStatus === 'sending' ? 'Sending…' : 'Send request'}
+                  <Button onClick={() => void sendRequest()}>
+                    Network & Chat
                   </Button>
                   <Button variant="secondary" onClick={() => setConnectStatus('skipped')}>
                     Not now

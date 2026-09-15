@@ -1,4 +1,4 @@
-import { profileDisplayName, type BusinessProfile, type VerificationStatus } from '../types'
+import { NON_BUSINESS_TYPES, profileDisplayName, type BusinessProfile, type VerificationStatus } from '../types'
 import { API_URL } from './http'
 
 export const PROFILE_PHOTO_MAX_BYTES = 5 * 1024 * 1024
@@ -77,8 +77,13 @@ export function resolveMediaUrl(url: string | null | undefined): string | null {
   ) {
     return url
   }
-  if (url.startsWith('/')) return `${API_URL}${url}`
-  return url
+  let path = url.startsWith('/') ? url : `/${url}`
+  if (API_URL.endsWith('/api') && path.startsWith('/api/')) {
+    path = path.slice(4)
+  } else if (!API_URL.endsWith('/api') && !path.startsWith('/api/')) {
+    path = `/api${path}`
+  }
+  return `${API_URL}${path}`
 }
 
 export const emptyProfile: BusinessProfile = {
@@ -108,12 +113,14 @@ export function isShortDescriptionValid(value: string): boolean {
 
 export function isProfileComplete(profile: BusinessProfile): boolean {
   const name = profileDisplayName(profile)
+  const isNonBusiness = NON_BUSINESS_TYPES.has(profile.businessType)
+  const companyValid = isNonBusiness ? true : Boolean(profile.companyName)
   return Boolean(
     name &&
       profile.mobileNumber &&
       profile.email &&
       profile.businessType &&
-      profile.companyName &&
+      companyValid &&
       profile.industry &&
       profile.city &&
       isShortDescriptionValid(profile.shortDescription) &&
@@ -124,10 +131,11 @@ export function isProfileComplete(profile: BusinessProfile): boolean {
 
 export function computeCompletionPercent(profile: BusinessProfile): number {
   const nameFilled = profileDisplayName(profile) ? 1 : 0
+  const isNonBusiness = NON_BUSINESS_TYPES.has(profile.businessType)
   const fields: (keyof BusinessProfile)[] = [
     'mobileNumber',
     'email',
-    'companyName',
+    ...(isNonBusiness ? [] : (['companyName'] as (keyof BusinessProfile)[])),
     'businessType',
     'industry',
     'city',

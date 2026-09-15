@@ -1,4 +1,4 @@
-import { API_URL, ApiError } from './http'
+import { ApiError, buildUrl } from './http'
 
 const STORAGE_KEY = 'randomcoffee.adminAuth'
 
@@ -51,16 +51,26 @@ async function readError(response: Response): Promise<string> {
 
 export async function adminRequest<T>(path: string, options: { method?: string; body?: unknown; auth?: boolean } = {}): Promise<T> {
   const { method = 'GET', body, auth = true } = options
-  const headers: Record<string, string> = {}
+  const headers: Record<string, string> = {
+    Accept: 'application/json',
+  }
   if (body !== undefined) headers['Content-Type'] = 'application/json'
   const token = auth ? getAdminAccessToken() : null
   if (token) headers.Authorization = `Bearer ${token}`
 
-  const response = await fetch(`${API_URL}${path}`, {
-    method,
-    headers,
-    body: body === undefined ? undefined : JSON.stringify(body),
-  })
+  let response: Response
+  try {
+    response = await fetch(buildUrl(path), {
+      method,
+      headers,
+      body: body === undefined ? undefined : JSON.stringify(body),
+    })
+  } catch (err) {
+    throw new ApiError(
+      err instanceof Error ? err.message : 'Network request failed. Please check your connection.',
+      0,
+    )
+  }
 
   if (!response.ok) {
     throw new ApiError(await readError(response), response.status)

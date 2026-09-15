@@ -14,13 +14,13 @@ export function listMessages(connectionId: string, after?: string, limit = 50): 
   if (after) params.set('after', after)
   if (limit) params.set('limit', String(limit))
   const query = params.toString()
-  return getJson(`/api/connections/${connectionId}/messages/${query ? `?${query}` : ''}`)
+  return getJson(`/connections/${connectionId}/messages/${query ? `?${query}` : ''}`)
 }
 
 export function sendMessage(connectionId: string, body: string): Promise<ChatMessage> {
-  return postJson(`/api/connections/${connectionId}/messages/`, { body })
+  return postJson(`/connections/${connectionId}/messages/`, { body })
 }
 
 export function markConnectionRead(connectionId: string): Promise<unknown> {
-  return postJson(`/api/connections/${connectionId}/read/`, {})
+  return postJson(`/connections/${connectionId}/read/`, {})
 }

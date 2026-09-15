@@ -1,30 +1,34 @@
 import { useEffect, useRef, useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import { Button } from '../components/ui/Button'
-import { IndustrySelect, LanguagePicker, SelectField } from '../components/ui/Field'
-import { isProfileComplete, useAuth } from '../context/AuthContext'
+import { IndustrySelect, SelectField } from '../components/ui/Field'
+import { useAuth } from '../context/AuthContext'
 import { ApiError } from '../services/http'
 import { findDemoMatch, requestMatch, stopMatching } from '../services/matchService'
 import { asLanguageList, type BusinessType, type MatchFilters } from '../types'
 
 const businessTypes: BusinessType[] = [
+  'Business Owner',
   'Startup Founder',
+  'Aspiring Founder',
+  'Co-founder Seeker',
+  'Student',
+  'Professional',
+  'Freelancer',
+  'Buyer',
+  'Supplier',
+  'Service Provider',
   'Manufacturer',
   'Trader',
   'Retailer',
-  'Supplier',
-  'Buyer',
-  'Service Provider',
-  'Freelancer',
   'Investor',
+  'Mentor',
   'Other',
 ]
 
 export function FindMatchPage() {
   const navigate = useNavigate()
   const { user } = useAuth()
-  const profileReady = isProfileComplete(user.profile)
-  const verified = user.verificationStatus === 'VERIFIED'
   const [filters, setFilters] = useState<MatchFilters>({
     businessTypes: [],
     industry: user.profile.industry,
@@ -38,13 +42,18 @@ export function FindMatchPage() {
   const requestIdRef = useRef(0)
 
   useEffect(() => {
+    return () => {
+      requestIdRef.current += 1
+    }
+  }, [])
+
+  useEffect(() => {
     if (status !== 'waiting') return
     const tick = setInterval(() => setWaitSeconds((s) => s + 1), 1000)
     return () => clearInterval(tick)
   }, [status])
 
   async function startMatching() {
-    if (!profileReady || !verified) return
     const requestId = ++requestIdRef.current
     setWaitSeconds(0)
     setError(null)
@@ -71,22 +80,54 @@ export function FindMatchPage() {
         return
       }
 
-      const result = await requestMatch({
-        industry: filters.industry.trim(),
-        businessType: filters.businessTypes[0] ?? '',
-        preferredLanguages: filters.preferredLanguages,
-        cityScope: filters.cityScope,
-      })
-      if (requestIdRef.current !== requestId) return
-      navigate('/call', {
-        state: {
-          matched: result.connectedUser,
-          user: result.user,
-          connectedUser: result.connectedUser,
-          session: result.session,
-          call: result.call,
-        },
-      })
+      // Infinite requeue loop: continuously re-fire if backend returns status: 'timeout'
+      let consecutiveErrors = 0
+      while (requestIdRef.current === requestId) {
+        try {
+          const result = await requestMatch({
+            industry: filters.industry.trim(),
+            businessType: filters.businessTypes[0] ?? '',
+            preferredLanguages: filters.preferredLanguages,
+            cityScope: filters.cityScope,
+          })
+          if (requestIdRef.current !== requestId) return
+
+          // Reset transient error counter on successful response
+          consecutiveErrors = 0
+
+          if ('status' in result && result.status === 'timeout') {
+            // Peer not found in this check; pause 1s on client then re-check
+            await new Promise((resolve) => setTimeout(resolve, 1000))
+            continue
+          }
+
+          if ('connectedUser' in result && result.connectedUser) {
+            navigate('/call', {
+              state: {
+                matched: result.connectedUser,
+                user: result.user,
+                connectedUser: result.connectedUser,
+                session: result.session,
+                call: result.call,
+              },
+            })
+            return
+          }
+        } catch (err) {
+          if (requestIdRef.current !== requestId) return
+          // If server returns a transient error (502/503/504 during deployment or brief network glitch),
+          // retry up to 5 times instead of aborting the queue
+          consecutiveErrors += 1
+          if (consecutiveErrors <= 5 && (err instanceof ApiError && (err.status >= 500 || err.status === 0))) {
+            console.warn(`[Matchmaking] Transient server error (${err.status}), retrying (${consecutiveErrors}/5)...`)
+            await new Promise((resolve) => setTimeout(resolve, 1500))
+            continue
+          }
+          setStatus('idle')
+          setError(err instanceof ApiError ? err.message : 'Could not find a match. Try again.')
+          return
+        }
+      }
     } catch (err) {
       if (requestIdRef.current !== requestId) return
       setStatus('idle')
@@ -102,27 +143,11 @@ export function FindMatchPage() {
     }
   }
 
-  if (!profileReady || !verified) {
-    return (
-      <div className="mx-auto max-w-xl rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
-        <h1 className="text-xl font-semibold">Complete setup first</h1>
-        <p className="mt-2 text-sm text-navy-900/60">
-          {!profileReady
-            ? 'Add a profile photo and finish your business profile, then get verified before matching.'
-            : 'Get verified to start finding business matches.'}
-        </p>
-        <Link to={profileReady ? '/profile?step=2' : '/profile'}>
-          <Button className="mt-5">{profileReady ? 'Get verified' : 'Complete profile'}</Button>
-        </Link>
-      </div>
-    )
-  }
-
   return (
     <div className="mx-auto max-w-xl">
       <h1 className="text-2xl font-semibold text-navy-950">Find a business match</h1>
       <p className="mt-1 text-sm text-navy-900/55">
-        Filter by industry, location, business type, and language, then start a 1:1 video call.
+        Filter by industry, location, and business type, then start a 1:1 video call.
       </p>
 
       <div className="mt-6 rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
@@ -136,11 +161,6 @@ export function FindMatchPage() {
               onChange={(value) => setFilters((f) => ({ ...f, industry: value }))}
             />
           </div>
-          <LanguagePicker
-            label="Languages"
-            values={filters.preferredLanguages}
-            onChange={(values) => setFilters((f) => ({ ...f, preferredLanguages: values }))}
-          />
           <SelectField
             id="businessTypeFilter"
             label="Business type I want to meet"

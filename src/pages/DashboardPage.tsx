@@ -88,7 +88,8 @@ export function DashboardPage() {
   const displayName = profileDisplayName(user.profile) || 'Your profile'
   const profileReady = isProfileComplete(user.profile)
   const verified = user.verificationStatus === 'VERIFIED'
-  const canMatch = profileReady && verified
+  // Temporarily allow any user to enter matchmaking queue for MVP testing
+  const canMatch = true
   const [inbox, setInbox] = useState<ConnectionRecord[]>([])
   const [inboxError, setInboxError] = useState<string | null>(null)
   const [tickets, setTickets] = useState<SupportTicket[]>([])
@@ -153,6 +154,11 @@ export function DashboardPage() {
         )
       })
       .catch(() => undefined)
+
+    const timer = window.setInterval(() => {
+      void refreshConnections().catch(() => undefined)
+    }, 10000)
+    return () => window.clearInterval(timer)
   }, [user.id])
 
   useEffect(() => {
@@ -385,7 +391,16 @@ export function DashboardPage() {
           {user.id === 'demo' ? (
             <p className="mt-3 text-xs text-navy-900/50">Sign in with a real account to see chats here.</p>
           ) : inboxError ? (
-            <p className="mt-3 text-xs text-red-600">{inboxError}</p>
+            <div className="mt-3 flex items-center justify-between gap-2">
+              <p className="text-xs text-red-600">{inboxError}</p>
+              <button
+                type="button"
+                onClick={() => void refreshConnections().catch(() => undefined)}
+                className="text-xs font-semibold text-gold-600 hover:underline"
+              >
+                Retry
+              </button>
+            </div>
           ) : messages.length === 0 ? (
             <p className="mt-3 text-xs text-navy-900/50">No chats yet. Accept a connection to start messaging.</p>
           ) : (

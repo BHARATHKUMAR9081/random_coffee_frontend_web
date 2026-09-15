@@ -38,11 +38,11 @@ declare global {
 }
 
 export function createPlanOrder(planId: PlanId, billing: BillingInfo): Promise<RazorpayOrder> {
-  return postJson<RazorpayOrder>('/api/accounts/payments/order/', { planId, billing })
+  return postJson<RazorpayOrder>('/accounts/payments/order/', { planId, billing })
 }
 
 export function verifyPlanPayment(payload: RazorpaySuccess): Promise<UserPayload> {
-  return postJson<UserPayload>('/api/accounts/payments/verify/', payload)
+  return postJson<UserPayload>('/accounts/payments/verify/', payload)
 }
 
 export function loadRazorpay(): Promise<RazorpayConstructor> {

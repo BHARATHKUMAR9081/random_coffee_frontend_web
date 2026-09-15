@@ -6,7 +6,7 @@ import { VerificationBadges } from '../components/ui/VerificationBadges'
 import { useAuth } from '../context/AuthContext'
 import { checkCallIdentity } from '../services/authService'
 import type { MatchCallCredentials } from '../services/matchService'
-import { updateMatchSession } from '../services/matchService'
+import { stopMatching, updateMatchSession } from '../services/matchService'
 import { createReport } from '../services/reportService'
 import { ScreenshotField } from '../components/support/ScreenshotField'
 import type { UploadedImage } from '../services/screenshotService'
@@ -155,9 +155,22 @@ export function CallRoomPage() {
     disconnect,
   } = useLiveKitRoom(permissionsGranted, displayName, call ?? null)
 
+  const hadRemoteConnected = useRef(false)
+
   useEffect(() => {
     if (!matched) navigate('/match', { replace: true })
   }, [matched, navigate])
+
+  useEffect(() => {
+    if (remoteConnected) {
+      hadRemoteConnected.current = true
+    } else if (hadRemoteConnected.current && status === 'connected') {
+      const timer = setTimeout(() => {
+        void leaveAndGo('/call/feedback', 'completed')
+      }, 1200)
+      return () => clearTimeout(timer)
+    }
+  }, [remoteConnected, status])
 
   useEffect(() => {
     if (!permissionsGranted || status !== 'connected') return
@@ -210,6 +223,9 @@ export function CallRoomPage() {
       } catch {
         // Keep hanging up even if the session log update fails.
       }
+    }
+    if (user.id !== 'demo') {
+      void stopMatching().catch(() => undefined)
     }
     await disconnect()
     navigate(
@@ -271,9 +287,14 @@ export function CallRoomPage() {
         <VerificationBadges className="mt-3 justify-center" business={matched.isProfileVerified} identity={matched.isIdentityVerified} />
         <p className="mt-4 text-sm text-navy-900/70">Allow camera and microphone to join the private video room.</p>
         <p className="mt-2 text-xs text-navy-900/50">Open this call in a second browser window to see live video.</p>
-        <Button className="mt-6 w-full" onClick={() => setPermissionsGranted(true)}>
-          Allow camera & microphone
-        </Button>
+        <div className="mt-6 flex flex-col gap-2">
+          <Button className="w-full" onClick={() => setPermissionsGranted(true)}>
+            Allow camera & microphone
+          </Button>
+          <Button variant="secondary" className="w-full" onClick={() => void leaveAndGo('/match', 'cancelled')}>
+            Leave call
+          </Button>
+        </div>
       </div>
     )
   }
@@ -356,6 +377,12 @@ export function CallRoomPage() {
         </p>
       )}
 
+      {hadRemoteConnected.current && !remoteConnected && (
+        <p className="absolute left-1/2 top-28 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl bg-navy-800/90 px-4 py-2 text-center text-sm font-medium text-white shadow-lg">
+          Partner has left the call. Taking you to feedback…
+        </p>
+      )}
+
       {secondsLeft <= WARNING_AT_SECONDS && status === 'connected' && (
         <p className="absolute left-1/2 top-44 w-[min(16rem,calc(100vw-2rem))] -translate-x-1/2 rounded-2xl bg-red-500/90 px-4 py-1.5 text-center text-sm font-medium text-white shadow-lg sm:top-24 sm:w-auto sm:rounded-full sm:whitespace-nowrap">
           Call ending soon — wrap up your conversation
@@ -386,9 +413,10 @@ export function CallRoomPage() {
           <button
             onClick={endCall}
             className="flex h-11 items-center gap-2 rounded-full bg-red-600 px-5 text-sm font-semibold text-white shadow-[0_4px_20px_-4px_rgba(220,38,38,0.6)] transition-colors hover:bg-red-500 sm:h-12 sm:px-6"
+            title="Leave Call"
           >
             <EndCallIcon />
-            End
+            Leave Call
           </button>
         </div>
       </div>
