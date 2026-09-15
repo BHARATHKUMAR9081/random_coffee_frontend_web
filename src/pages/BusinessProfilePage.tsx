@@ -87,7 +87,7 @@ export function BusinessProfilePage() {
       setLoading(true)
       setError(null)
       try {
-        if (user.id !== 'demo' && UUID_RE.test(accountId)) {
+        if (UUID_RE.test(accountId)) {
           const data = await fetchPublicProfile(accountId)
           if (!cancelled) setProfile(data.profile)
         } else if (preview || historyEntry) {
@@ -102,16 +102,14 @@ export function BusinessProfilePage() {
         else setError(err instanceof ApiError ? err.message : 'Could not load this business profile.')
       }
 
-      if (user.id !== 'demo') {
-        try {
-          const inbox = await listConnections()
-          if (cancelled) return
-          const match = inbox.connections.find((row) => row.otherUser.accountId === accountId)
-          setConnection(match ?? null)
-          if (match && !UUID_RE.test(accountId)) setProfile(profileFromMatch(match.otherUser))
-        } catch {
-          /* profile can still render without connection actions */
-        }
+      try {
+        const inbox = await listConnections()
+        if (cancelled) return
+        const match = inbox.connections.find((row) => row.otherUser.accountId === accountId)
+        setConnection(match ?? null)
+        if (match && !UUID_RE.test(accountId)) setProfile(profileFromMatch(match.otherUser))
+      } catch {
+        /* profile can still render without connection actions */
       }
       if (!cancelled) setLoading(false)
     }
@@ -120,7 +118,7 @@ export function BusinessProfilePage() {
     return () => {
       cancelled = true
     }
-  }, [accountId, historyEntry, preview, user.id])
+  }, [accountId, historyEntry, preview])
 
   const isOwn = accountId === user.id
   const locationLabel = [profile?.city, profile?.state, profile?.country].filter(Boolean).join(', ')
@@ -132,7 +130,7 @@ export function BusinessProfilePage() {
   }
 
   async function requestConnect() {
-    if (!accountId || user.id === 'demo') return
+    if (!accountId) return
     setBusy(true)
     setError(null)
     try {
@@ -223,8 +221,6 @@ export function BusinessProfilePage() {
                 <span className="rounded-full bg-navy-900/10 px-3 py-2 text-xs font-semibold text-navy-900/60">
                   Requested
                 </span>
-              ) : user.id === 'demo' ? (
-                <p className="text-xs text-navy-900/50">Sign in with a real account to connect.</p>
               ) : (
                 <Button disabled={busy || !UUID_RE.test(accountId)} onClick={() => void requestConnect()}>
                   {busy ? 'Sending…' : 'Connect request'}

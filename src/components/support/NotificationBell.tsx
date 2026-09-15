@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useAuth } from '../../context/AuthContext'
 import {
   listNotifications,
   markAllNotificationsRead,
@@ -14,18 +13,12 @@ function timeLabel(iso: string | null) {
 }
 
 export function NotificationBell() {
-  const { user } = useAuth()
   const [open, setOpen] = useState(false)
   const [items, setItems] = useState<AppNotification[]>([])
   const [unread, setUnread] = useState(0)
   const panelRef = useRef<HTMLDivElement | null>(null)
 
   async function refresh() {
-    if (user.id === 'demo') {
-      setItems([])
-      setUnread(0)
-      return
-    }
     const data = await listNotifications()
     setItems(data.notifications)
     setUnread(data.unreadCount)
@@ -33,10 +26,9 @@ export function NotificationBell() {
 
   useEffect(() => {
     void refresh().catch(() => undefined)
-    if (user.id === 'demo') return
     const timer = window.setInterval(() => void refresh().catch(() => undefined), 12000)
     return () => window.clearInterval(timer)
-  }, [user.id])
+  }, [])
 
   useEffect(() => {
     function onDocClick(event: MouseEvent) {
@@ -93,9 +85,7 @@ export function NotificationBell() {
               </button>
             )}
           </div>
-          {user.id === 'demo' ? (
-            <p className="px-3 py-4 text-xs text-navy-900/50">Sign in with a real account to see notifications.</p>
-          ) : items.length === 0 ? (
+          {items.length === 0 ? (
             <p className="px-3 py-4 text-xs text-navy-900/50">No notifications yet.</p>
           ) : (
             <ul className="max-h-80 overflow-y-auto">

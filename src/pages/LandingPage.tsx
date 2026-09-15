@@ -10,7 +10,7 @@ import { BackgroundGradients } from '../components/landing/BackgroundGradients'
 import { StaggerContainer, StaggerItem } from '../components/landing/StaggerContainer'
 
 export function LandingPage() {
-  const { isLoggedIn, loginDemo } = useAuth()
+  const { isLoggedIn } = useAuth()
   const navigate = useNavigate()
   const heroRef = useRef<HTMLDivElement>(null)
 
@@ -19,11 +19,6 @@ export function LandingPage() {
       navigate('/dashboard', { replace: true })
     }
   }, [isLoggedIn, navigate])
-
-  function handleDemo() {
-    loginDemo()
-    navigate('/dashboard')
-  }
 
   function handleNavigateSection(section: 'how-it-works' | 'roles') {
     if (section === 'roles') {
@@ -55,7 +50,7 @@ export function LandingPage() {
       <BackgroundGradients />
 
       {/* Header: Fixed top navbar with transparent top and blur/border on scroll */}
-      <Navbar onNavigateSection={handleNavigateSection} onDemoClick={handleDemo} />
+      <Navbar onNavigateSection={handleNavigateSection} />
 
       {/* ============================================================ */}
       {/* CHAPTER 1: DARK OBSIDIAN & COFFEE-GOLD 3D REVOLVING GLOBE HERO */}
@@ -83,7 +78,7 @@ export function LandingPage() {
             {/* Right Column (Cols 8-12): Copy & Action Buttons */}
             <StaggerItem className="sm:col-start-8 sm:col-end-13 lg:col-start-9 lg:col-end-13 flex flex-col gap-6 max-w-[360px] ml-auto text-left pointer-events-auto pb-1">
               <p className="text-sm sm:text-[15px] text-zinc-300/90 leading-relaxed font-normal">
-                Turn your coffee break into high-value partnerships. RandomCoffee connects verified founders, investors, and enterprise decision-makers for focused 2-minute 1:1 video chats — zero cold outreach, zero spam, pure serendipity.
+                Turn your coffee break into high-value partnerships. RandomCoffee connects verified founders, investors, and business leaders for focused 2-minute 1:1 video chats — zero cold outreach, zero spam, pure serendipity.
               </p>
 
               <div className="flex items-center gap-3.5">
@@ -93,13 +88,12 @@ export function LandingPage() {
                 >
                   TRY IT NOW
                 </Link>
-                <button
-                  type="button"
-                  onClick={handleDemo}
+                <Link
+                  to="/login"
                   className="px-6 py-3 text-xs font-mono font-medium tracking-wider uppercase text-white bg-white/[0.06] hover:bg-white/[0.12] border border-white/10 rounded-sm backdrop-blur-md transition-all transform hover:-translate-y-0.5 cursor-pointer"
                 >
-                  BOOK A DEMO
-                </button>
+                  SIGN IN
+                </Link>
               </div>
             </StaggerItem>
           </StaggerContainer>
@@ -119,7 +113,7 @@ export function LandingPage() {
       {/* ============================================================ */}
       {/* CHAPTER 4: DARK OBSIDIAN & COFFEE GOLD 3D FINALE & FOOTER    */}
       {/* ============================================================ */}
-      <BottomCtaSection onDemoClick={handleDemo} />
+      <BottomCtaSection />
     </div>
   )
 }

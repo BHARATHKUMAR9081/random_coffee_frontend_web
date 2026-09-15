@@ -18,7 +18,7 @@ const relevanceOptions = ['Very relevant', 'Somewhat relevant', 'Not relevant'] 
 export function PostCallFeedbackPage() {
   const location = useLocation()
   const navigate = useNavigate()
-  const { addCallHistoryEntry, user } = useAuth()
+  const { addCallHistoryEntry } = useAuth()
   const locationState = location.state as
     | { matched?: MatchedProfile; connectedUser?: MatchedProfile; session?: MatchSessionLog; durationSeconds?: number }
     | null
@@ -61,10 +61,6 @@ export function PostCallFeedbackPage() {
   async function sendRequest() {
     if (!matched?.accountId) {
       setConnectError('This match has no account id, so a request cannot be sent.')
-      return
-    }
-    if (user.id === 'demo') {
-      setConnectStatus('connected')
       return
     }
     setConnectStatus('sending')

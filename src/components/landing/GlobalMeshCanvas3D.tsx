@@ -43,7 +43,7 @@ const GLOBAL_HUBS: HubData[] = [
     name: 'London',
     region: 'EU-WEST',
     activeCount: '850+',
-    role: 'Enterprise Procurement VPs',
+    role: 'Strategic Partnerships & VPs',
     x: 47.4,
     y: 27.7,
   },

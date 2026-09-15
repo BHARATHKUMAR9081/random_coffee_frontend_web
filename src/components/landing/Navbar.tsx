@@ -3,20 +3,19 @@ import { Link, useLocation, useNavigate } from 'react-router-dom'
 
 interface NavbarProps {
   onNavigateSection?: (section: 'how-it-works' | 'roles') => void
-  onDemoClick: () => void
 }
 
 const HOW_IT_WORKS_PREVIEW = {
   step: '01 / 03',
   tag: 'DETERMINISTIC SPEED',
   title: 'Sub-Second Verified Matchmaking',
-  desc: 'Algorithmic matching connecting founders, angel investors, and enterprise buyers in seconds.',
+  desc: 'Algorithmic matching connecting founders, angel investors, and business leaders in seconds.',
   stats: '18.4s median time · 94.2% conversion',
 }
 
 type NavMode = 'hero' | 'curved' | 'footer'
 
-export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
+export function Navbar({ onNavigateSection }: NavbarProps) {
   const [navMode, setNavMode] = useState<NavMode>('hero')
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const [showHowItWorksPreview, setShowHowItWorksPreview] = useState(false)
@@ -335,15 +334,13 @@ export function Navbar({ onNavigateSection, onDemoClick }: NavbarProps) {
             PRICING
           </Link>
           <div className="pt-3 border-t border-white/10 flex flex-col gap-2">
-            <button
-              onClick={() => {
-                onDemoClick()
-                setMobileMenuOpen(false)
-              }}
-              className="w-full py-2 text-xs font-tech font-semibold rounded-lg bg-white/5 text-white cursor-pointer"
+            <Link
+              to="/login"
+              onClick={() => setMobileMenuOpen(false)}
+              className="w-full py-2 text-center text-xs font-tech font-semibold rounded-lg bg-white/5 text-white cursor-pointer"
             >
-              TRY DEMO MODE
-            </button>
+              SIGN IN
+            </Link>
             <Link
               to="/register"
               onClick={() => setMobileMenuOpen(false)}

@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
-import { useAuth } from '../context/AuthContext'
 import { Button } from '../components/ui/Button'
 import { ApiError } from '../services/http'
 import { resolveMediaUrl } from '../services/profileService'
@@ -22,7 +21,6 @@ function formatTime(iso: string | null) {
 export function TicketThreadPage() {
   const { ticketId } = useParams()
   const navigate = useNavigate()
-  const { user } = useAuth()
   const [ticket, setTicket] = useState<SupportTicket | null>(null)
   const [comments, setComments] = useState<TicketComment[]>([])
   const [draft, setDraft] = useState('')
@@ -35,7 +33,6 @@ export function TicketThreadPage() {
       return
     }
     const id = ticketId
-    if (user.id === 'demo') return
 
     let cancelled = false
 
@@ -57,11 +54,11 @@ export function TicketThreadPage() {
       cancelled = true
       window.clearInterval(timer)
     }
-  }, [navigate, ticketId, user.id])
+  }, [navigate, ticketId])
 
   async function handleSend(event: React.FormEvent) {
     event.preventDefault()
-    if (!ticketId || user.id === 'demo' || ticket?.status === 'closed') return
+    if (!ticketId || ticket?.status === 'closed') return
     const body = draft.trim()
     if (!body) return
     setSending(true)
@@ -89,9 +86,6 @@ export function TicketThreadPage() {
         <p className="text-sm text-navy-900/55">{ticket ? statusLabel(ticket.status) : 'Loading…'}</p>
       </div>
 
-      {user.id === 'demo' && (
-        <p className="rounded-2xl border border-navy-900/10 bg-white px-4 py-3 text-sm text-navy-900/70">Demo mode does not open real tickets.</p>
-      )}
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <section className="rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
@@ -130,12 +124,12 @@ export function TicketThreadPage() {
             <textarea
               value={draft}
               onChange={(event) => setDraft(event.target.value.slice(0, 2000))}
-              disabled={user.id === 'demo' || sending || closed || !ticket}
+              disabled={sending || closed || !ticket}
               rows={2}
               placeholder={closed ? 'This ticket is closed' : 'Write a reply'}
               className="min-h-12 w-full resize-none rounded-xl border border-navy-900/15 px-3 py-2 text-sm focus:border-gold-500 focus:outline-none focus:ring-2 focus:ring-gold-500/30 disabled:bg-navy-900/5"
             />
-            <Button type="submit" disabled={user.id === 'demo' || sending || closed || !draft.trim()}>
+            <Button type="submit" disabled={sending || closed || !draft.trim()}>
               {sending ? 'Sending…' : 'Reply'}
             </Button>
           </div>

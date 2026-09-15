@@ -101,10 +101,6 @@ export function ConnectionsPage() {
   const [busyId, setBusyId] = useState<string | null>(null)
 
   async function refresh() {
-    if (user.id === 'demo') {
-      setRows([])
-      return
-    }
     const data = await listConnections()
     setRows(data.connections)
   }
@@ -113,10 +109,6 @@ export function ConnectionsPage() {
     let cancelled = false
     async function load() {
       try {
-        if (user.id === 'demo') {
-          if (!cancelled) setRows([])
-          return
-        }
         const data = await listConnections()
         if (!cancelled) {
           setRows(data.connections)
@@ -171,12 +163,6 @@ export function ConnectionsPage() {
             Retry
           </button>
         </div>
-      )}
-
-      {user.id === 'demo' && (
-        <p className="rounded-2xl border border-navy-900/10 bg-white px-4 py-3 text-sm text-navy-900/70">
-          Demo mode does not send real connection requests. Sign in with an account to use this.
-        </p>
       )}
 
       <section className="rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">

@@ -35,10 +35,6 @@ export function HelpPage() {
   const [saving, setSaving] = useState(false)
 
   async function refresh() {
-    if (user.id === 'demo') {
-      setTickets([])
-      return
-    }
     const data = await listTickets()
     setTickets(data.tickets)
   }
@@ -47,14 +43,10 @@ export function HelpPage() {
     void refresh().catch((err) => {
       setError(err instanceof ApiError ? err.message : 'Could not load tickets.')
     })
-  }, [user.id])
+  }, [])
 
   async function handleSubmit(event: React.FormEvent) {
     event.preventDefault()
-    if (user.id === 'demo') {
-      setError('Demo mode does not create real tickets. Sign in with an account.')
-      return
-    }
     if (!subject.trim() || !body.trim()) {
       setError('Subject and details are required.')
       return
@@ -89,12 +81,6 @@ export function HelpPage() {
         </p>
       </div>
 
-      {user.id === 'demo' && (
-        <p className="rounded-2xl border border-navy-900/10 bg-white px-4 py-3 text-sm text-navy-900/70">
-          Demo mode does not file real tickets.
-        </p>
-      )}
-
       {error && <p className="text-sm text-red-600">{error}</p>}
 
       <section className="rounded-2xl border border-navy-900/8 bg-white p-4 text-navy-950 shadow-[0_8px_24px_-16px_rgba(10,22,40,0.2)] sm:p-6">
@@ -116,8 +102,8 @@ export function HelpPage() {
             onChange={(e) => setBody(e.target.value)}
             placeholder="What happened?"
           />
-          <ScreenshotField folder="tickets" accountId={user.id} disabled={saving || user.id === 'demo'} onUploaded={setImage} />
-          <Button type="submit" className="w-full sm:w-auto" disabled={saving || user.id === 'demo'}>
+          <ScreenshotField folder="tickets" accountId={user.id} disabled={saving} onUploaded={setImage} />
+          <Button type="submit" className="w-full sm:w-auto" disabled={saving}>
             {saving ? 'Sending…' : 'Submit ticket'}
           </Button>
         </form>

@@ -18,18 +18,11 @@ import {
 } from '../services/authService'
 import type { PageMeta } from '../services/paging'
 
-const demoActivity: ActivityLogEntry[] = [
-  { id: 'demo-1', event: 'account.login', title: 'Signed in', createdAt: new Date().toISOString() },
-  { id: 'demo-2', event: 'profile.updated', title: 'Business profile updated', createdAt: '2026-08-28T10:15:00.000Z' },
-  { id: 'demo-3', event: 'account.registered', title: 'Account created', createdAt: '2026-08-01T09:00:00.000Z' },
-]
-
 const emptyPage: PageMeta = { page: 1, pageSize: 10, total: 0, totalPages: 1, hasNext: false, hasPrev: false }
 
 export function SettingsPage() {
-  const { user, logout } = useAuth()
+  const { logout } = useAuth()
   const navigate = useNavigate()
-  const isDemo = user.id === 'demo'
 
   const [oldPassword, setOldPassword] = useState('')
   const [newPassword, setNewPassword] = useState('')
@@ -41,12 +34,12 @@ export function SettingsPage() {
   const [activity, setActivity] = useState<ActivityLogEntry[]>([])
   const [activityMeta, setActivityMeta] = useState<PageMeta>(emptyPage)
   const [activityError, setActivityError] = useState<string | null>(null)
-  const [activityLoading, setActivityLoading] = useState(!isDemo)
+  const [activityLoading, setActivityLoading] = useState(true)
   const [usage, setUsage] = useState<UsageSummary | null>(null)
   const [usageLogs, setUsageLogs] = useState<UsageLogEntry[]>([])
   const [usageMeta, setUsageMeta] = useState<PageMeta>(emptyPage)
   const [usageError, setUsageError] = useState<string | null>(null)
-  const [usageLoading, setUsageLoading] = useState(!isDemo)
+  const [usageLoading, setUsageLoading] = useState(true)
 
   const [deletePassword, setDeletePassword] = useState('')
   const [deleteConfirmed, setDeleteConfirmed] = useState(false)
@@ -57,11 +50,6 @@ export function SettingsPage() {
     setActivityError(null)
     setActivityLoading(true)
     try {
-      if (isDemo) {
-        setActivity(demoActivity)
-        setActivityMeta({ page: 1, pageSize: 10, total: demoActivity.length, totalPages: 1, hasNext: false, hasPrev: false })
-        return
-      }
       const data = await listActivityLog({ page })
       setActivity(data.activity)
       setActivityMeta({
@@ -83,19 +71,6 @@ export function SettingsPage() {
     setUsageError(null)
     setUsageLoading(true)
     try {
-      if (isDemo) {
-        setUsage({
-          creditsRemaining: 50,
-          creditsLimit: 50,
-          creditsPeriod: 'lifetime',
-          periodStart: null,
-          connectionCost: 1,
-          receiverCost: 1,
-        })
-        setUsageLogs([])
-        setUsageMeta(emptyPage)
-        return
-      }
       const data = await listUsageLog({ page })
       setUsage(data.usage)
       setUsageLogs(data.usageLogs)
@@ -117,7 +92,7 @@ export function SettingsPage() {
   useEffect(() => {
     void loadActivity(1)
     void loadUsage(1)
-  }, [isDemo])
+  }, [])
 
   function timeLabel(iso: string | null) {
     if (!iso) return ''
@@ -133,10 +108,6 @@ export function SettingsPage() {
   async function handlePasswordSubmit(e: React.FormEvent) {
     e.preventDefault()
     setPasswordSuccess(null)
-    if (isDemo) {
-      setPasswordError('Password changes are not available on the demo account.')
-      return
-    }
     if (!oldPassword || !newPassword) {
       setPasswordError('Enter your current and new password.')
       return
@@ -171,10 +142,6 @@ export function SettingsPage() {
 
   async function handleDelete(e: React.FormEvent) {
     e.preventDefault()
-    if (isDemo) {
-      setDeleteError('The demo account cannot be deleted.')
-      return
-    }
     if (!deletePassword) {
       setDeleteError('Enter your current password to delete your account.')
       return

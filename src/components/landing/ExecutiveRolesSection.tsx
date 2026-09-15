@@ -88,12 +88,12 @@ const ROLE_STORIES: RoleStory[] = [
   },
   {
     id: 'buyers',
-    label: 'Enterprise Buyers',
-    title: 'Enterprise Buyers',
+    label: 'Strategic Partners',
+    title: 'Strategic Partners',
     description:
-      'Evaluate cutting-edge software and developer tools in 2-minute zero-commitment briefing rooms. Direct access to technical founders who build the software.',
+      'Evaluate cutting-edge software and innovative solutions in 2-minute zero-commitment briefing rooms. Direct access to technical founders and builders.',
     centerImage: '/images/buyer-portrait.jpg',
-    centerAlt: 'Enterprise VP of Procurement & Tech',
+    centerAlt: 'VP of Strategic Partnerships & Tech',
     satellites: {
       topRight: {
         tag: 'Architecture Pilot',
