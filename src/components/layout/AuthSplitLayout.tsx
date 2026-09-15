@@ -48,8 +48,9 @@ export function AuthSplitLayout({
         <img src={imageSrc} alt={imageAlt} className="absolute inset-0 h-full w-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy-950 via-navy-950/55 to-navy-950/15" />
         <div className="relative z-10 flex h-full flex-col justify-between p-10 text-white">
-          <Link to="/" className="text-lg font-semibold tracking-tight">
-            <span className="text-gold-500">Random</span>Coffee
+          <Link to="/" className="text-lg font-semibold tracking-tight flex items-center gap-2.5">
+            <img src="/brand-logo.jpg" alt="RandomCoffee" className="h-8 w-8 rounded-xl object-cover shadow-sm" />
+            <span><span className="text-gold-500">Random</span>Coffee</span>
           </Link>
 
           <div className="max-w-xl">
@@ -74,8 +75,9 @@ export function AuthSplitLayout({
       </aside>
 
       <section className="flex w-full flex-col justify-center overflow-y-auto px-4 py-8 sm:px-10 lg:w-[35%] lg:px-12">
-        <Link to="/" className="mb-8 text-lg font-semibold text-navy-950 lg:hidden">
-          <span className="text-gold-500">Random</span>Coffee
+        <Link to="/" className="mb-8 text-lg font-semibold text-navy-950 lg:hidden flex items-center gap-2.5">
+          <img src="/brand-logo.jpg" alt="RandomCoffee" className="h-8 w-8 rounded-xl object-cover shadow-sm" />
+          <span><span className="text-gold-500">Random</span>Coffee</span>
         </Link>
         {children}
       </section>
