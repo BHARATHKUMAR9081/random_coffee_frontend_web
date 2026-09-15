@@ -56,47 +56,10 @@ const FEATURES = [
 // ─── Right-side visual panels ──────────────────────────────────────────────
 
 function BenchmarkPanel() {
-  const [mode, setMode] = useState<'venture' | 'enterprise'>('venture')
-
   return (
     <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
-      {/* Top Telemetry Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 font-mono text-[10px]">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold tracking-wider">
-          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-          BENCHMARK : TIME TO DECISION MAKER
-        </div>
-        <div className="flex items-center gap-2">
-          <div className="flex items-center p-0.5 bg-slate-900/90 border border-slate-800 rounded-lg text-[10px] font-mono">
-            <button
-              type="button"
-              onClick={() => setMode('venture')}
-              className={`px-2.5 py-0.5 rounded-md transition-all font-medium cursor-pointer ${
-                mode === 'venture'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              VC & Seed
-            </button>
-            <button
-              type="button"
-              onClick={() => setMode('enterprise')}
-              className={`px-2.5 py-0.5 rounded-md transition-all font-medium cursor-pointer ${
-                mode === 'enterprise'
-                  ? 'bg-amber-500 text-slate-950 font-bold shadow-[0_0_10px_rgba(245,158,11,0.5)]'
-                  : 'text-slate-400 hover:text-white'
-              }`}
-            >
-              Enterprise
-            </button>
-          </div>
-          <span className="hidden sm:inline text-slate-500 text-[10px]">SAMPLE: 4,200+ EXECS</span>
-        </div>
-      </div>
-
       {/* Main Center Display Stage */}
-      <div className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3.5 sm:p-5 flex flex-col justify-between">
+      <div className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-1 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3.5 sm:p-5 flex flex-col justify-between">
         {/* Subtle Background Grid */}
         <div className="absolute inset-0 pointer-events-none opacity-20">
           <div className="absolute left-1/4 top-0 bottom-0 border-r border-dashed border-slate-700" />
@@ -110,29 +73,29 @@ function BenchmarkPanel() {
 
         {/* Hero Row: RandomCoffee Deterministic Speed */}
         <div className="relative z-10 rounded-xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 p-3 sm:p-4">
-          <div className="flex items-center justify-between font-mono mb-2">
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mb-2.5">
+            <div className="flex items-center gap-2.5">
               <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
-              <span className="text-amber-300 font-bold text-xs tracking-wide">
-                RANDOMCOFFEE DETERMINISTIC ENGINE
+              <span className="text-amber-300 font-display font-medium text-xs sm:text-sm tracking-tight">
+                RandomCoffee Deterministic Engine
               </span>
-              <span className="hidden sm:inline-block px-1.5 py-0.5 rounded bg-amber-400/20 text-amber-300 text-[9px] font-bold">
-                99.8% FASTER
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-sans font-semibold tracking-wide">
+                99.8% Faster
               </span>
             </div>
             <div className="text-right">
-              <span className="text-amber-400 font-display font-bold text-lg sm:text-xl tracking-tight">
-                {mode === 'venture' ? '18.4s' : '24.2s'}
+              <span className="text-amber-400 font-display font-semibold text-xl sm:text-2xl tracking-tight">
+                18.4s
               </span>
-              <span className="text-slate-400 text-[9px] block">MEDIAN TIME TO PARTNER</span>
+              <span className="text-slate-400 text-[10px] font-sans block">Median time to partner</span>
             </div>
           </div>
 
           {/* Animated Glowing Progress Bar */}
-          <div className="relative h-3 w-full bg-slate-950 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
+          <div className="relative h-2.5 w-full bg-slate-950 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
             <div
               className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-200 rounded-full transition-all duration-700 relative shadow-[0_0_16px_rgba(245,158,11,0.8)]"
-              style={{ width: mode === 'venture' ? '14%' : '18%' }}
+              style={{ width: '16%' }}
             >
               <div className="absolute right-0 top-0 bottom-0 w-2 bg-white rounded-full animate-pulse shadow-[0_0_8px_#ffffff]" />
             </div>
@@ -143,19 +106,19 @@ function BenchmarkPanel() {
         <div className="relative z-10 space-y-2.5 my-auto">
           {[
             {
-              channel: 'LINKEDIN COLD INMAIL',
+              channel: 'LinkedIn Cold InMail',
               stat: '14 Days (1.2M sec)',
               note: '4.8% response rate · $99/mo subscription',
               width: '52%',
             },
             {
-              channel: 'INDUSTRY SUMMITS & CONFERENCES',
+              channel: 'Industry Summits & Conferences',
               stat: '21 Days + $4,200',
               note: 'Ticket, flight & hotel · High friction',
               width: '74%',
             },
             {
-              channel: 'RETAINED EXECUTIVE HEADHUNTER',
+              channel: 'Retained Executive Headhunter',
               stat: '60 Days avg cycle',
               note: '30% first-year placement compensation',
               width: '98%',
@@ -165,11 +128,11 @@ function BenchmarkPanel() {
               key={row.channel}
               className="p-2 sm:p-2.5 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
             >
-              <div className="flex flex-wrap items-center justify-between text-[10px] font-mono mb-1 gap-1">
-                <span className="text-slate-300 font-semibold">{row.channel}</span>
+              <div className="flex flex-wrap items-center justify-between text-xs font-sans mb-1 gap-1">
+                <span className="text-slate-200 font-medium">{row.channel}</span>
                 <div className="flex items-center gap-2">
-                  <span className="text-slate-400 text-[9px]">{row.note}</span>
-                  <span className="text-slate-200 font-bold">{row.stat}</span>
+                  <span className="text-slate-400 text-[11px]">{row.note}</span>
+                  <span className="text-slate-200 font-semibold">{row.stat}</span>
                 </div>
               </div>
               <div className="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/80">
@@ -183,32 +146,32 @@ function BenchmarkPanel() {
         </div>
 
         {/* Bottom Metrics HUD Strip inside center stage */}
-        <div className="relative z-10 grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/70 text-center font-mono">
-          <div className="bg-slate-950/70 rounded-md py-1 border border-slate-800/60">
-            <div className="text-amber-400 font-bold text-xs">184 HRS</div>
-            <div className="text-[8.5px] text-slate-400 tracking-wider uppercase">Saved / Exec / Yr</div>
+        <div className="relative z-10 grid grid-cols-3 gap-2 pt-2 border-t border-slate-800/70 text-center">
+          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">184 Hrs</div>
+            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Saved / Exec / Yr</div>
           </div>
-          <div className="bg-slate-950/70 rounded-md py-1 border border-slate-800/60">
-            <div className="text-amber-400 font-bold text-xs">0%</div>
-            <div className="text-[8.5px] text-slate-400 tracking-wider uppercase">Cold Outreach Waste</div>
+          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">0%</div>
+            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Cold Outreach Waste</div>
           </div>
-          <div className="bg-slate-950/70 rounded-md py-1 border border-slate-800/60">
-            <div className="text-amber-400 font-bold text-xs">94.2%</div>
-            <div className="text-[8.5px] text-slate-400 tracking-wider uppercase">Pipeline Conversion</div>
+          <div className="bg-slate-950/70 rounded-lg py-1.5 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-sm sm:text-base">94.2%</div>
+            <div className="text-[9.5px] text-slate-400 font-sans tracking-normal">Pipeline Conversion</div>
           </div>
         </div>
       </div>
 
       {/* Bottom Details Drawer */}
-      <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[11px] font-mono">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-amber-400 font-bold">Audited ROI</span>
-          <span className="text-slate-500">·</span>
-          <span className="text-slate-300 font-sans text-[11px]">
+          <span className="text-amber-400 font-semibold">Audited ROI</span>
+          <span className="text-slate-600">·</span>
+          <span className="text-slate-300 text-[11.5px]">
             94.2% of matched executive calls convert to active deal pipeline in 48 hours.
           </span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-semibold shrink-0">
+        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
           Verified ROI Engine
         </div>
@@ -243,27 +206,27 @@ function VideoPanel() {
 
   return (
     <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
-      {/* Top Telemetry Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 font-mono text-[10px]">
-        <div className="flex items-center gap-2 px-2.5 py-1 rounded bg-amber-500/10 border border-amber-500/30 text-amber-400 font-bold tracking-wider">
+      {/* Top Status Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
-          WEBRTC DEAL ROOM : #RC-48201
+          Encrypted 1:1 Executive Room
         </div>
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-red-500/10 border border-red-500/30 text-red-400 font-bold">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-red-500/10 border border-red-500/30 text-red-400 font-medium text-[11px]">
             <span className="h-1.5 w-1.5 rounded-full bg-red-400 animate-ping" />
-            {formatTimer(seconds)} REMAINING
+            {formatTimer(seconds)} Remaining
           </div>
-          <span className="hidden sm:inline text-slate-400 text-[10px]">E2EE AES-256 P2P</span>
+          <span className="hidden sm:inline text-slate-400 text-[11px]">Direct E2EE P2P</span>
         </div>
       </div>
 
       {/* Main Center Display Stage */}
       <div className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3 sm:p-4 flex flex-col justify-between">
         {/* Center HUD Latency Watermark */}
-        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded bg-slate-950/85 border border-slate-800 font-mono text-[9px] text-slate-400 flex items-center gap-1.5 shadow-md">
+        <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20 px-2.5 py-0.5 rounded-full bg-slate-950/85 border border-slate-800 font-sans text-[10px] text-slate-400 flex items-center gap-1.5 shadow-md">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400" />
-          <span>DIRECT P2P · 14ms LATENCY · ZERO-CLOUD PROXY</span>
+          <span>Direct P2P · 14ms Latency · Zero-Cloud Proxy</span>
         </div>
 
         {/* Video Feeds Grid */}
@@ -273,13 +236,13 @@ function VideoPanel() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-amber-500/5 rounded-full blur-2xl pointer-events-none" />
 
             {/* Stream Top Header */}
-            <div className="flex items-center justify-between text-[10px] font-mono z-10">
-              <span className="text-amber-400 font-bold flex items-center gap-1.5">
+            <div className="flex items-center justify-between text-xs font-sans z-10">
+              <span className="text-amber-400 font-medium flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Founder (You)
               </span>
-              <span className="text-amber-400 text-[9px] px-2 py-0.5 rounded bg-amber-950/40 border border-amber-500/30 font-semibold">
-                VERIFIED PROFILE
+              <span className="text-amber-300 text-[10px] px-2 py-0.5 rounded-full bg-amber-950/40 border border-amber-500/30 font-medium">
+                Verified Profile
               </span>
             </div>
 
@@ -293,31 +256,31 @@ function VideoPanel() {
                   ✓
                 </span>
               </div>
-              <h5 className="mt-2 text-sm font-display font-semibold text-white">Subash S.</h5>
-              <p className="text-[10px] text-amber-300/80 font-mono">Founder & CEO · Seed AI</p>
+              <h5 className="mt-2 text-sm sm:text-base font-display font-medium text-white">Subash S.</h5>
+              <p className="text-xs text-amber-200/80 font-sans">Founder & CEO · Seed AI</p>
             </div>
 
             {/* Stream Bottom Controls & Waveform */}
             <div className="flex items-center justify-between z-10 pt-2 border-t border-slate-800/70">
               {/* Mic & Cam toggleable pills */}
-              <div className="flex items-center gap-1.5 font-mono text-[9px]">
+              <div className="flex items-center gap-1.5 font-sans text-[10px]">
                 <button
                   type="button"
                   onClick={() => setMicMuted(!micMuted)}
-                  className={`px-2 py-0.5 rounded cursor-pointer transition ${
+                  className={`px-2.5 py-0.5 rounded-md cursor-pointer font-medium transition ${
                     micMuted ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-slate-800 text-slate-300'
                   }`}
                 >
-                  {micMuted ? 'MIC OFF' : 'MIC ON'}
+                  {micMuted ? 'Mic Off' : 'Mic On'}
                 </button>
                 <button
                   type="button"
                   onClick={() => setCamMuted(!camMuted)}
-                  className={`px-2 py-0.5 rounded cursor-pointer transition ${
+                  className={`px-2.5 py-0.5 rounded-md cursor-pointer font-medium transition ${
                     camMuted ? 'bg-red-500/20 text-red-400 border border-red-500/30' : 'bg-slate-800 text-slate-300'
                   }`}
                 >
-                  {camMuted ? 'CAM OFF' : '1080p'}
+                  {camMuted ? 'Cam Off' : '1080p HD'}
                 </button>
               </div>
 
@@ -343,13 +306,13 @@ function VideoPanel() {
             <div className="absolute top-0 right-0 w-32 h-32 bg-cyan-500/5 rounded-full blur-2xl pointer-events-none" />
 
             {/* Stream Top Header */}
-            <div className="flex items-center justify-between text-[10px] font-mono z-10">
-              <span className="text-cyan-400 font-bold flex items-center gap-1.5">
+            <div className="flex items-center justify-between text-xs font-sans z-10">
+              <span className="text-cyan-400 font-medium flex items-center gap-1.5">
                 <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
                 Matched Executive
               </span>
-              <span className="text-emerald-400 text-[9px] px-2 py-0.5 rounded bg-emerald-950/60 border border-emerald-500/40">
-                EXECUTIVE MEMBER
+              <span className="text-emerald-300 text-[10px] px-2 py-0.5 rounded-full bg-emerald-950/60 border border-emerald-500/40 font-medium">
+                Executive Member
               </span>
             </div>
 
@@ -363,13 +326,13 @@ function VideoPanel() {
                   ✓
                 </span>
               </div>
-              <h5 className="mt-2 text-sm font-display font-semibold text-white">Michael R.</h5>
-              <p className="text-[10px] text-cyan-300/80 font-mono">Managing Partner · Tier-1 Venture</p>
+              <h5 className="mt-2 text-sm sm:text-base font-display font-medium text-white">Michael R.</h5>
+              <p className="text-xs text-cyan-200/80 font-sans">Managing Partner · Tier-1 Venture</p>
             </div>
 
             {/* Stream Bottom Controls & Waveform */}
             <div className="flex items-center justify-between z-10 pt-2 border-t border-slate-800/70">
-              <span className="text-[9px] font-mono text-slate-400">SPEAKER ACTIVE</span>
+              <span className="text-[10px] font-sans text-slate-400 uppercase tracking-wider font-medium">Speaker Active</span>
 
               {/* Animated Audio Equalizer Waveform */}
               <div className="flex items-center gap-0.5 h-3">
@@ -390,8 +353,8 @@ function VideoPanel() {
         </div>
 
         {/* Interactive Mutual Card Exchange Bar */}
-        <div className="relative z-10 pt-2 border-t border-slate-800/80 flex items-center justify-between font-mono">
-          <div className="text-[10px] text-slate-400">
+        <div className="relative z-10 pt-2 border-t border-slate-800/80 flex items-center justify-between font-sans">
+          <div className="text-xs text-slate-300">
             {exchanged
               ? '✓ Cards exchanged! Direct LinkedIn, email & WhatsApp unlocked.'
               : 'Auto-destruct timer active. Swap cards before room expires.'}
@@ -399,27 +362,27 @@ function VideoPanel() {
           <button
             type="button"
             onClick={() => setExchanged(!exchanged)}
-            className={`px-3.5 py-1 text-[10px] font-bold tracking-wider uppercase rounded-lg transition-all duration-300 cursor-pointer ${
+            className={`px-4 py-1.5 text-xs font-semibold tracking-wider uppercase rounded-lg transition-all duration-300 cursor-pointer ${
               exchanged
                 ? 'bg-emerald-500 text-black shadow-[0_0_15px_rgba(16,185,129,0.5)]'
                 : 'bg-gradient-to-r from-amber-400 to-amber-500 hover:from-amber-300 hover:to-amber-400 text-slate-950 shadow-[0_0_15px_rgba(245,158,11,0.5)]'
             }`}
           >
-            {exchanged ? 'CARDS EXCHANGED ✓' : 'EXCHANGE CARDS ⚡'}
+            {exchanged ? 'Cards Exchanged ✓' : 'Exchange Cards ⚡'}
           </button>
         </div>
       </div>
 
       {/* Bottom Details Drawer */}
-      <div className="pt-2 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-[11px] font-mono">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
         <div className="flex items-center gap-2 flex-wrap">
-          <span className="text-amber-400 font-bold">Double-Blind Exchange</span>
-          <span className="text-slate-500">·</span>
-          <span className="text-slate-300 font-sans text-[11px]">
+          <span className="text-amber-400 font-semibold">Double-Blind Exchange</span>
+          <span className="text-slate-600">·</span>
+          <span className="text-slate-300 text-[11.5px]">
             Zero spam or unconsented data sales. Contact details unlock only if both parties agree.
           </span>
         </div>
-        <div className="flex items-center gap-2 text-[10px] text-emerald-400 font-semibold shrink-0">
+        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium shrink-0">
           <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
           Encrypted P2P · Guard Active
         </div>
@@ -443,7 +406,7 @@ function MobileLayout() {
   return (
     <section className="md:hidden bg-[#F8FAFC] text-slate-900 shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.6)] border-t border-slate-800/80 rounded-t-[2.5rem] px-6 sm:px-10 pt-12 pb-20">
       <div className="mb-8 pb-6 border-b border-slate-200">
-        <span className="font-mono text-[10px] font-semibold tracking-widest text-slate-500 uppercase">WHY RANDOMCOFFEE</span>
+        <span className="font-sans text-[11px] font-semibold tracking-wider text-slate-500 uppercase">WHY RANDOMCOFFEE</span>
         <h2 className="font-display font-medium text-2xl text-slate-900 mt-2 leading-tight">
           Executive speed without the networking complexity
         </h2>
@@ -462,16 +425,16 @@ function MobileLayout() {
               className="space-y-5"
             >
               <div className="flex items-center gap-2.5">
-                <span className="font-mono text-xs font-bold px-2.5 py-1 rounded bg-amber-500 text-black">{f.num} / 04</span>
-                <span className="font-mono text-[10px] tracking-widest uppercase text-amber-600 font-semibold">{f.tag}</span>
+                <span className="font-sans text-xs font-semibold px-2.5 py-1 rounded bg-amber-500 text-black">{f.num} / 03</span>
+                <span className="font-sans text-xs tracking-wider uppercase text-amber-600 font-semibold">{f.tag}</span>
               </div>
               <h3 className="font-display font-semibold text-2xl text-slate-900 leading-tight">{f.title}</h3>
-              <p className="text-sm text-slate-600 leading-relaxed">{f.desc}</p>
+              <p className="text-sm text-slate-600 leading-relaxed font-sans">{f.desc}</p>
               <div className="grid grid-cols-3 gap-3 pt-3 border-t border-slate-200">
                 {f.metrics.map(m => (
                   <div key={m.label}>
-                    <div className="font-display font-bold text-slate-900 text-xl">{m.value}</div>
-                    <div className="font-mono text-[9px] text-slate-500 tracking-wider uppercase mt-0.5">{m.label}</div>
+                    <div className="font-display font-semibold text-slate-900 text-xl">{m.value}</div>
+                    <div className="font-sans text-[10px] text-slate-500 tracking-wider uppercase mt-0.5 font-medium">{m.label}</div>
                   </div>
                 ))}
               </div>
@@ -578,7 +541,7 @@ export function StickyFeatureShowcase() {
                 <div>
                   <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
                     <span style={{ height: 7, width: 7, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b', display: 'inline-block' }} />
-                    <span style={{ fontFamily: 'var(--font-mono)', fontSize: 10, fontWeight: 600, letterSpacing: '0.12em', color: '#64748b', textTransform: 'uppercase' }}>
+                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: '#64748b', textTransform: 'uppercase' }}>
                       WHY RANDOMCOFFEE
                     </span>
                   </div>
@@ -587,13 +550,13 @@ export function StickyFeatureShowcase() {
                   </h2>
                 </div>
 
-                {/* Progress indicator: 01 02 03 04 */}
+                {/* Progress indicator: 01 02 03 */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
                   {FEATURES.map((f, i) => (
                     <div key={f.num} style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 3, opacity: i === activeStep ? 1 : 0.25, transition: 'opacity 0.3s' }}>
                       <span style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 12,
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 13,
                         fontWeight: 700,
                         color: i === activeStep ? '#d97706' : '#94a3b8',
                         transition: 'color 0.3s',
@@ -609,9 +572,10 @@ export function StickyFeatureShowcase() {
                         display: 'block',
                       }} />
                       <span style={{
-                        fontFamily: 'var(--font-mono)',
-                        fontSize: 8,
-                        letterSpacing: '0.08em',
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        letterSpacing: '0.06em',
                         color: '#94a3b8',
                         textTransform: 'uppercase',
                         display: i === activeStep ? 'block' : 'none',
@@ -640,9 +604,9 @@ export function StickyFeatureShowcase() {
                       {/* Step tag */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
                         <span style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 10,
-                          fontWeight: 700,
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: 11,
+                          fontWeight: 600,
                           padding: '2px 8px',
                           borderRadius: 4,
                           background: '#f59e0b',
@@ -651,9 +615,9 @@ export function StickyFeatureShowcase() {
                           {feat.num} / 03
                         </span>
                         <span style={{
-                          fontFamily: 'var(--font-mono)',
-                          fontSize: 10,
-                          letterSpacing: '0.12em',
+                          fontFamily: 'var(--font-sans)',
+                          fontSize: 11,
+                          letterSpacing: '0.08em',
                           textTransform: 'uppercase',
                           color: '#b45309',
                           fontWeight: 600,
@@ -686,7 +650,7 @@ export function StickyFeatureShowcase() {
                       </div>
 
                       {/* Description */}
-                      <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0 }}>
+                      <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
                         {feat.desc}
                       </p>
 
@@ -703,7 +667,7 @@ export function StickyFeatureShowcase() {
                             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
                               {m.value}
                             </div>
-                            <div style={{ fontFamily: 'var(--font-mono)', fontSize: 8.5, color: '#94a3b8', letterSpacing: '0.08em', textTransform: 'uppercase', marginTop: 2 }}>
+                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#94a3b8', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
                               {m.label}
                             </div>
                           </div>
@@ -711,7 +675,7 @@ export function StickyFeatureShowcase() {
                       </div>
 
                       {/* Footnote */}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b' }}>
+                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
                         <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
                         <span>{feat.footnote}</span>
                       </div>
@@ -728,7 +692,7 @@ export function StickyFeatureShowcase() {
                             display: 'inline-block',
                           }} />
                         ))}
-                        <span style={{ fontFamily: 'var(--font-mono)', fontSize: 9.5, color: '#94a3b8', marginLeft: 4 }}>
+                        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
                           {activeStep + 1} / 3 — scroll ↓
                         </span>
                       </div>
