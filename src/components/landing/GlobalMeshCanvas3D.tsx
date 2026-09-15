@@ -108,7 +108,7 @@ const NETWORK_ROUTES: [string, string][] = [
   ['singapore', 'sydney'],
 ]
 
-export function GlobalMeshCanvas3D() {
+export function GlobalMeshCanvas3D({ className = '' }: { className?: string } = {}) {
   const canvasRef = useRef<HTMLCanvasElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   // Default to Singapore (550+) matching Cerebrium screenshot
@@ -266,9 +266,9 @@ export function GlobalMeshCanvas3D() {
   }, [activeHub, hoveredHub])
 
   return (
-    <div className="relative w-full rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
+    <div className={`relative w-full h-[520px] sm:h-[540px] rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between ${className}`}>
       {/* Top Status Header Bar */}
-      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans">
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans shrink-0">
         <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
           <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
           3,500+ Verified Leaders
@@ -282,7 +282,7 @@ export function GlobalMeshCanvas3D() {
       {/* Real World Map Canvas Container */}
       <div
         ref={containerRef}
-        className="relative w-full aspect-[950/560] min-h-[260px] sm:min-h-[320px] md:min-h-[380px] my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60"
+        className="relative w-full flex-1 my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 min-h-0"
       >
         {/* Subtle Latitude / Longitude Navigation Grid */}
         <div className="absolute inset-0 pointer-events-none opacity-20">
@@ -335,7 +335,7 @@ export function GlobalMeshCanvas3D() {
       </div>
 
       {/* Bottom Hub Details Telemetry Drawer */}
-      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans">
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans shrink-0">
         <div className="flex items-center gap-2 flex-wrap">
           <span className="text-amber-400 font-display font-medium text-sm">{activeHub.name}</span>
           <span className="text-slate-400 text-xs font-normal">({activeHub.region})</span>
