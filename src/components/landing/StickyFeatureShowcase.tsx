@@ -1,11 +1,10 @@
 import { useState, useRef, useEffect } from 'react'
 import {
   motion,
-  AnimatePresence,
   useScroll,
+  useTransform,
   useMotionValueEvent,
   useReducedMotion,
-  type Transition,
 } from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
 import { InteractiveDotGrid } from './InteractiveDotGrid'
@@ -406,13 +405,6 @@ function VideoPanel() {
 
 const PANELS = [BenchmarkPanel, GlobePanel, VideoPanel]
 
-// ─── Animation config ──────────────────────────────────────────────────────────
-
-const EASE = [0.21, 0.47, 0.32, 0.98] as const
-
-const TEXT_TRANSITION: Transition = { duration: 0.4, ease: EASE }
-const PANEL_TRANSITION: Transition = { duration: 0.4, ease: EASE }
-
 // ─── Mobile stacked fallback ───────────────────────────────────────────────────
 
 function MobileLayout() {
@@ -477,44 +469,65 @@ export function StickyFeatureShowcase() {
 
   // sectionRef goes on the OUTER 480vh element — generous runway prevents early unpinning
   const sectionRef = useRef<HTMLElement>(null)
-  const lastProgress = useRef(0)
 
   const { scrollYProgress } = useScroll({
     target: sectionRef,
     offset: ['start start', 'end end'],
   })
 
-  // Balanced single-lock thresholds with hysteresis:
-  // Step 01 -> 02: Locks for one natural scroll gesture (~0.20), matching the single-lock feel of 2 -> 3
-  // Step 02 -> 03: Locks for one natural scroll gesture (~0.58)
-  const THRESHOLD_01_DOWN = 0.20
-  const THRESHOLD_12_DOWN = 0.58
-  const THRESHOLD_12_UP = 0.54
-  const THRESHOLD_01_UP = 0.16
+  // ── 1. Real-Time Card Transforms (Right Column 3D Deck) ───────────────────
+  // Card 0 (Sub-Second Matching): visible at start, smoothly exits in real time as user scrolls
+  const cardOpacity0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [1, 1, 0])
+  const cardY0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [0, 0, shouldReduceMotion ? 0 : -45])
+  const cardScale0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [1, 1, shouldReduceMotion ? 1 : 0.94])
+  const cardRotateX0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [0, 0, shouldReduceMotion ? 0 : -5])
+
+  // Card 1 (Global Executive Mesh): arrives from below in real time between 1 & 2, rests, then exits
+  const cardOpacity1 = useTransform(scrollYProgress, [0.08, 0.38, 0.62, 0.92], [0, 1, 1, 0])
+  const cardY1 = useTransform(
+    scrollYProgress,
+    [0.08, 0.38, 0.62, 0.92],
+    [shouldReduceMotion ? 0 : 65, 0, 0, shouldReduceMotion ? 0 : -45]
+  )
+  const cardScale1 = useTransform(
+    scrollYProgress,
+    [0.08, 0.38, 0.62, 0.92],
+    [shouldReduceMotion ? 1 : 0.94, 1, 1, shouldReduceMotion ? 1 : 0.94]
+  )
+  const cardRotateX1 = useTransform(
+    scrollYProgress,
+    [0.08, 0.38, 0.62, 0.92],
+    [shouldReduceMotion ? 0 : 5, 0, 0, shouldReduceMotion ? 0 : -5]
+  )
+
+  // Card 2 (Zero-Download WebRTC): arrives from below in real time between 2 & 3, rests until section unpins
+  const cardOpacity2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [0, 1, 1])
+  const cardY2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 0 : 65, 0, 0])
+  const cardScale2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 1 : 0.94, 1, 1])
+  const cardRotateX2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 0 : 5, 0, 0])
+
+  // ── 2. Real-Time Text Transforms (Left Column) ─────────────────────────────
+  const textOpacity0 = useTransform(scrollYProgress, [0, 0.08, 0.36], [1, 1, 0])
+  const textY0 = useTransform(scrollYProgress, [0, 0.08, 0.36], [0, 0, shouldReduceMotion ? 0 : -25])
+
+  const textOpacity1 = useTransform(scrollYProgress, [0.10, 0.38, 0.62, 0.90], [0, 1, 1, 0])
+  const textY1 = useTransform(
+    scrollYProgress,
+    [0.10, 0.38, 0.62, 0.90],
+    [shouldReduceMotion ? 0 : 25, 0, 0, shouldReduceMotion ? 0 : -25]
+  )
+
+  const textOpacity2 = useTransform(scrollYProgress, [0.64, 0.92, 1], [0, 1, 1])
+  const textY2 = useTransform(scrollYProgress, [0.64, 0.92, 1], [shouldReduceMotion ? 0 : 25, 0, 0])
 
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    const isScrollingUp = v < lastProgress.current
-    lastProgress.current = v
-
-    let next = activeStep
-    if (isScrollingUp) {
-      // Scrolling UP: holds previous state until crossing reverse hysteresis boundary
-      if (v < THRESHOLD_01_UP) {
-        next = 0
-      } else if (v < THRESHOLD_12_UP) {
-        next = 1
-      } else {
-        next = 2
-      }
+    let next = 0
+    if (v >= 0.62) {
+      next = 2
+    } else if (v >= 0.23) {
+      next = 1
     } else {
-      // Scrolling DOWN: holds current state until crossing forward hysteresis boundary
-      if (v >= THRESHOLD_12_DOWN) {
-        next = 2
-      } else if (v >= THRESHOLD_01_DOWN) {
-        next = 1
-      } else {
-        next = 0
-      }
+      next = 0
     }
     setActiveStep(prev => (prev !== next ? next : prev))
   })
@@ -524,15 +537,18 @@ export function StickyFeatureShowcase() {
     const rect = sectionRef.current.getBoundingClientRect()
     const scrollTop = window.scrollY + rect.top
     const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
-    const targetPercent = i === 0 ? 0.08 : i === 1 ? 0.38 : 0.78
+    const targetPercent = i === 0 ? 0.05 : i === 1 ? 0.50 : 0.95
     window.scrollTo({
       top: scrollTop + targetPercent * scrollableHeight,
       behavior: 'smooth',
     })
   }
 
-  const feat = FEATURES[activeStep]
-  const Panel = PANELS[activeStep]
+  const textConfigs = [
+    { f: FEATURES[0], opacity: textOpacity0, y: textY0, idx: 0 },
+    { f: FEATURES[1], opacity: textOpacity1, y: textY1, idx: 1 },
+    { f: FEATURES[2], opacity: textOpacity2, y: textY2, idx: 2 },
+  ]
 
   return (
     <>
@@ -668,16 +684,21 @@ export function StickyFeatureShowcase() {
               {/* ── Two-column body ── */}
               <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '2.5rem', alignItems: 'center' }}>
 
-                {/* LEFT COLUMN — text changes via AnimatePresence */}
-                <div style={{ minHeight: 280 }}>
-                  <AnimatePresence mode="wait">
+                {/* LEFT COLUMN — real-time continuous scroll cross-fade */}
+                <div style={{ position: 'relative', width: '100%', minHeight: 330 }}>
+                  {textConfigs.map(({ f, opacity, y, idx }) => (
                     <motion.div
-                      key={`text-${activeStep}`}
-                      initial={{ opacity: 0, y: shouldReduceMotion ? 0 : -16 }}
-                      animate={{ opacity: 1, y: 0 }}
-                      exit={{ opacity: 0, y: shouldReduceMotion ? 0 : -16 }}
-                      transition={TEXT_TRANSITION}
-                      style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
+                      key={f.num}
+                      style={{
+                        opacity,
+                        y,
+                        position: 'absolute',
+                        inset: 0,
+                        pointerEvents: activeStep === idx ? 'auto' : 'none',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        gap: 12,
+                      }}
                     >
                       {/* Step tag */}
                       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
@@ -690,7 +711,7 @@ export function StickyFeatureShowcase() {
                           background: '#f59e0b',
                           color: '#000',
                         }}>
-                          {feat.num} / 03
+                          {f.num} / 03
                         </span>
                         <span style={{
                           fontFamily: 'var(--font-sans)',
@@ -700,7 +721,7 @@ export function StickyFeatureShowcase() {
                           color: '#b45309',
                           fontWeight: 600,
                         }}>
-                          {feat.tag}
+                          {f.tag}
                         </span>
                       </div>
 
@@ -714,7 +735,7 @@ export function StickyFeatureShowcase() {
                           lineHeight: 1.2,
                           margin: 0,
                         }}>
-                          {feat.title}
+                          {f.title}
                         </h3>
                         <p style={{
                           fontFamily: 'var(--font-display)',
@@ -723,13 +744,13 @@ export function StickyFeatureShowcase() {
                           fontWeight: 500,
                           margin: '4px 0 0',
                         }}>
-                          {feat.subtitle}
+                          {f.subtitle}
                         </p>
                       </div>
 
                       {/* Description */}
                       <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
-                        {feat.desc}
+                        {f.desc}
                       </p>
 
                       {/* Metrics */}
@@ -740,7 +761,7 @@ export function StickyFeatureShowcase() {
                         paddingTop: 12,
                         borderTop: '1px solid #e2e8f0',
                       }}>
-                        {feat.metrics.map(m => (
+                        {f.metrics.map(m => (
                           <div key={m.label}>
                             <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
                               {m.value}
@@ -755,7 +776,7 @@ export function StickyFeatureShowcase() {
                       {/* Footnote */}
                       <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
                         <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
-                        <span>{feat.footnote}</span>
+                        <span>{f.footnote}</span>
                       </div>
 
                       {/* Scroll hint */}
@@ -763,57 +784,76 @@ export function StickyFeatureShowcase() {
                         {FEATURES.map((_, i) => (
                           <span key={i} style={{
                             height: 2.5,
-                            width: i === activeStep ? 22 : i < activeStep ? 12 : 5,
+                            width: i === idx ? 22 : i < idx ? 12 : 5,
                             borderRadius: 99,
-                            background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#e2e8f0',
+                            background: i === idx ? '#f59e0b' : i < idx ? '#fcd34d' : '#e2e8f0',
                             transition: 'all 0.5s',
                             display: 'inline-block',
                           }} />
                         ))}
                         <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
-                          {activeStep === 2 ? '3 / 3 — explore room' : `${activeStep + 1} / 3 — scroll ↓`}
+                          {idx === 2 ? '3 / 3 — explore room' : `${idx + 1} / 3 — scroll ↓`}
                         </span>
                       </div>
                     </motion.div>
-                  </AnimatePresence>
+                  ))}
                 </div>
 
-                {/* RIGHT COLUMN — visual panel changes via AnimatePresence with 3D perspective rotational tilt */}
-                <div className="w-full h-[520px] sm:h-[540px]" style={{ perspective: 1200 }}>
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`panel-${activeStep}`}
-                      initial={{
-                        opacity: 0,
-                        scale: shouldReduceMotion ? 1 : 0.96,
-                        y: shouldReduceMotion ? 0 : 20,
-                        rotateX: shouldReduceMotion ? 0 : 4,
-                        rotateY: shouldReduceMotion ? 0 : -3,
-                      }}
-                      animate={{
-                        opacity: 1,
-                        scale: 1,
-                        y: 0,
-                        rotateX: 0,
-                        rotateY: 0,
-                      }}
-                      exit={{
-                        opacity: 0,
-                        scale: shouldReduceMotion ? 1 : 0.96,
-                        y: shouldReduceMotion ? 0 : -20,
-                        rotateX: shouldReduceMotion ? 0 : -4,
-                        rotateY: shouldReduceMotion ? 0 : 3,
-                      }}
-                      transition={PANEL_TRANSITION}
-                      className="w-full h-full"
-                      style={{
-                        transformStyle: 'preserve-3d',
-                        willChange: 'transform, opacity',
-                      }}
-                    >
-                      <Panel />
-                    </motion.div>
-                  </AnimatePresence>
+                {/* RIGHT COLUMN — visual 3D stacked deck driven in real time by scroll */}
+                <div className="w-full h-[520px] sm:h-[540px] relative" style={{ perspective: 1200 }}>
+                  {/* Card 0: Benchmark */}
+                  <motion.div
+                    style={{
+                      opacity: cardOpacity0,
+                      y: cardY0,
+                      scale: cardScale0,
+                      rotateX: cardRotateX0,
+                      position: 'absolute',
+                      inset: 0,
+                      pointerEvents: activeStep === 0 ? 'auto' : 'none',
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform, opacity',
+                    }}
+                    className="w-full h-full"
+                  >
+                    <BenchmarkPanel />
+                  </motion.div>
+
+                  {/* Card 1: Globe / Mesh */}
+                  <motion.div
+                    style={{
+                      opacity: cardOpacity1,
+                      y: cardY1,
+                      scale: cardScale1,
+                      rotateX: cardRotateX1,
+                      position: 'absolute',
+                      inset: 0,
+                      pointerEvents: activeStep === 1 ? 'auto' : 'none',
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform, opacity',
+                    }}
+                    className="w-full h-full"
+                  >
+                    <GlobePanel />
+                  </motion.div>
+
+                  {/* Card 2: Video Room */}
+                  <motion.div
+                    style={{
+                      opacity: cardOpacity2,
+                      y: cardY2,
+                      scale: cardScale2,
+                      rotateX: cardRotateX2,
+                      position: 'absolute',
+                      inset: 0,
+                      pointerEvents: activeStep === 2 ? 'auto' : 'none',
+                      transformStyle: 'preserve-3d',
+                      willChange: 'transform, opacity',
+                    }}
+                    className="w-full h-full"
+                  >
+                    <VideoPanel />
+                  </motion.div>
                 </div>
 
               </div>
