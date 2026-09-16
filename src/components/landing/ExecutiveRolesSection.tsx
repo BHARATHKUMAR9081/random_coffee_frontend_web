@@ -206,8 +206,8 @@ export function ExecutiveRolesSection() {
   return (
     <section
       id="executive-roles"
-      className="relative z-30 w-full min-h-screen min-h-[100dvh] overflow-hidden flex flex-col justify-center items-center py-6 sm:py-10 px-4 sm:px-6 lg:px-12 rounded-b-[3.5rem] border-b border-slate-200 shadow-[0_25px_60px_rgba(0,0,0,0.06)]"
-      style={{ backgroundColor: '#FFFFFF' }}
+      className="relative z-30 w-full min-h-screen min-h-[100dvh] overflow-hidden flex flex-col justify-center items-center py-6 sm:py-10 px-4 sm:px-6 lg:px-12 rounded-b-[3.5rem] border-b border-slate-200 shadow-[0_25px_60px_rgba(0,0,0,0.06)] scroll-mt-[36px]"
+      style={{ backgroundColor: '#FFFFFF', scrollMarginTop: '36px' }}
     >
       {/* Interactive Separating Dot Grid Canvas on White */}
       <InteractiveDotGrid
