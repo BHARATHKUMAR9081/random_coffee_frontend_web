@@ -484,18 +484,13 @@ export function StickyFeatureShowcase() {
     offset: ['start start', 'end end'],
   })
 
-  // Bidirectional Scroll-Lock Hysteresis constants:
-  // Requires the user to exert intentional scroll effort to move past steps 01, 02, and 03
-  const LOCK_HYSTERESIS_DOWN = 0.035
-  const LOCK_HYSTERESIS_UP = 0.035
-
-  // Baseline boundary thresholds:
-  // Step 0 -> 1 baseline: 0.333
-  // Step 1 -> 2 baseline: 0.666
-  const THRESHOLD_01_DOWN = 0.333 + LOCK_HYSTERESIS_DOWN // ~0.368
-  const THRESHOLD_12_DOWN = 0.666 + LOCK_HYSTERESIS_DOWN // ~0.701
-  const THRESHOLD_12_UP = 0.666 - LOCK_HYSTERESIS_UP // ~0.631
-  const THRESHOLD_01_UP = 0.333 - LOCK_HYSTERESIS_UP // ~0.298
+  // Balanced single-lock thresholds with hysteresis:
+  // Step 01 -> 02: Locks for one natural scroll gesture (~0.20), matching the single-lock feel of 2 -> 3
+  // Step 02 -> 03: Locks for one natural scroll gesture (~0.58)
+  const THRESHOLD_01_DOWN = 0.20
+  const THRESHOLD_12_DOWN = 0.58
+  const THRESHOLD_12_UP = 0.54
+  const THRESHOLD_01_UP = 0.16
 
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
     const isScrollingUp = v < lastProgress.current
@@ -529,7 +524,7 @@ export function StickyFeatureShowcase() {
     const rect = sectionRef.current.getBoundingClientRect()
     const scrollTop = window.scrollY + rect.top
     const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
-    const targetPercent = i === 0 ? 0.16 : i === 1 ? 0.50 : 0.84
+    const targetPercent = i === 0 ? 0.08 : i === 1 ? 0.38 : 0.78
     window.scrollTo({
       top: scrollTop + targetPercent * scrollableHeight,
       behavior: 'smooth',
