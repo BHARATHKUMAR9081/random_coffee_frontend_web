@@ -2,13 +2,14 @@ import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
 /**
- * Idea 5 with User's Takeaway Coffee Cup:
+ * SweepingRibbons3D - Realistic Takeaway Coffee Cup with True Volumetric Steam & Mid-Level Voice Visualizer
  *
- * Faithfully incorporates the user's iconic takeaway coffee cup silhouette:
- * - Crisp matte white takeaway cup body with subtle gold brand accent and base ring
- * - Protruding snap-on takeaway lid with realistic collar overhang, raised plateau, and sipping aperture
- * - Dual vocal coffee steam ribbons (Speaker 1 Gold & Speaker 2 Amber) rising from the sipping spout
- * - 3D floating equalizer bars around the base and floating golden acoustic phonons
+ * Specific Enhancements:
+ * 1. Cup: Completely seamless pure-white paper cup matching user's silhouette image (NO black/dark line in middle).
+ * 2. Realistic Steam: Volumetric rising smoke puff particle system using procedural soft Gaussian alpha sprites
+ *    with buoyant convective curl, expansion, and natural evaporation. Plus ethereal wispy vapor accents.
+ * 3. Realistic Voice Visualizer in the MIDDLE: Relocated from bottom to middle elevation. Features a sleek 3D
+ *    acoustic equalizer ring with refined luminous micro-bars and an undulating voice frequency waveform.
  */
 export function SweepingRibbons3D() {
   const containerRef = useRef<HTMLDivElement>(null)
@@ -26,7 +27,7 @@ export function SweepingRibbons3D() {
     let height = container.clientHeight || 360
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000)
-    camera.position.set(0, 1.5, 46)
+    camera.position.set(0, 1.2, 45)
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -37,65 +38,56 @@ export function SweepingRibbons3D() {
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.35
+    renderer.toneMappingExposure = 1.3
 
-    // 2. High-Luxury Studio Lighting
-    const ambientLight = new THREE.AmbientLight(0x1a2130, 1.8)
+    // 2. Realistic Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0x27272a, 2.2)
     scene.add(ambientLight)
 
-    // Key Light: Crisp warm studio light for clean white cup definition
-    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.5)
-    keyLight.position.set(25, 28, 32)
+    // Key Light: Soft studio light for realistic paper cup highlights
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.2)
+    keyLight.position.set(22, 26, 30)
     scene.add(keyLight)
 
-    // Back Rim Light: Golden glow highlighting cup silhouette and steam ribbons
-    const rimLight = new THREE.DirectionalLight(0xf59e0b, 4.5)
-    rimLight.position.set(-22, -8, -24)
+    // Back Rim Light: Warm champagne rim glow on cup contours and steam
+    const rimLight = new THREE.DirectionalLight(0xf59e0b, 3.8)
+    rimLight.position.set(-20, -6, -22)
     scene.add(rimLight)
 
-    // Soft Warm Front Fill
-    const fillLight = new THREE.DirectionalLight(0xfff7ed, 2.0)
-    fillLight.position.set(-20, 12, 28)
+    // Fill Light: Soft neutral fill
+    const fillLight = new THREE.DirectionalLight(0xfff7ed, 1.8)
+    fillLight.position.set(-18, 10, 24)
     scene.add(fillLight)
 
-    // Golden Halo point light behind the cup
-    const coreLight = new THREE.PointLight(0xf59e0b, 3.8, 32)
-    coreLight.position.set(0, 2, -2)
-    scene.add(coreLight)
+    // Warm Steam Point Light positioned directly above the lid
+    const steamLight = new THREE.PointLight(0xfef08a, 2.5, 20)
+    steamLight.position.set(0, 4, 1)
+    scene.add(steamLight)
 
-    // Master Visualizer Group
-    const visualizerGroup = new THREE.Group()
-    visualizerGroup.position.set(0, -3.2, 0)
-    scene.add(visualizerGroup)
+    // Master Group for Mouse Parallax
+    const masterGroup = new THREE.Group()
+    masterGroup.position.set(0, -2.2, 0)
+    scene.add(masterGroup)
 
-    // 3. Materials (Crisp Pure White Takeaway Cup + Gold Foil Detailing)
+    // 3. Materials (Crisp Pure White Paper Cup - No Dark Lines)
     const cupMat = new THREE.MeshStandardMaterial({
-      color: 0xfcfbfa,
-      roughness: 0.32,
-      metalness: 0.04,
+      color: 0xffffff,
+      roughness: 0.42,
+      metalness: 0.02,
     })
 
     const lidMat = new THREE.MeshStandardMaterial({
-      color: 0xf6f5f0,
-      roughness: 0.22,
-      metalness: 0.06,
+      color: 0xf4f4f0,
+      roughness: 0.28,
+      metalness: 0.04,
     })
 
-    const goldAccentMat = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      roughness: 0.16,
-      metalness: 0.95,
-      emissive: 0x3d2706,
-      emissiveIntensity: 0.2,
-    })
-
-    // 4. Iconic Takeaway Coffee Cup (Matching User Silhouette Image)
+    // 4. Iconic Takeaway Coffee Cup (Matching Silhouette Perfectly)
     const cupGroup = new THREE.Group()
-    cupGroup.position.set(0, -3.5, 0)
-    visualizerGroup.add(cupGroup)
+    cupGroup.position.set(0, -3.8, 0)
+    masterGroup.add(cupGroup)
 
-    // A. Cup Body (Tapered Cylinder matching silhouette proportions)
-    // Top radius 2.65, bottom radius 1.95, height 6.8
+    // A. Clean Seamless Cup Body (Pure white, tapered cylinder, NO black band)
     const cupBodyGeo = new THREE.CylinderGeometry(2.65, 1.95, 6.8, 64)
     const cupBodyMesh = new THREE.Mesh(cupBodyGeo, cupMat)
     cupGroup.add(cupBodyMesh)
@@ -106,21 +98,15 @@ export function SweepingRibbons3D() {
     cupBaseMesh.position.y = -3.42
     cupGroup.add(cupBaseMesh)
 
-    // C. Cup Top Rim (Rolled paper edge)
+    // C. Rolled Paper Top Rim Lip
     const cupRimGeo = new THREE.TorusGeometry(2.68, 0.08, 16, 64)
     const cupRimMesh = new THREE.Mesh(cupRimGeo, cupMat)
     cupRimMesh.rotation.x = Math.PI / 2
     cupRimMesh.position.y = 3.4
     cupGroup.add(cupRimMesh)
 
-    // D. Decorative Gold Band on Cup (Luxury Executive Branding)
-    const cupBandGeo = new THREE.CylinderGeometry(2.45, 2.38, 0.6, 64)
-    const cupBandMesh = new THREE.Mesh(cupBandGeo, goldAccentMat)
-    cupBandMesh.position.y = 0.5
-    cupGroup.add(cupBandMesh)
-
-    // E. Takeaway Snap-on Lid (Distinct Silhouette Steps)
-    // Step 1: Overhanging Rim / Lip Collar (Prominently juts out over cup)
+    // D. Snap-on Takeaway Lid (Exact Silhouette Steps)
+    // Step 1: Overhanging Rim / Lip Collar (Prominently juts out over cup edge)
     const lidCollarGeo = new THREE.CylinderGeometry(2.92, 2.94, 0.48, 64)
     const lidCollarMesh = new THREE.Mesh(lidCollarGeo, lidMat)
     lidCollarMesh.position.y = 3.65
@@ -138,156 +124,224 @@ export function SweepingRibbons3D() {
     lidCapMesh.position.y = 4.34
     cupGroup.add(lidCapMesh)
 
-    // Step 4: Drinking Spout Aperture with Gold Trim
-    const spoutGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.12, 32)
-    const spoutMesh = new THREE.Mesh(spoutGeo, goldAccentMat)
-    spoutMesh.position.set(0, 4.54, 1.88)
+    // Step 4: Drinking Spout Aperture
+    const spoutGeo = new THREE.CylinderGeometry(0.38, 0.38, 0.1, 32)
+    const spoutMat = new THREE.MeshStandardMaterial({
+      color: 0x18181b,
+      roughness: 0.5,
+      metalness: 0.1,
+    })
+    const spoutMesh = new THREE.Mesh(spoutGeo, spoutMat)
+    spoutMesh.position.set(0, 4.54, 1.85)
     cupGroup.add(spoutMesh)
 
-    // Subtle initial ergonomic tilt
-    cupGroup.rotation.set(0.12, 0.18, -0.05)
+    // Subtle natural tilt
+    cupGroup.rotation.set(0.12, 0.16, -0.04)
 
-    // 5. Dual Rising Vocal Steam Audio Ribbons (Emitting from Spout)
-    const RIBBON_SEGMENTS_Y = 64
-    const RIBBON_HEIGHT = 18
-    const RIBBON_WIDTH = 2.2
+    // 5. Realistic Volumetric Coffee Steam (Procedural Soft Smoke Particles)
+    // Create a high-fidelity Gaussian smoke puff texture
+    function createSmokeTexture() {
+      const c = document.createElement('canvas')
+      c.width = 128
+      c.height = 128
+      const ctx = c.getContext('2d')!
 
-    // Speaker 1 Ribbon Geometry (Warm Gold)
-    const ribbonGeo1 = new THREE.PlaneGeometry(RIBBON_WIDTH, RIBBON_HEIGHT, 8, RIBBON_SEGMENTS_Y)
-    const ribbonMat1 = new THREE.MeshStandardMaterial({
-      color: 0xd4af37,
-      emissive: 0x926c15,
-      emissiveIntensity: 0.5,
-      roughness: 0.22,
-      metalness: 0.88,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.9,
-    })
-    const ribbonMesh1 = new THREE.Mesh(ribbonGeo1, ribbonMat1)
-    ribbonMesh1.position.set(0, 10.2, 0)
-    visualizerGroup.add(ribbonMesh1)
+      // Multiple layered soft radial gradients for realistic cloudy vapor diffusion
+      const grad = ctx.createRadialGradient(64, 64, 0, 64, 64, 64)
+      grad.addColorStop(0, 'rgba(255, 252, 245, 0.75)')
+      grad.addColorStop(0.25, 'rgba(250, 240, 220, 0.45)')
+      grad.addColorStop(0.55, 'rgba(235, 215, 185, 0.20)')
+      grad.addColorStop(0.85, 'rgba(215, 190, 160, 0.05)')
+      grad.addColorStop(1, 'rgba(200, 180, 150, 0)')
 
-    // Speaker 2 Ribbon Geometry (Counter-phase, Amber Ember)
-    const ribbonGeo2 = new THREE.PlaneGeometry(RIBBON_WIDTH, RIBBON_HEIGHT, 8, RIBBON_SEGMENTS_Y)
-    const ribbonMat2 = new THREE.MeshStandardMaterial({
-      color: 0xf97316,
-      emissive: 0x9a3412,
-      emissiveIntensity: 0.45,
-      roughness: 0.25,
-      metalness: 0.82,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.85,
-    })
-    const ribbonMesh2 = new THREE.Mesh(ribbonGeo2, ribbonMat2)
-    ribbonMesh2.position.set(0, 10.2, 0)
-    visualizerGroup.add(ribbonMesh2)
-
-    // Base anchors for parametric audio wave deformation
-    const basePos1 = ribbonGeo1.attributes.position.clone()
-    const basePos2 = ribbonGeo2.attributes.position.clone()
-
-    // 6. Acoustic Expanding Concentric Rings (Sound Pulses from Cup Lid)
-    const acousticRings: { mesh: THREE.Mesh; baseScale: number; speed: number; phase: number }[] = []
-    const ringMat = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b,
-      transparent: true,
-      opacity: 0.4,
-      blending: THREE.AdditiveBlending,
-      side: THREE.DoubleSide,
-    })
-
-    for (let i = 0; i < 3; i++) {
-      const ringGeo = new THREE.RingGeometry(2.7, 2.85, 48)
-      const ringMesh = new THREE.Mesh(ringGeo, ringMat.clone())
-      ringMesh.rotation.x = -Math.PI / 2
-      ringMesh.position.set(0, 4.5, 0)
-      cupGroup.add(ringMesh)
-      acousticRings.push({
-        mesh: ringMesh,
-        baseScale: 1,
-        speed: 0.8,
-        phase: i * (Math.PI * 2 / 3),
-      })
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, 128, 128)
+      return new THREE.CanvasTexture(c)
     }
 
-    // 7. 3D Equalizer Spectrograph Bars (Orbiting the Takeaway Cup Base)
-    const BAR_COUNT = 24
-    const BAR_RADIUS = 6.4
-    const barGeo = new THREE.CylinderGeometry(0.16, 0.16, 1, 16)
-    const barMat = new THREE.MeshStandardMaterial({
+    const smokeTexture = createSmokeTexture()
+    const STEAM_COUNT = 85
+
+    interface SteamParticle {
+      mesh: THREE.Sprite
+      x: number
+      y: number
+      z: number
+      vy: number
+      scale: number
+      growthRate: number
+      maxLife: number
+      age: number
+      curlPhase: number
+      curlSpeed: number
+      baseOpacity: number
+    }
+
+    const steamParticles: SteamParticle[] = []
+    const steamGroup = new THREE.Group()
+    masterGroup.add(steamGroup)
+
+    for (let i = 0; i < STEAM_COUNT; i++) {
+      const mat = new THREE.SpriteMaterial({
+        map: smokeTexture,
+        transparent: true,
+        opacity: 0,
+        blending: THREE.NormalBlending,
+        depthWrite: false,
+      })
+      const sprite = new THREE.Sprite(mat)
+
+      // Stagger initial particle ages so steam flow is already established
+      const initialAge = (i / STEAM_COUNT) * 6.0
+      const p: SteamParticle = {
+        mesh: sprite,
+        x: (Math.random() - 0.5) * 0.4,
+        y: 1.2 + initialAge * 2.6,
+        z: 1.8 + (Math.random() - 0.5) * 0.4,
+        vy: 0.045 + Math.random() * 0.025,
+        scale: 1.0 + initialAge * 0.55,
+        growthRate: 0.018 + Math.random() * 0.012,
+        maxLife: 5.5 + Math.random() * 1.5,
+        age: initialAge,
+        curlPhase: Math.random() * Math.PI * 2,
+        curlSpeed: 0.8 + Math.random() * 0.6,
+        baseOpacity: 0.32 + Math.random() * 0.14,
+      }
+      sprite.position.set(p.x, p.y, p.z)
+      sprite.scale.set(p.scale, p.scale, 1)
+      steamGroup.add(sprite)
+      steamParticles.push(p)
+    }
+
+    // Wispy Ethereal Vapor Stream Ribbons (Ultra-sheer, translucent, organic)
+    const wispGeo1 = new THREE.PlaneGeometry(1.6, 16, 4, 48)
+    const wispMat1 = new THREE.MeshBasicMaterial({
+      color: 0xfffaed,
+      transparent: true,
+      opacity: 0.16,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+    const wispMesh1 = new THREE.Mesh(wispGeo1, wispMat1)
+    wispMesh1.position.set(0, 9.2, 1.2)
+    masterGroup.add(wispMesh1)
+
+    const wispGeo2 = new THREE.PlaneGeometry(1.4, 15, 4, 48)
+    const wispMat2 = new THREE.MeshBasicMaterial({
+      color: 0xfef08a,
+      transparent: true,
+      opacity: 0.12,
+      side: THREE.DoubleSide,
+      blending: THREE.AdditiveBlending,
+      depthWrite: false,
+    })
+    const wispMesh2 = new THREE.Mesh(wispGeo2, wispMat2)
+    wispMesh2.position.set(0, 8.8, 1.0)
+    masterGroup.add(wispMesh2)
+
+    const baseWispPos1 = wispGeo1.attributes.position.clone()
+    const baseWispPos2 = wispGeo2.attributes.position.clone()
+
+    // 6. REALISTIC VOICE VISUALIZER IN THE MIDDLE (Elevation y: ~ 0.5 to 2.5)
+    // A refined 3D acoustic waveform ring positioned around the middle of the cup
+    const voiceGroup = new THREE.Group()
+    voiceGroup.position.set(0, 0.8, 0) // Centered at the middle!
+    masterGroup.add(voiceGroup)
+
+    // Array of sleek, modern LED equalizer frequency micro-bars
+    const BAR_COUNT = 32
+    const RING_RADIUS = 5.2
+    const barGeo = new THREE.CylinderGeometry(0.08, 0.08, 1, 16)
+    const barCapGeo = new THREE.SphereGeometry(0.12, 12, 12)
+
+    const barStemMat = new THREE.MeshStandardMaterial({
       color: 0xd4af37,
-      emissive: 0xf59e0b,
-      emissiveIntensity: 0.55,
-      roughness: 0.2,
+      roughness: 0.25,
       metalness: 0.9,
     })
 
-    const eqBars: { mesh: THREE.Mesh; angle: number; phaseOffset: number }[] = []
-    const eqGroup = new THREE.Group()
-    eqGroup.position.set(0, -6.8, 0)
-    visualizerGroup.add(eqGroup)
+    const barHeadMat = new THREE.MeshStandardMaterial({
+      color: 0xfffbeb,
+      emissive: 0xf59e0b,
+      emissiveIntensity: 0.9,
+      roughness: 0.1,
+      metalness: 0.8,
+    })
+
+    interface EqBarNode {
+      group: THREE.Group
+      stem: THREE.Mesh
+      head: THREE.Mesh
+      angle: number
+      phase: number
+      baseScale: number
+    }
+
+    const eqBars: EqBarNode[] = []
 
     for (let i = 0; i < BAR_COUNT; i++) {
       const angle = (i / BAR_COUNT) * Math.PI * 2
-      const bar = new THREE.Mesh(barGeo, barMat)
-      bar.position.set(Math.cos(angle) * BAR_RADIUS, 0, Math.sin(angle) * BAR_RADIUS)
-      eqGroup.add(bar)
+      const g = new THREE.Group()
+      g.position.set(Math.cos(angle) * RING_RADIUS, 0, Math.sin(angle) * RING_RADIUS)
 
+      const stem = new THREE.Mesh(barGeo, barStemMat)
+      stem.position.y = 0.5
+      g.add(stem)
+
+      const head = new THREE.Mesh(barCapGeo, barHeadMat)
+      head.position.y = 1.0
+      g.add(head)
+
+      voiceGroup.add(g)
       eqBars.push({
-        mesh: bar,
+        group: g,
+        stem,
+        head,
         angle,
-        phaseOffset: i * 0.42,
+        phase: i * 0.38,
+        baseScale: 1,
       })
     }
 
-    // 8. Rising Vocal Phonons / Steam Sparkles
-    const PARTICLE_COUNT = 70
-    const particlePositions = new Float32Array(PARTICLE_COUNT * 3)
-    const particleVelocities: { x: number; y: number; z: number; phase: number }[] = []
-
-    for (let i = 0; i < PARTICLE_COUNT; i++) {
-      particlePositions[i * 3 + 0] = (Math.random() - 0.5) * 4
-      particlePositions[i * 3 + 1] = Math.random() * 20 - 2
-      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 4
-
-      particleVelocities.push({
-        x: (Math.random() - 0.5) * 0.025,
-        y: 0.045 + Math.random() * 0.055,
-        z: (Math.random() - 0.5) * 0.025,
-        phase: Math.random() * Math.PI * 2,
-      })
-    }
-
-    const particleGeo = new THREE.BufferGeometry()
-    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
-
-    // Soft glowing circle sprite texture
-    const pCanvas = document.createElement('canvas')
-    pCanvas.width = 64
-    pCanvas.height = 64
-    const pCtx = pCanvas.getContext('2d')!
-    const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32)
-    pGrad.addColorStop(0, 'rgba(255, 245, 210, 1)')
-    pGrad.addColorStop(0.35, 'rgba(234, 179, 8, 0.8)')
-    pGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
-    pCtx.fillStyle = pGrad
-    pCtx.fillRect(0, 0, 64, 64)
-    const particleTexture = new THREE.CanvasTexture(pCanvas)
-
-    const particleMat = new THREE.PointsMaterial({
-      size: 0.85,
-      map: particleTexture,
+    // Mid-level Glowing Acoustic Waveform Ring (Soundwave ripple around middle)
+    const waveRingGeo = new THREE.TorusGeometry(RING_RADIUS, 0.04, 16, 96)
+    const waveRingMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
       transparent: true,
+      opacity: 0.45,
+      blending: THREE.AdditiveBlending,
+    })
+    const waveRingMesh = new THREE.Mesh(waveRingGeo, waveRingMat)
+    waveRingMesh.rotation.x = Math.PI / 2
+    voiceGroup.add(waveRingMesh)
+
+    // Floating Audio Data Sparkles in Middle Air
+    const SPARKLE_COUNT = 45
+    const sparkleGeo = new THREE.BufferGeometry()
+    const sparklePos = new Float32Array(SPARKLE_COUNT * 3)
+
+    for (let i = 0; i < SPARKLE_COUNT; i++) {
+      const theta = Math.random() * Math.PI * 2
+      const rad = 2.5 + Math.random() * 4.5
+      sparklePos[i * 3 + 0] = Math.cos(theta) * rad
+      sparklePos[i * 3 + 1] = (Math.random() - 0.5) * 5.5
+      sparklePos[i * 3 + 2] = Math.sin(theta) * rad
+    }
+    sparkleGeo.setAttribute('position', new THREE.BufferAttribute(sparklePos, 3))
+
+    const sparkleMat = new THREE.PointsMaterial({
+      color: 0xfef08a,
+      size: 0.7,
+      transparent: true,
+      opacity: 0.65,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
-      opacity: 0.75,
     })
-    const particles = new THREE.Points(particleGeo, particleMat)
-    visualizerGroup.add(particles)
+    const sparkles = new THREE.Points(sparkleGeo, sparkleMat)
+    voiceGroup.add(sparkles)
 
-    // 9. Interactive Mouse Parallax
+    // 7. Interactive Mouse Parallax Tracking
     let targetRotY = 0
     let targetRotX = 0
     let currentRotY = 0
@@ -297,13 +351,13 @@ export function SweepingRibbons3D() {
       const rect = container.getBoundingClientRect()
       const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1
       const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1)
-      targetRotY = nx * 0.4
-      targetRotX = ny * 0.22
+      targetRotY = nx * 0.35
+      targetRotX = ny * 0.18
     }
 
-    window.addEventListener('mousemove', handleMouseMove)
+    window.addEventListener('mousemove', handleMouseMove, { passive: true })
 
-    // 10. Resize Observer
+    // 8. Resize Observer
     const resizeObserver = new ResizeObserver((entries) => {
       for (const entry of entries) {
         width = entry.contentRect.width
@@ -315,127 +369,112 @@ export function SweepingRibbons3D() {
     })
     resizeObserver.observe(container)
 
-    // 11. Animation Loop
+    // 9. Animation Loop
     let animationFrameId: number
     const clock = new THREE.Clock()
 
     const animate = () => {
       const t = clock.getElapsedTime()
 
-      // Mouse Parallax Damping
+      // Smooth mouse parallax damping
       currentRotY += (targetRotY - currentRotY) * 0.05
       currentRotX += (targetRotX - currentRotX) * 0.05
 
-      visualizerGroup.rotation.y = currentRotY + Math.sin(t * 0.35) * 0.07
-      visualizerGroup.rotation.x = currentRotX + Math.cos(t * 0.3) * 0.04
+      masterGroup.rotation.y = currentRotY + Math.sin(t * 0.3) * 0.06
+      masterGroup.rotation.x = currentRotX + Math.cos(t * 0.25) * 0.03
 
-      // Gentle cup hovering & slow axial rotation
-      cupGroup.position.y = -3.5 + Math.sin(t * 1.5) * 0.18
-      cupGroup.rotation.y = t * 0.22
-      cupGroup.rotation.z = -0.05 + Math.sin(t * 0.9) * 0.02
+      // Gentle cup floating hovering
+      cupGroup.position.y = -3.8 + Math.sin(t * 1.3) * 0.14
+      cupGroup.rotation.y = t * 0.18
 
-      eqGroup.rotation.y = -t * 0.14
+      // Slow orbital rotation of mid-level voice visualizer
+      voiceGroup.rotation.y = -t * 0.15
 
-      // Voice Simulation Signals (Speaker 1 Gold & Speaker 2 Amber)
-      const speech1 = Math.max(0, Math.sin(t * 1.7) * 0.7 + Math.sin(t * 3.3) * 0.4)
-      const speech2 = Math.max(0, Math.sin(t * 1.5 + 2.2) * 0.75 + Math.cos(t * 2.9) * 0.35)
+      // Realistic Conversational Audio Signals (Speaker 1 Gold & Speaker 2 Amber)
+      const speech1 = Math.max(0, Math.sin(t * 2.1) * 0.75 + Math.sin(t * 4.2) * 0.35)
+      const speech2 = Math.max(0, Math.sin(t * 1.8 + 2.4) * 0.7 + Math.cos(t * 3.6) * 0.4)
 
-      // Animate Acoustic Rings
-      acousticRings.forEach((ring) => {
-        const p = ((t * ring.speed + ring.phase) % (Math.PI * 2)) / (Math.PI * 2)
-        const scale = 1 + p * 1.5
-        ring.mesh.scale.set(scale, scale, 1)
-        ring.mesh.position.y = 4.5 + p * 1.6
-        const mat = ring.mesh.material as THREE.MeshBasicMaterial
-        mat.opacity = (1 - p) * 0.45 * (0.5 + speech1 * 0.5)
-      })
-
-      // Animate Speaker 1 Ribbon (Undulating vocal steam wave)
-      const posAttr1 = ribbonGeo1.attributes.position
-      const count1 = posAttr1.count
-
-      for (let i = 0; i < count1; i++) {
-        const origX = basePos1.getX(i)
-        const origY = basePos1.getY(i)
-        const normY = (origY + RIBBON_HEIGHT / 2) / RIBBON_HEIGHT
-        const widthScale = 0.35 + normY * 1.15
-
-        const waveX =
-          Math.sin(normY * 6 - t * 4.2) * (1.1 + speech1 * 2.1) * normY +
-          Math.sin(normY * 14 - t * 7.5) * (0.35 + speech1 * 0.75) * normY
-
-        const waveZ =
-          Math.cos(normY * 5 - t * 3.8) * (0.95 + speech1 * 1.7) * normY +
-          Math.cos(normY * 12 - t * 6.2) * (0.3 + speech1 * 0.55) * normY
-
-        const spiralX = Math.sin(normY * 3.8 + t * 0.75) * normY * 2.0
-        const spiralZ = Math.cos(normY * 3.8 + t * 0.75) * normY * 2.0
-
-        posAttr1.setX(i, origX * widthScale + waveX + spiralX)
-        posAttr1.setZ(i, waveZ + spiralZ)
-      }
-      posAttr1.needsUpdate = true
-      ribbonGeo1.computeVertexNormals()
-
-      // Animate Speaker 2 Ribbon (Intertwining counter-phase stream)
-      const posAttr2 = ribbonGeo2.attributes.position
-      const count2 = posAttr2.count
-
-      for (let i = 0; i < count2; i++) {
-        const origX = basePos2.getX(i)
-        const origY = basePos2.getY(i)
-        const normY = (origY + RIBBON_HEIGHT / 2) / RIBBON_HEIGHT
-        const widthScale = 0.32 + normY * 1.05
-
-        const waveX =
-          Math.cos(normY * 5.5 - t * 3.9 + Math.PI) * (1.0 + speech2 * 1.9) * normY +
-          Math.cos(normY * 13 - t * 7.0) * (0.32 + speech2 * 0.7) * normY
-
-        const waveZ =
-          Math.sin(normY * 4.8 - t * 3.5 + Math.PI) * (0.85 + speech2 * 1.5) * normY +
-          Math.sin(normY * 11 - t * 5.8) * (0.28 + speech2 * 0.5) * normY
-
-        const spiralX = Math.sin(normY * 3.8 - t * 0.7 + Math.PI) * normY * 1.8
-        const spiralZ = Math.cos(normY * 3.8 - t * 0.7 + Math.PI) * normY * 1.8
-
-        posAttr2.setX(i, origX * widthScale + waveX + spiralX)
-        posAttr2.setZ(i, waveZ + spiralZ)
-      }
-      posAttr2.needsUpdate = true
-      ribbonGeo2.computeVertexNormals()
-
-      // Emissive glow modulation
-      ribbonMat1.emissiveIntensity = 0.35 + speech1 * 0.65
-      ribbonMat2.emissiveIntensity = 0.3 + speech2 * 0.6
-
-      // Animate 3D Equalizer Bars
-      eqBars.forEach((b) => {
+      // ── Animate Middle Voice Frequency Bars ──
+      eqBars.forEach((bar) => {
+        // Multi-frequency harmonic resonance mimicking voice formant speech
         const harmonic =
-          Math.abs(Math.sin(t * 4.5 + b.phaseOffset)) * 0.5 +
-          Math.abs(Math.sin(t * 8.2 + b.phaseOffset * 2)) * 0.35 +
-          Math.abs(Math.cos(t * 2.1 + b.phaseOffset)) * 0.25
+          Math.abs(Math.sin(t * 5.2 + bar.phase)) * 0.45 +
+          Math.abs(Math.sin(t * 9.5 + bar.phase * 2)) * 0.35 +
+          Math.abs(Math.cos(t * 2.8 + bar.phase)) * 0.2
 
-        const voiceInfluence = (speech1 + speech2) * 0.6
-        const height = 0.5 + harmonic * (1.6 + voiceInfluence * 2.8)
-        b.mesh.scale.set(1, height, 1)
-        b.mesh.position.y = height / 2
+        const speechTotal = (speech1 + speech2) * 0.65
+        const height = 0.4 + harmonic * (1.2 + speechTotal * 2.4)
+
+        bar.stem.scale.set(1, height, 1)
+        bar.stem.position.y = height / 2
+        bar.head.position.y = height + 0.12
       })
 
-      // Animate Phonon Particles
-      const pArr = particleGeo.attributes.position.array as Float32Array
-      for (let i = 0; i < PARTICLE_COUNT; i++) {
-        const vel = particleVelocities[i]
-        pArr[i * 3 + 1] += vel.y
-        pArr[i * 3 + 0] += vel.x + Math.sin(t * 2 + vel.phase) * 0.02
-        pArr[i * 3 + 2] += vel.z + Math.cos(t * 2 + vel.phase) * 0.02
+      // Pulsing glow on wave ring
+      waveRingMat.opacity = 0.35 + (speech1 + speech2) * 0.25
 
-        if (pArr[i * 3 + 1] > 20) {
-          pArr[i * 3 + 1] = -1
-          pArr[i * 3 + 0] = (Math.random() - 0.5) * 3
-          pArr[i * 3 + 2] = (Math.random() - 0.5) * 3
+      // ── Animate Realistic Volumetric Coffee Steam Particles ──
+      steamParticles.forEach((p) => {
+        p.age += 0.02
+        p.y += p.vy
+        p.scale += p.growthRate
+
+        // Convective fluid turbulence curl
+        const curlX = Math.sin(t * p.curlSpeed + p.y * 0.7 + p.curlPhase) * 0.025
+        const curlZ = Math.cos(t * p.curlSpeed + p.y * 0.8 + p.curlPhase) * 0.022
+        p.x += curlX
+        p.z += curlZ
+
+        // Natural vapor opacity curve:
+        // Ramps up smoothly near spout (0 to 1.5 units), stays visible, then evaporates smoothly
+        const normLife = p.age / p.maxLife
+        let alpha = 0
+        if (normLife < 0.25) {
+          alpha = (normLife / 0.25) * p.baseOpacity
+        } else {
+          alpha = (1 - (normLife - 0.25) / 0.75) * p.baseOpacity
         }
+
+        const spriteMat = p.mesh.material as THREE.SpriteMaterial
+        spriteMat.opacity = Math.max(0, alpha)
+        p.mesh.position.set(p.x, p.y, p.z)
+        p.mesh.scale.set(p.scale, p.scale, 1)
+
+        // Respawn particle at the drinking spout when lifespan expires
+        if (p.age >= p.maxLife || p.y > 15) {
+          p.age = 0
+          p.y = 1.0 + Math.random() * 0.3
+          p.x = (Math.random() - 0.5) * 0.35
+          p.z = 1.8 + (Math.random() - 0.5) * 0.35
+          p.scale = 0.9 + Math.random() * 0.35
+        }
+      })
+
+      // ── Animate Ethereal Wispy Vapor Ribbons ──
+      const wPos1 = wispGeo1.attributes.position
+      for (let i = 0; i < wPos1.count; i++) {
+        const origX = baseWispPos1.getX(i)
+        const origY = baseWispPos1.getY(i)
+        const ny = (origY + 8) / 16
+        const curl = Math.sin(ny * 4 - t * 1.8) * (0.8 * ny)
+        wPos1.setX(i, origX * (0.5 + ny * 1.2) + curl)
+        wPos1.setZ(i, Math.cos(ny * 3.5 - t * 1.6) * (0.6 * ny))
       }
-      particleGeo.attributes.position.needsUpdate = true
+      wPos1.needsUpdate = true
+
+      const wPos2 = wispGeo2.attributes.position
+      for (let i = 0; i < wPos2.count; i++) {
+        const origX = baseWispPos2.getX(i)
+        const origY = baseWispPos2.getY(i)
+        const ny = (origY + 7.5) / 15
+        const curl = Math.cos(ny * 3.8 - t * 1.5 + Math.PI) * (0.7 * ny)
+        wPos2.setX(i, origX * (0.4 + ny * 1.1) + curl)
+        wPos2.setZ(i, Math.sin(ny * 3.2 - t * 1.4 + Math.PI) * (0.5 * ny))
+      }
+      wPos2.needsUpdate = true
+
+      // Slow sparkle drift
+      sparkles.rotation.y = t * 0.08
 
       renderer.render(scene, camera)
       animationFrameId = requestAnimationFrame(animate)
@@ -443,7 +482,7 @@ export function SweepingRibbons3D() {
 
     animate()
 
-    // 12. Resource Cleanup
+    // 10. Complete Resource Disposal
     return () => {
       cancelAnimationFrame(animationFrameId)
       window.removeEventListener('mousemove', handleMouseMove)
@@ -453,25 +492,31 @@ export function SweepingRibbons3D() {
       cupBodyGeo.dispose()
       cupBaseGeo.dispose()
       cupRimGeo.dispose()
-      cupBandGeo.dispose()
       lidCollarGeo.dispose()
       lidShelfGeo.dispose()
       lidCapGeo.dispose()
       spoutGeo.dispose()
-      ribbonGeo1.dispose()
-      ribbonGeo2.dispose()
+      smokeTexture.dispose()
+      wispGeo1.dispose()
+      wispGeo2.dispose()
       barGeo.dispose()
-      particleGeo.dispose()
-      particleTexture.dispose()
+      barCapGeo.dispose()
+      waveRingGeo.dispose()
+      sparkleGeo.dispose()
 
       cupMat.dispose()
       lidMat.dispose()
-      goldAccentMat.dispose()
-      ringMat.dispose()
-      ribbonMat1.dispose()
-      ribbonMat2.dispose()
-      barMat.dispose()
-      particleMat.dispose()
+      spoutMat.dispose()
+      wispMat1.dispose()
+      wispMat2.dispose()
+      barStemMat.dispose()
+      barHeadMat.dispose()
+      waveRingMat.dispose()
+      sparkleMat.dispose()
+
+      steamParticles.forEach((p) => {
+        ;(p.mesh.material as THREE.Material).dispose()
+      })
     }
   }, [])
 
