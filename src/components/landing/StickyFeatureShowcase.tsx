@@ -2,9 +2,8 @@ import { useState, useRef, useEffect } from 'react'
 import {
   motion,
   useScroll,
-  useTransform,
   useMotionValueEvent,
-  useReducedMotion,
+  AnimatePresence,
 } from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
 import { InteractiveDotGrid } from './InteractiveDotGrid'
@@ -465,9 +464,8 @@ function MobileLayout() {
 
 export function StickyFeatureShowcase() {
   const [activeStep, setActiveStep] = useState(0)
-  const shouldReduceMotion = useReducedMotion()
 
-  // sectionRef on the outer runway
+  // Section runway for scroll-driven progression
   const sectionRef = useRef<HTMLElement>(null)
 
   const { scrollYProgress } = useScroll({
@@ -475,52 +473,17 @@ export function StickyFeatureShowcase() {
     offset: ['start start', 'end end'],
   })
 
-  // ── 1. Idea 1: Apple-Style Opaque Stacking Deck (Right Column) ─────────────
-  // Card 0: Base card. Scales down slightly & dims as Card 1 slides over it.
-  const cardScale0 = useTransform(scrollYProgress, [0.18, 0.44], [1, shouldReduceMotion ? 1 : 0.95])
-  const cardY0 = useTransform(scrollYProgress, [0.18, 0.44], [0, shouldReduceMotion ? 0 : -18])
-  const cardDim0 = useTransform(scrollYProgress, [0.18, 0.44], [0, 0.45])
-
-  // Card 1: Slides UP from y: 540px to 0px, solid opaque, covering Card 0.
-  const cardY1 = useTransform(
-    scrollYProgress,
-    [0, 0.18, 0.44, 0.58, 0.84],
-    [540, 540, 0, 0, shouldReduceMotion ? 0 : -18]
-  )
-  const cardScale1 = useTransform(scrollYProgress, [0.58, 0.84], [1, shouldReduceMotion ? 1 : 0.95])
-  const cardDim1 = useTransform(scrollYProgress, [0.58, 0.84], [0, 0.45])
-
-  // Card 2: Slides UP from y: 540px to 0px, solid opaque, covering Card 1.
-  const cardY2 = useTransform(
-    scrollYProgress,
-    [0, 0.58, 0.84, 1],
-    [540, 540, 0, 0]
-  )
-
-  // ── 2. Non-Overlapping Vertical Reel Track (Left Column) ───────────────────
-  // Translates each slide cleanly out of view so text NEVER overlaps in place
-  const reelY = useTransform(
-    scrollYProgress,
-    [0, 0.18, 0.44, 0.58, 0.84, 1],
-    [0, 0, -360, -360, -720, -720]
-  )
-
-  const slideOpacity0 = useTransform(scrollYProgress, [0, 0.18, 0.42], [1, 1, 0.05])
-  const slideOpacity1 = useTransform(scrollYProgress, [0.20, 0.44, 0.58, 0.82], [0.05, 1, 1, 0.05])
-  const slideOpacity2 = useTransform(scrollYProgress, [0.60, 0.84, 1], [0.05, 1, 1])
-
-  const slideOpacities = [slideOpacity0, slideOpacity1, slideOpacity2]
-
+  // Synchronize active step with scroll progress
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
     let next = 0
-    if (v >= 0.58) {
+    if (v >= 0.65) {
       next = 2
-    } else if (v >= 0.22) {
+    } else if (v >= 0.32) {
       next = 1
     } else {
       next = 0
     }
-    setActiveStep(prev => (prev !== next ? next : prev))
+    setActiveStep((prev) => (prev !== next ? next : prev))
   })
 
   function scrollToStep(i: number) {
@@ -528,11 +491,12 @@ export function StickyFeatureShowcase() {
     const rect = sectionRef.current.getBoundingClientRect()
     const scrollTop = window.scrollY + rect.top
     const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
-    const targetPercent = i === 0 ? 0.06 : i === 1 ? 0.51 : 0.94
+    const targetPercent = i === 0 ? 0.06 : i === 1 ? 0.48 : 0.92
     window.scrollTo({
       top: scrollTop + targetPercent * scrollableHeight,
       behavior: 'smooth',
     })
+    setActiveStep(i)
   }
 
   return (
@@ -547,7 +511,7 @@ export function StickyFeatureShowcase() {
         className="scroll-story-section hidden md:block"
         style={{
           position: 'relative',
-          height: '380vh',
+          height: '260vh',
           width: '100%',
           backgroundColor: 'transparent',
         }}
@@ -623,7 +587,7 @@ export function StickyFeatureShowcase() {
                         flexDirection: 'column',
                         alignItems: 'center',
                         gap: 3,
-                        opacity: i === activeStep ? 1 : 0.4,
+                        opacity: i === activeStep ? 1 : 0.45,
                         transition: 'opacity 0.3s, transform 0.2s',
                         background: 'none',
                         border: 'none',
@@ -667,193 +631,142 @@ export function StickyFeatureShowcase() {
               </div>
 
               {/* ── Two-column body ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '2.5rem', alignItems: 'center' }}>
+              <div style={{ display: 'grid', gridTemplateColumns: '5.2fr 6.8fr', gap: '2.5rem', alignItems: 'center' }}>
 
-                {/* LEFT COLUMN — vertical reel track (never overlaps in place) */}
-                <div style={{ position: 'relative', width: '100%', height: 360, overflow: 'hidden' }}>
-                  <motion.div
-                    style={{
-                      y: reelY,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      width: '100%',
-                      willChange: 'transform',
-                    }}
-                  >
-                    {FEATURES.map((f, idx) => (
-                      <motion.div
+                {/* LEFT COLUMN — Stripe / Raycast Interactive Stepper Accordion */}
+                <div className="flex flex-col justify-between h-[520px] sm:h-[540px] gap-3">
+                  {FEATURES.map((f, idx) => {
+                    const isActive = activeStep === idx
+                    return (
+                      <div
                         key={f.num}
-                        style={{
-                          height: 360,
-                          width: '100%',
-                          display: 'flex',
-                          flexDirection: 'column',
-                          justifyContent: 'space-between',
-                          padding: '6px 0',
-                          boxSizing: 'border-box',
-                          opacity: slideOpacities[idx],
-                        }}
+                        onClick={() => scrollToStep(idx)}
+                        className={`relative rounded-2xl transition-all duration-300 cursor-pointer border select-none overflow-hidden ${
+                          isActive
+                            ? 'bg-amber-500/[0.04] border-amber-500/40 shadow-[0_4px_24px_-6px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30'
+                            : 'bg-slate-50/70 hover:bg-slate-100/80 border-slate-200/80 hover:border-slate-300 opacity-65 hover:opacity-100'
+                        } p-3.5 sm:p-4 flex flex-col justify-between ${isActive ? 'flex-1' : 'shrink-0'}`}
                       >
-                        {/* Step tag */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                          <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: 11,
-                            fontWeight: 600,
-                            padding: '2px 8px',
-                            borderRadius: 4,
-                            background: '#f59e0b',
-                            color: '#000',
-                          }}>
-                            {f.num} / 03
-                          </span>
-                          <span style={{
-                            fontFamily: 'var(--font-sans)',
-                            fontSize: 11,
-                            letterSpacing: '0.08em',
-                            textTransform: 'uppercase',
-                            color: '#b45309',
-                            fontWeight: 600,
-                          }}>
-                            {f.tag}
-                          </span>
+                        {/* Active Ambient Glow */}
+                        {isActive && (
+                          <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
+                        )}
+
+                        {/* Top Header Row */}
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`font-sans text-[11px] font-bold px-2 py-0.5 rounded transition-colors ${
+                                isActive
+                                  ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.4)]'
+                                  : 'bg-slate-200 text-slate-700'
+                              }`}
+                            >
+                              {f.num}
+                            </span>
+                            <span
+                              className={`font-sans text-[11px] tracking-wider uppercase font-semibold transition-colors ${
+                                isActive ? 'text-amber-700' : 'text-slate-500'
+                              }`}
+                            >
+                              {f.tag}
+                            </span>
+                          </div>
+
+                          <div className="flex items-center gap-1.5 text-xs">
+                            {isActive ? (
+                              <span className="flex items-center gap-1 text-[10.5px] font-sans text-amber-600 font-medium bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
+                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
+                                Active View
+                              </span>
+                            ) : (
+                              <span className="text-slate-400 text-[10.5px] font-sans group-hover:text-slate-600">
+                                Click to view →
+                              </span>
+                            )}
+                          </div>
                         </div>
 
-                        {/* Title */}
-                        <div>
-                          <h3 style={{
-                            fontFamily: 'var(--font-display)',
-                            fontWeight: 600,
-                            fontSize: 'clamp(1.35rem, 2vw, 1.75rem)',
-                            color: '#0f172a',
-                            lineHeight: 1.2,
-                            margin: 0,
-                          }}>
+                        {/* Title & Subtitle */}
+                        <div className={isActive ? 'mt-2' : 'mt-1'}>
+                          <h3
+                            className={`font-display font-semibold transition-all ${
+                              isActive
+                                ? 'text-lg sm:text-xl text-slate-900 leading-tight'
+                                : 'text-sm sm:text-base text-slate-800 leading-snug'
+                            }`}
+                          >
                             {f.title}
                           </h3>
-                          <p style={{
-                            fontFamily: 'var(--font-display)',
-                            fontSize: 13,
-                            color: '#b45309',
-                            fontWeight: 500,
-                            margin: '4px 0 0',
-                          }}>
+                          <p
+                            className={`font-display font-medium text-xs transition-colors ${
+                              isActive ? 'text-amber-700 mt-0.5' : 'text-slate-500'
+                            }`}
+                          >
                             {f.subtitle}
                           </p>
                         </div>
 
-                        {/* Description */}
-                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
-                          {f.desc}
-                        </p>
+                        {/* Expanded Details when Active */}
+                        {isActive && (
+                          <motion.div
+                            initial={{ opacity: 0, height: 0 }}
+                            animate={{ opacity: 1, height: 'auto' }}
+                            exit={{ opacity: 0, height: 0 }}
+                            transition={{ duration: 0.3, ease: 'easeOut' }}
+                            className="space-y-2.5 pt-2"
+                          >
+                            <p className="text-[12.5px] text-slate-600 leading-relaxed font-sans line-clamp-2">
+                              {f.desc}
+                            </p>
 
-                        {/* Metrics */}
-                        <div style={{
-                          display: 'grid',
-                          gridTemplateColumns: 'repeat(3, 1fr)',
-                          gap: 8,
-                          paddingTop: 12,
-                          borderTop: '1px solid #e2e8f0',
-                        }}>
-                          {f.metrics.map(m => (
-                            <div key={m.label}>
-                              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
-                                {m.value}
-                              </div>
-                              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
-                                {m.label}
-                              </div>
+                            {/* Metrics */}
+                            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/80">
+                              {f.metrics.map((m) => (
+                                <div key={m.label}>
+                                  <div className="font-display font-bold text-slate-900 text-sm sm:text-base">
+                                    {m.value}
+                                  </div>
+                                  <div className="font-sans text-[9px] text-slate-500 tracking-wider uppercase mt-0.5 font-medium">
+                                    {m.label}
+                                  </div>
+                                </div>
+                              ))}
                             </div>
-                          ))}
-                        </div>
 
-                        {/* Footnote */}
-                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
-                          <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
-                          <span>{f.footnote}</span>
-                        </div>
+                            {/* Footnote */}
+                            <div className="flex items-start gap-1.5 text-[11px] text-slate-500 font-sans pt-0.5">
+                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 mt-1 animate-pulse" />
+                              <span className="line-clamp-1">{f.footnote}</span>
+                            </div>
+                          </motion.div>
+                        )}
 
-                        {/* Scroll hint */}
-                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 2 }}>
-                          {FEATURES.map((_, i) => (
-                            <span key={i} style={{
-                              height: 2.5,
-                              width: i === idx ? 22 : i < idx ? 12 : 5,
-                              borderRadius: 99,
-                              background: i === idx ? '#f59e0b' : i < idx ? '#fcd34d' : '#e2e8f0',
-                              transition: 'all 0.5s',
-                              display: 'inline-block',
-                            }} />
-                          ))}
-                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
-                            {idx === 2 ? '3 / 3 — explore room' : `${idx + 1} / 3 — scroll ↓`}
-                          </span>
-                        </div>
-                      </motion.div>
-                    ))}
-                  </motion.div>
+                        {/* Active Step Glowing Bottom Progress Bar */}
+                        {isActive && (
+                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
+                        )}
+                      </div>
+                    )
+                  })}
                 </div>
 
-                {/* RIGHT COLUMN — Apple-Style Opaque Stacking Deck */}
-                <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18]">
-                  {/* Card 0: Benchmark (Base layer) */}
-                  <motion.div
-                    style={{
-                      y: cardY0,
-                      scale: cardScale0,
-                      position: 'absolute',
-                      inset: 0,
-                      zIndex: 10,
-                      pointerEvents: activeStep === 0 ? 'auto' : 'none',
-                      willChange: 'transform',
-                    }}
-                    className="w-full h-full"
-                  >
-                    <BenchmarkPanel />
-                    {/* Ambient depth dimming when Card 1 covers it */}
+                {/* RIGHT COLUMN — Smooth Morphing Visual Stage */}
+                <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18] border border-slate-800">
+                  <AnimatePresence mode="wait">
                     <motion.div
-                      style={{ opacity: cardDim0 }}
-                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
-                    />
-                  </motion.div>
-
-                  {/* Card 1: Globe / Mesh (Slides up over Card 0) */}
-                  <motion.div
-                    style={{
-                      y: cardY1,
-                      scale: cardScale1,
-                      position: 'absolute',
-                      inset: 0,
-                      zIndex: 20,
-                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
-                      pointerEvents: activeStep === 1 ? 'auto' : 'none',
-                      willChange: 'transform',
-                    }}
-                    className="w-full h-full rounded-2xl overflow-hidden"
-                  >
-                    <GlobePanel />
-                    {/* Ambient depth dimming when Card 2 covers it */}
-                    <motion.div
-                      style={{ opacity: cardDim1 }}
-                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
-                    />
-                  </motion.div>
-
-                  {/* Card 2: Video Room (Slides up over Card 1) */}
-                  <motion.div
-                    style={{
-                      y: cardY2,
-                      position: 'absolute',
-                      inset: 0,
-                      zIndex: 30,
-                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
-                      pointerEvents: activeStep === 2 ? 'auto' : 'none',
-                      willChange: 'transform',
-                    }}
-                    className="w-full h-full rounded-2xl overflow-hidden"
-                  >
-                    <VideoPanel />
-                  </motion.div>
+                      key={`showcase-panel-${activeStep}`}
+                      initial={{ opacity: 0, scale: 0.98, y: 12 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      exit={{ opacity: 0, scale: 0.98, y: -12 }}
+                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                      className="w-full h-full"
+                    >
+                      {activeStep === 0 && <BenchmarkPanel />}
+                      {activeStep === 1 && <GlobePanel />}
+                      {activeStep === 2 && <VideoPanel />}
+                    </motion.div>
+                  </AnimatePresence>
                 </div>
 
               </div>
