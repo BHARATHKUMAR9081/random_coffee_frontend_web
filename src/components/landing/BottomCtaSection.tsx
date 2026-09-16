@@ -66,7 +66,7 @@ export function BottomCtaSection({}: BottomCtaSectionProps = {}) {
               {/* Top badge inside 3D card */}
               <div className="absolute top-3.5 left-4 flex items-center gap-2 font-sans text-[10.5px] font-medium text-zinc-400 tracking-wider uppercase z-10 pointer-events-none">
                 <span className="h-2 w-2 rounded-full bg-gold-400 shadow-[0_0_8px_#d4af37]" />
-                Coffee Match Engine
+                Verified 1:1 Coffee Chats
               </div>
 
               {/* 3D Gyro Engine Canvas */}
@@ -75,7 +75,7 @@ export function BottomCtaSection({}: BottomCtaSectionProps = {}) {
               {/* Bottom stats inside 3D card */}
               <div className="absolute bottom-3.5 inset-x-4 flex items-center justify-between font-sans text-[11px] text-zinc-400 border-t border-white/[0.06] pt-1.5 z-10 pointer-events-none">
                 <span>Latency: 18ms</span>
-                <span className="text-gold-400 font-medium">Deterministic Pair</span>
+                <span className="text-gold-400 font-medium">Deterministic Deal Flow</span>
               </div>
             </div>
           </div>
