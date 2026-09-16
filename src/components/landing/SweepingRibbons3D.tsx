@@ -1,6 +1,14 @@
 import { useEffect, useRef } from 'react'
 import * as THREE from 'three'
 
+/**
+ * Idea 5: The Coffee Steam Audio Waveform (1:1 Live Conversation Visualizer)
+ *
+ * A tactile 3D visualization combining a sleek obsidian espresso cup with
+ * dual intertwining ribbons of illuminated coffee vapor that oscillate as
+ * real-time acoustic voice waveforms (Speaker 1 Gold & Speaker 2 Amber).
+ * Features 3D spectral equalizer bars, expanding acoustic rings, and floating audio phonons.
+ */
 export function SweepingRibbons3D() {
   const containerRef = useRef<HTMLDivElement>(null)
   const canvasRef = useRef<HTMLCanvasElement>(null)
@@ -10,14 +18,14 @@ export function SweepingRibbons3D() {
     const canvas = canvasRef.current
     if (!container || !canvas) return
 
-    // 1. Scene, Camera, Renderer
+    // 1. Scene & Camera Setup
     const scene = new THREE.Scene()
 
     let width = container.clientWidth || 400
     let height = container.clientHeight || 360
 
-    const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000)
-    camera.position.set(0, 0, 54)
+    const camera = new THREE.PerspectiveCamera(40, width / height, 0.1, 1000)
+    camera.position.set(0, 2, 48)
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -28,305 +36,390 @@ export function SweepingRibbons3D() {
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.4
+    renderer.toneMappingExposure = 1.35
 
-    // 2. High-Luxury Gold & Amber Lighting
-    const ambientLight = new THREE.AmbientLight(0x1a2130, 1.8)
+    // 2. High-End Studio Lighting
+    const ambientLight = new THREE.AmbientLight(0x18181b, 2.0)
     scene.add(ambientLight)
 
-    // Key Directional Light: Warm champagne metallic sheen
-    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.8)
-    keyLight.position.set(30, 30, 35)
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.0)
+    keyLight.position.set(25, 30, 30)
     scene.add(keyLight)
 
-    // Back Rim Light: Golden edge illumination
-    const rimLight = new THREE.DirectionalLight(0xf59e0b, 3.8)
-    rimLight.position.set(-25, -10, -20)
+    const rimLight = new THREE.DirectionalLight(0xf59e0b, 5.0)
+    rimLight.position.set(-20, -10, -25)
     scene.add(rimLight)
 
-    // Soft Warm Front Fill Light
-    const fillLight = new THREE.DirectionalLight(0xfff7ed, 2.2)
-    fillLight.position.set(-20, 15, 30)
-    scene.add(fillLight)
+    const warmCoreLight = new THREE.PointLight(0xf59e0b, 4.5, 30)
+    warmCoreLight.position.set(0, -4, 2)
+    scene.add(warmCoreLight)
 
-    // Golden Halo Point Light directly behind the cup
-    const coreLight = new THREE.PointLight(0xf59e0b, 5.0, 35)
-    coreLight.position.set(0, 0, -2.5)
-    scene.add(coreLight)
+    // Master visualizer group
+    const visualizerGroup = new THREE.Group()
+    visualizerGroup.position.set(0, -2.5, 0)
+    scene.add(visualizerGroup)
 
-    // 3. Materials
-    const goldMetalMat = new THREE.MeshStandardMaterial({
+    // 3. Obsidian Ceramic Espresso Cup & Saucer at Base
+    const cupGroup = new THREE.Group()
+    cupGroup.position.set(0, -7.5, 0)
+    visualizerGroup.add(cupGroup)
+
+    // Ceramic material (Deep charcoal/obsidian with subtle gold rim sheen)
+    const ceramicMat = new THREE.MeshStandardMaterial({
+      color: 0x141417,
+      roughness: 0.18,
+      metalness: 0.25,
+    })
+
+    const goldTrimMat = new THREE.MeshStandardMaterial({
       color: 0xd4af37,
-      metalness: 0.96,
-      roughness: 0.14,
-      emissive: 0x3d2706,
-      emissiveIntensity: 0.25,
+      roughness: 0.2,
+      metalness: 0.95,
     })
 
-    const champagneGoldMat = new THREE.MeshStandardMaterial({
-      color: 0xfef08a,
-      metalness: 0.94,
-      roughness: 0.16,
-      emissive: 0x52360a,
-      emissiveIntensity: 0.2,
+    const liquidMat = new THREE.MeshStandardMaterial({
+      color: 0x221307,
+      roughness: 0.08,
+      metalness: 0.35,
     })
 
-    const cupMat = new THREE.MeshStandardMaterial({
-      color: 0xfcfbfa,
-      roughness: 0.38,
-      metalness: 0.02,
+    // Saucer
+    const saucerGeo = new THREE.CylinderGeometry(7.6, 5.2, 0.45, 48)
+    const saucer = new THREE.Mesh(saucerGeo, ceramicMat)
+    saucer.position.y = -0.25
+    cupGroup.add(saucer)
+
+    const saucerRimGeo = new THREE.TorusGeometry(7.5, 0.12, 16, 48)
+    const saucerRim = new THREE.Mesh(saucerRimGeo, goldTrimMat)
+    saucerRim.rotation.x = Math.PI / 2
+    saucerRim.position.y = -0.05
+    cupGroup.add(saucerRim)
+
+    // Cup Body
+    const cupGeo = new THREE.CylinderGeometry(4.2, 2.8, 4.8, 48, 1, true)
+    const cup = new THREE.Mesh(cupGeo, ceramicMat)
+    cup.position.y = 2.4
+    cupGroup.add(cup)
+
+    // Cup Base Plug
+    const cupBottomGeo = new THREE.CylinderGeometry(2.8, 2.7, 0.2, 48)
+    const cupBottom = new THREE.Mesh(cupBottomGeo, ceramicMat)
+    cupBottom.position.y = 0.1
+    cupGroup.add(cupBottom)
+
+    // Gold Lip Ring
+    const lipGeo = new THREE.TorusGeometry(4.2, 0.14, 16, 48)
+    const lip = new THREE.Mesh(lipGeo, goldTrimMat)
+    lip.rotation.x = Math.PI / 2
+    lip.position.y = 4.8
+    cupGroup.add(lip)
+
+    // Liquid Surface
+    const liquidGeo = new THREE.CircleGeometry(4.05, 48)
+    const liquid = new THREE.Mesh(liquidGeo, liquidMat)
+    liquid.rotation.x = -Math.PI / 2
+    liquid.position.y = 4.5
+    cupGroup.add(liquid)
+
+    // 4. Acoustic Expanding Rings Radiating from Cup Mouth
+    const acousticRings: { mesh: THREE.Mesh; baseScale: number; speed: number; phase: number }[] = []
+    const ringMat = new THREE.MeshBasicMaterial({
+      color: 0xf59e0b,
+      transparent: true,
+      opacity: 0.35,
+      blending: THREE.AdditiveBlending,
+      side: THREE.DoubleSide,
     })
 
-    const lidMat = new THREE.MeshStandardMaterial({
-      color: 0xf6f4ee,
-      roughness: 0.26,
-      metalness: 0.06,
-    })
+    for (let i = 0; i < 3; i++) {
+      const ringGeo = new THREE.RingGeometry(4.2, 4.38, 48)
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat.clone())
+      ringMesh.rotation.x = -Math.PI / 2
+      ringMesh.position.y = 4.6
+      cupGroup.add(ringMesh)
+      acousticRings.push({
+        mesh: ringMesh,
+        baseScale: 1,
+        speed: 0.75,
+        phase: i * (Math.PI * 2 / 3),
+      })
+    }
 
-    const beadMat = new THREE.MeshStandardMaterial({
-      color: 0xfffbeb,
+    // 5. Dual Rising Voice Waveform Ribbons (Speaker 1: Gold, Speaker 2: Amber)
+    // We construct two high-resolution custom parametric ribbon planes that undulate
+    // mathematically according to simulated speech harmonics.
+    const RIBBON_SEGMENTS_Y = 64
+    const RIBBON_HEIGHT = 20
+    const RIBBON_WIDTH = 2.4
+
+    // Speaker 1 Ribbon Geometry
+    const ribbonGeo1 = new THREE.PlaneGeometry(RIBBON_WIDTH, RIBBON_HEIGHT, 8, RIBBON_SEGMENTS_Y)
+    const ribbonMat1 = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
+      emissive: 0x926c15,
+      emissiveIntensity: 0.45,
+      roughness: 0.25,
+      metalness: 0.85,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.9,
+    })
+    const ribbonMesh1 = new THREE.Mesh(ribbonGeo1, ribbonMat1)
+    ribbonMesh1.position.set(0, 7.5, 0)
+    visualizerGroup.add(ribbonMesh1)
+
+    // Speaker 2 Ribbon Geometry (Counter-phase, ember tint)
+    const ribbonGeo2 = new THREE.PlaneGeometry(RIBBON_WIDTH, RIBBON_HEIGHT, 8, RIBBON_SEGMENTS_Y)
+    const ribbonMat2 = new THREE.MeshStandardMaterial({
+      color: 0xf97316,
+      emissive: 0x9a3412,
+      emissiveIntensity: 0.4,
+      roughness: 0.28,
+      metalness: 0.8,
+      side: THREE.DoubleSide,
+      transparent: true,
+      opacity: 0.85,
+    })
+    const ribbonMesh2 = new THREE.Mesh(ribbonGeo2, ribbonMat2)
+    ribbonMesh2.position.set(0, 7.5, 0)
+    visualizerGroup.add(ribbonMesh2)
+
+    // Save initial vertex X/Z anchors for the parametric audio deformation
+    const basePos1 = ribbonGeo1.attributes.position.clone()
+    const basePos2 = ribbonGeo2.attributes.position.clone()
+
+    // 6. 3D Equalizer Spectrograph Bars (Circular Floating Array)
+    const BAR_COUNT = 28
+    const BAR_RADIUS = 7.8
+    const barGeo = new THREE.CylinderGeometry(0.18, 0.18, 1, 16)
+    const barMat = new THREE.MeshStandardMaterial({
+      color: 0xd4af37,
       emissive: 0xf59e0b,
-      emissiveIntensity: 0.85,
-      roughness: 0.1,
+      emissiveIntensity: 0.5,
+      roughness: 0.2,
       metalness: 0.9,
     })
 
-    const collarMat = new THREE.MeshStandardMaterial({
-      color: 0xe2e8f0,
-      metalness: 0.85,
-      roughness: 0.18,
-    })
+    const eqBars: { mesh: THREE.Mesh; angle: number; phaseOffset: number; baseHeight: number }[] = []
+    const eqGroup = new THREE.Group()
+    eqGroup.position.set(0, -2, 0)
+    visualizerGroup.add(eqGroup)
 
-    // 4. Main Instrument Assembly
-    const mainGroup = new THREE.Group()
-    scene.add(mainGroup)
+    for (let i = 0; i < BAR_COUNT; i++) {
+      const angle = (i / BAR_COUNT) * Math.PI * 2
+      const bar = new THREE.Mesh(barGeo, barMat)
+      bar.position.set(Math.cos(angle) * BAR_RADIUS, 0, Math.sin(angle) * BAR_RADIUS)
+      eqGroup.add(bar)
 
-    // ── A. Floating 3D Coffee Cup with Lid ──
-    const cupGroup = new THREE.Group()
-    mainGroup.add(cupGroup)
-
-    // Cup Body (Tapered Cylinder)
-    const cupBodyGeo = new THREE.CylinderGeometry(2.55, 1.85, 6.6, 64)
-    const cupBodyMesh = new THREE.Mesh(cupBodyGeo, cupMat)
-    cupGroup.add(cupBodyMesh)
-
-    // Cup Base Lip
-    const cupBaseGeo = new THREE.CylinderGeometry(1.9, 1.82, 0.3, 64)
-    const cupBaseMesh = new THREE.Mesh(cupBaseGeo, cupMat)
-    cupBaseMesh.position.y = -3.35
-    cupGroup.add(cupBaseMesh)
-
-    // Cup Top Rim Lip
-    const cupRimGeo = new THREE.TorusGeometry(2.58, 0.09, 16, 64)
-    const cupRimMesh = new THREE.Mesh(cupRimGeo, cupMat)
-    cupRimMesh.rotation.x = Math.PI / 2
-    cupRimMesh.position.y = 3.3
-    cupGroup.add(cupRimMesh)
-
-    // Lid Base Collar (fits over the rim)
-    const lidBaseGeo = new THREE.CylinderGeometry(2.72, 2.74, 0.45, 64)
-    const lidBaseMesh = new THREE.Mesh(lidBaseGeo, lidMat)
-    lidBaseMesh.position.y = 3.52
-    cupGroup.add(lidBaseMesh)
-
-    // Lid Middle Shelf
-    const lidShelfGeo = new THREE.CylinderGeometry(2.6, 2.68, 0.35, 64)
-    const lidShelfMesh = new THREE.Mesh(lidShelfGeo, lidMat)
-    lidShelfMesh.position.y = 3.88
-    cupGroup.add(lidShelfMesh)
-
-    // Lid Raised Top Cap / Plateau
-    const lidCapGeo = new THREE.CylinderGeometry(2.38, 2.52, 0.35, 64)
-    const lidCapMesh = new THREE.Mesh(lidCapGeo, lidMat)
-    lidCapMesh.position.y = 4.18
-    cupGroup.add(lidCapMesh)
-
-    // Lid Sipping Spout / Tab detail
-    const spoutGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.12, 24)
-    const spoutMesh = new THREE.Mesh(spoutGeo, lidMat)
-    spoutMesh.position.set(0, 4.38, 1.82)
-    cupGroup.add(spoutMesh)
-
-    // Initial natural cup tilt matching reference
-    cupGroup.rotation.set(0.16, 0.22, -0.08)
-
-    // ── B. Satellite Bead Factory (with Collar Rings matching reference) ──
-    const beadGeo = new THREE.SphereGeometry(0.5, 20, 20)
-    const collarGeo = new THREE.TorusGeometry(0.72, 0.06, 12, 28)
-
-    interface SatelliteNode {
-      group: THREE.Group
-      collar: THREE.Mesh
+      eqBars.push({
+        mesh: bar,
+        angle,
+        phaseOffset: i * 0.4,
+        baseHeight: 1,
+      })
     }
 
-    function createSatelliteNode(): SatelliteNode {
-      const g = new THREE.Group()
-      const sphere = new THREE.Mesh(beadGeo, beadMat)
-      const collar = new THREE.Mesh(collarGeo, collarMat)
-      g.add(sphere)
-      g.add(collar)
-      return { group: g, collar }
+    // 7. Rising Vocal Phonons / Steam Sparkles
+    const PARTICLE_COUNT = 75
+    const particlePositions = new Float32Array(PARTICLE_COUNT * 3)
+    const particleVelocities: { x: number; y: number; z: number; phase: number }[] = []
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particlePositions[i * 3 + 0] = (Math.random() - 0.5) * 5
+      particlePositions[i * 3 + 1] = Math.random() * 22 - 3
+      particlePositions[i * 3 + 2] = (Math.random() - 0.5) * 5
+
+      particleVelocities.push({
+        x: (Math.random() - 0.5) * 0.03,
+        y: 0.04 + Math.random() * 0.06,
+        z: (Math.random() - 0.5) * 0.03,
+        phase: Math.random() * Math.PI * 2,
+      })
     }
 
-    // ── C. Three Armillary Golden Orbital Rings ──
-    // Ring 1: Inner Gimbal (Radius 8.2)
-    const ring1Group = new THREE.Group()
-    ring1Group.rotation.set(0.35, 0.45, 0.2)
-    mainGroup.add(ring1Group)
-    const ring1Geo = new THREE.TorusGeometry(8.2, 0.22, 24, 96)
-    const ring1Mesh = new THREE.Mesh(ring1Geo, goldMetalMat)
-    ring1Group.add(ring1Mesh)
+    const particleGeo = new THREE.BufferGeometry()
+    particleGeo.setAttribute('position', new THREE.BufferAttribute(particlePositions, 3))
 
-    const node1 = createSatelliteNode()
-    const node2 = createSatelliteNode()
-    ring1Group.add(node1.group)
-    ring1Group.add(node2.group)
+    // Soft glowing circle sprite texture
+    const pCanvas = document.createElement('canvas')
+    pCanvas.width = 64
+    pCanvas.height = 64
+    const pCtx = pCanvas.getContext('2d')!
+    const pGrad = pCtx.createRadialGradient(32, 32, 0, 32, 32, 32)
+    pGrad.addColorStop(0, 'rgba(255, 245, 200, 1)')
+    pGrad.addColorStop(0.3, 'rgba(234, 179, 8, 0.8)')
+    pGrad.addColorStop(1, 'rgba(0, 0, 0, 0)')
+    pCtx.fillStyle = pGrad
+    pCtx.fillRect(0, 0, 64, 64)
+    const particleTexture = new THREE.CanvasTexture(pCanvas)
 
-    // Ring 2: Middle Gimbal (Radius 11.2 - tilted)
-    const ring2Group = new THREE.Group()
-    ring2Group.rotation.set(1.15, -0.35, 0.75)
-    mainGroup.add(ring2Group)
-    const ring2Geo = new THREE.TorusGeometry(11.2, 0.25, 24, 96)
-    const ring2Mesh = new THREE.Mesh(ring2Geo, champagneGoldMat)
-    ring2Group.add(ring2Mesh)
-
-    const node3 = createSatelliteNode()
-    const node4 = createSatelliteNode()
-    ring2Group.add(node3.group)
-    ring2Group.add(node4.group)
-
-    // Ring 3: Outer Horizon Ring (Radius 14.4 - tilted)
-    const ring3Group = new THREE.Group()
-    ring3Group.rotation.set(-0.65, 1.25, -0.35)
-    mainGroup.add(ring3Group)
-    const ring3Geo = new THREE.TorusGeometry(14.4, 0.28, 24, 96)
-    const ring3Mesh = new THREE.Mesh(ring3Geo, goldMetalMat)
-    ring3Group.add(ring3Mesh)
-
-    const node5 = createSatelliteNode()
-    const node6 = createSatelliteNode()
-    ring3Group.add(node5.group)
-    ring3Group.add(node6.group)
-
-    // ── D. Golden Stardust Dust Cloud ──
-    function createCircleTexture() {
-      const c = document.createElement('canvas')
-      c.width = 32
-      c.height = 32
-      const ctx = c.getContext('2d')!
-      const g = ctx.createRadialGradient(16, 16, 0, 16, 16, 16)
-      g.addColorStop(0, 'rgba(255, 255, 255, 1)')
-      g.addColorStop(0.3, 'rgba(254, 240, 138, 0.8)')
-      g.addColorStop(1, 'rgba(254, 240, 138, 0)')
-      ctx.fillStyle = g
-      ctx.fillRect(0, 0, 32, 32)
-      return new THREE.CanvasTexture(c)
-    }
-
-    const circleTexture = createCircleTexture()
-    const starCount = 65
-    const starGeo = new THREE.BufferGeometry()
-    const starPos = new Float32Array(starCount * 3)
-
-    for (let i = 0; i < starCount; i++) {
-      starPos[i * 3] = (Math.random() - 0.5) * 38
-      starPos[i * 3 + 1] = (Math.random() - 0.5) * 38
-      starPos[i * 3 + 2] = (Math.random() - 0.5) * 22
-    }
-    starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3))
-
-    const starMat = new THREE.PointsMaterial({
-      color: 0xfde047,
-      size: 0.85,
-      map: circleTexture,
+    const particleMat = new THREE.PointsMaterial({
+      size: 0.9,
+      map: particleTexture,
       transparent: true,
-      opacity: 0.6,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
+      opacity: 0.75,
     })
-    const starPoints = new THREE.Points(starGeo, starMat)
-    mainGroup.add(starPoints)
+    const particles = new THREE.Points(particleGeo, particleMat)
+    visualizerGroup.add(particles)
 
-    // 5. Mouse Parallax Tracking
-    let targetRotX = 0.2
-    let targetRotY = 0.35
-    let currentRotX = 0.2
-    let currentRotY = 0.35
+    // 8. Mouse Parallax Interaction
+    let targetRotY = 0
+    let targetRotX = 0
+    let currentRotY = 0
+    let currentRotX = 0
 
-    function handleMouseMove(e: MouseEvent) {
-      const rect = container?.getBoundingClientRect()
-      if (!rect) return
-      const cx = rect.left + rect.width / 2
-      const cy = rect.top + rect.height / 2
-      const nx = (e.clientX - cx) / (window.innerWidth / 2)
-      const ny = (e.clientY - cy) / (window.innerHeight / 2)
-      targetRotY = 0.35 + nx * 0.75
-      targetRotX = 0.2 + ny * 0.55
+    const handleMouseMove = (e: MouseEvent) => {
+      const rect = container.getBoundingClientRect()
+      const nx = ((e.clientX - rect.left) / rect.width) * 2 - 1
+      const ny = -(((e.clientY - rect.top) / rect.height) * 2 - 1)
+      targetRotY = nx * 0.35
+      targetRotX = ny * 0.2
     }
 
-    window.addEventListener('mousemove', handleMouseMove, { passive: true })
+    window.addEventListener('mousemove', handleMouseMove)
 
-    // 6. Resize Observer
-    function handleResize() {
-      if (!container) return
-      width = container.clientWidth || 400
-      height = container.clientHeight || 360
-      camera.aspect = width / height
-      camera.updateProjectionMatrix()
-      renderer.setSize(width, height)
-    }
-
-    const resizeObserver = new ResizeObserver(handleResize)
+    // 9. Resize Observer
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        width = entry.contentRect.width
+        height = entry.contentRect.height
+        camera.aspect = width / height
+        camera.updateProjectionMatrix()
+        renderer.setSize(width, height)
+      }
+    })
     resizeObserver.observe(container)
 
-    // 7. Animation Loop
+    // 10. Animation Loop: Synthetic Audio Voice Simulation & Waveform Synthesis
     let animationFrameId: number
     const clock = new THREE.Clock()
 
-    function animate() {
+    const animate = () => {
       const t = clock.getElapsedTime()
 
-      // Smooth mouse lerp
-      currentRotX += (targetRotX - currentRotX) * 0.05
+      // Smooth mouse parallax damping
       currentRotY += (targetRotY - currentRotY) * 0.05
+      currentRotX += (targetRotX - currentRotX) * 0.05
 
-      mainGroup.rotation.x = currentRotX + Math.sin(t * 0.3) * 0.05
-      mainGroup.rotation.y = currentRotY + t * 0.1
+      // Natural gentle sway + parallax
+      visualizerGroup.rotation.y = currentRotY + Math.sin(t * 0.4) * 0.08
+      visualizerGroup.rotation.x = currentRotX + Math.cos(t * 0.35) * 0.04
 
-      // Cup hovering & slow majestic rotation
-      cupGroup.position.y = Math.sin(t * 1.4) * 0.22
-      cupGroup.rotation.y = t * 0.12
-      cupGroup.rotation.z = -0.08 + Math.sin(t * 0.8) * 0.025
+      // Gentle rotation of the cup & equalizer ring
+      cupGroup.rotation.y = t * 0.25
+      eqGroup.rotation.y = -t * 0.15
 
-      // Ring Rotations
-      ring1Group.rotation.z = t * 0.35
-      ring2Group.rotation.y = -t * 0.25
-      ring3Group.rotation.z = t * 0.2
+      // Simulated Vocal Activity Cadence:
+      // Speaker 1 (Gold) speaks in pulses with pauses; Speaker 2 (Amber) responds
+      const speech1 = Math.max(0, Math.sin(t * 1.6) * 0.7 + Math.sin(t * 3.1) * 0.4)
+      const speech2 = Math.max(0, Math.sin(t * 1.4 + 2.0) * 0.75 + Math.cos(t * 2.8) * 0.35)
 
-      // ── BEAD GLIDE ANIMATION WITH TANGENTIAL COLLAR ROTATIONS ──
-      // Ring 1 Beads (Radius 8.2)
-      const angle1 = t * 0.8
-      node1.group.position.set(Math.cos(angle1) * 8.2, Math.sin(angle1) * 8.2, 0)
-      node1.collar.rotation.z = angle1 + Math.PI / 2
-      node2.group.position.set(Math.cos(angle1 + Math.PI) * 8.2, Math.sin(angle1 + Math.PI) * 8.2, 0)
-      node2.collar.rotation.z = angle1 + Math.PI + Math.PI / 2
+      // Animate Acoustic Rings
+      acousticRings.forEach((ring) => {
+        const p = ((t * ring.speed + ring.phase) % (Math.PI * 2)) / (Math.PI * 2)
+        const scale = 1 + p * 1.6
+        ring.mesh.scale.set(scale, scale, 1)
+        ring.mesh.position.y = 4.6 + p * 1.8
+        const mat = ring.mesh.material as THREE.MeshBasicMaterial
+        mat.opacity = (1 - p) * 0.45 * (0.5 + speech1 * 0.5)
+      })
 
-      // Ring 2 Beads (Radius 11.2)
-      const angle2 = -t * 0.6
-      node3.group.position.set(Math.cos(angle2) * 11.2, Math.sin(angle2) * 11.2, 0)
-      node3.collar.rotation.z = angle2 + Math.PI / 2
-      node4.group.position.set(Math.cos(angle2 + Math.PI) * 11.2, Math.sin(angle2 + Math.PI) * 11.2, 0)
-      node4.collar.rotation.z = angle2 + Math.PI + Math.PI / 2
+      // Animate Speaker 1 Ribbon (Undulating vocal steam wave)
+      const posAttr1 = ribbonGeo1.attributes.position
+      const count1 = posAttr1.count
 
-      // Ring 3 Beads (Radius 14.4)
-      const angle3 = t * 0.45 + 1.2
-      node5.group.position.set(Math.cos(angle3) * 14.4, Math.sin(angle3) * 14.4, 0)
-      node5.collar.rotation.z = angle3 + Math.PI / 2
-      node6.group.position.set(Math.cos(angle3 + Math.PI) * 14.4, Math.sin(angle3 + Math.PI) * 14.4, 0)
-      node6.collar.rotation.z = angle3 + Math.PI + Math.PI / 2
+      for (let i = 0; i < count1; i++) {
+        const origX = basePos1.getX(i)
+        const origY = basePos1.getY(i)
+        // Normalized height from bottom (0) to top (1)
+        const normY = (origY + RIBBON_HEIGHT / 2) / RIBBON_HEIGHT
 
-      // Stardust slow ambient drift
-      starPoints.rotation.y = t * 0.02
+        // Steam expansion taper: narrow at cup rim, expanding upward
+        const widthScale = 0.4 + normY * 1.2
+
+        // Complex multi-harmonic voice frequency formula
+        const waveX =
+          Math.sin(normY * 6 - t * 4.2) * (1.2 + speech1 * 2.2) * normY +
+          Math.sin(normY * 14 - t * 7.5) * (0.4 + speech1 * 0.8) * normY
+
+        const waveZ =
+          Math.cos(normY * 5 - t * 3.8) * (1.0 + speech1 * 1.8) * normY +
+          Math.cos(normY * 12 - t * 6.2) * (0.35 + speech1 * 0.6) * normY
+
+        // Helical curl as steam rises
+        const spiralX = Math.sin(normY * 4 + t * 0.8) * normY * 2.2
+        const spiralZ = Math.cos(normY * 4 + t * 0.8) * normY * 2.2
+
+        posAttr1.setX(i, origX * widthScale + waveX + spiralX)
+        posAttr1.setZ(i, waveZ + spiralZ)
+      }
+      posAttr1.needsUpdate = true
+      ribbonGeo1.computeVertexNormals()
+
+      // Animate Speaker 2 Ribbon (Intertwining counter-phase vocal stream)
+      const posAttr2 = ribbonGeo2.attributes.position
+      const count2 = posAttr2.count
+
+      for (let i = 0; i < count2; i++) {
+        const origX = basePos2.getX(i)
+        const origY = basePos2.getY(i)
+        const normY = (origY + RIBBON_HEIGHT / 2) / RIBBON_HEIGHT
+        const widthScale = 0.35 + normY * 1.1
+
+        const waveX =
+          Math.cos(normY * 5.5 - t * 3.9 + Math.PI) * (1.1 + speech2 * 2.0) * normY +
+          Math.cos(normY * 13 - t * 7.0) * (0.35 + speech2 * 0.75) * normY
+
+        const waveZ =
+          Math.sin(normY * 4.8 - t * 3.5 + Math.PI) * (0.9 + speech2 * 1.6) * normY +
+          Math.sin(normY * 11 - t * 5.8) * (0.3 + speech2 * 0.55) * normY
+
+        // Counter-helical curl
+        const spiralX = Math.sin(normY * 4 - t * 0.7 + Math.PI) * normY * 2.0
+        const spiralZ = Math.cos(normY * 4 - t * 0.7 + Math.PI) * normY * 2.0
+
+        posAttr2.setX(i, origX * widthScale + waveX + spiralX)
+        posAttr2.setZ(i, waveZ + spiralZ)
+      }
+      posAttr2.needsUpdate = true
+      ribbonGeo2.computeVertexNormals()
+
+      // Dynamic ribbon glow intensity matching vocal modulation
+      ribbonMat1.emissiveIntensity = 0.35 + speech1 * 0.65
+      ribbonMat2.emissiveIntensity = 0.3 + speech2 * 0.6
+
+      // Animate 3D Equalizer Spectrograph Bars
+      eqBars.forEach((b) => {
+        // Multi-frequency harmonic formula
+        const harmonic =
+          Math.abs(Math.sin(t * 4.5 + b.phaseOffset)) * 0.5 +
+          Math.abs(Math.sin(t * 8.2 + b.phaseOffset * 2)) * 0.35 +
+          Math.abs(Math.cos(t * 2.1 + b.phaseOffset)) * 0.25
+
+        const voiceInfluence = (speech1 + speech2) * 0.6
+        const height = 0.6 + harmonic * (1.8 + voiceInfluence * 3.2)
+        b.mesh.scale.set(1, height, 1)
+        b.mesh.position.y = height / 2
+      })
+
+      // Animate Rising Vocal Phonon Particles
+      const pArr = particleGeo.attributes.position.array as Float32Array
+      for (let i = 0; i < PARTICLE_COUNT; i++) {
+        const vel = particleVelocities[i]
+        pArr[i * 3 + 1] += vel.y
+        pArr[i * 3 + 0] += vel.x + Math.sin(t * 2 + vel.phase) * 0.02
+        pArr[i * 3 + 2] += vel.z + Math.cos(t * 2 + vel.phase) * 0.02
+
+        // Reset particle if it drifts above ribbon ceiling
+        if (pArr[i * 3 + 1] > 20) {
+          pArr[i * 3 + 1] = -3
+          pArr[i * 3 + 0] = (Math.random() - 0.5) * 3
+          pArr[i * 3 + 2] = (Math.random() - 0.5) * 3
+        }
+      }
+      particleGeo.attributes.position.needsUpdate = true
 
       renderer.render(scene, camera)
       animationFrameId = requestAnimationFrame(animate)
@@ -334,35 +427,33 @@ export function SweepingRibbons3D() {
 
     animate()
 
-    // 8. Cleanup
+    // 11. Complete Resource Disposal
     return () => {
       cancelAnimationFrame(animationFrameId)
       window.removeEventListener('mousemove', handleMouseMove)
       resizeObserver.disconnect()
 
       renderer.dispose()
-      cupBodyGeo.dispose()
-      cupBaseGeo.dispose()
-      cupRimGeo.dispose()
-      lidBaseGeo.dispose()
-      lidShelfGeo.dispose()
-      lidCapGeo.dispose()
-      spoutGeo.dispose()
-      ring1Geo.dispose()
-      ring2Geo.dispose()
-      ring3Geo.dispose()
-      beadGeo.dispose()
-      collarGeo.dispose()
-      starGeo.dispose()
-      circleTexture.dispose()
+      saucerGeo.dispose()
+      saucerRimGeo.dispose()
+      cupGeo.dispose()
+      cupBottomGeo.dispose()
+      lipGeo.dispose()
+      liquidGeo.dispose()
+      ribbonGeo1.dispose()
+      ribbonGeo2.dispose()
+      barGeo.dispose()
+      particleGeo.dispose()
+      particleTexture.dispose()
 
-      goldMetalMat.dispose()
-      champagneGoldMat.dispose()
-      cupMat.dispose()
-      lidMat.dispose()
-      beadMat.dispose()
-      collarMat.dispose()
-      starMat.dispose()
+      ceramicMat.dispose()
+      goldTrimMat.dispose()
+      liquidMat.dispose()
+      ringMat.dispose()
+      ribbonMat1.dispose()
+      ribbonMat2.dispose()
+      barMat.dispose()
+      particleMat.dispose()
     }
   }, [])
 
