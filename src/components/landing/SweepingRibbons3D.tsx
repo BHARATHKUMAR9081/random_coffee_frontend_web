@@ -28,50 +28,50 @@ export function SweepingRibbons3D() {
     renderer.setSize(width, height)
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
     renderer.toneMapping = THREE.ACESFilmicToneMapping
-    renderer.toneMappingExposure = 1.35
+    renderer.toneMappingExposure = 1.4
 
     // 2. High-Luxury Gold & Amber Lighting
-    const ambientLight = new THREE.AmbientLight(0xffedd5, 1.8)
+    const ambientLight = new THREE.AmbientLight(0x1a2130, 1.8)
     scene.add(ambientLight)
 
-    // Warm Gold Key Light
-    const keyLight = new THREE.DirectionalLight(0xf59e0b, 5.5)
-    keyLight.position.set(30, 25, 40)
+    // Key Directional Light: Warm champagne metallic sheen
+    const keyLight = new THREE.DirectionalLight(0xfffaed, 4.8)
+    keyLight.position.set(30, 30, 35)
     scene.add(keyLight)
 
-    // Champagne Rim Light from behind
-    const rimLight = new THREE.DirectionalLight(0xfffbeb, 6.0)
-    rimLight.position.set(-35, 20, -25)
+    // Back Rim Light: Golden edge illumination
+    const rimLight = new THREE.DirectionalLight(0xf59e0b, 4.2)
+    rimLight.position.set(-30, -15, -25)
     scene.add(rimLight)
 
-    // Center Core Point Light
-    const coreLight = new THREE.PointLight(0xfbbf24, 3.5, 45)
+    // Central Singularity Point Light (inside the coffee bean)
+    const coreLight = new THREE.PointLight(0xf59e0b, 4.0, 40)
     coreLight.position.set(0, 0, 0)
     scene.add(coreLight)
 
     // 3. Materials
     const goldMetalMat = new THREE.MeshStandardMaterial({
       color: 0xd4af37,
-      emissive: 0x85540b,
-      emissiveIntensity: 0.35,
-      roughness: 0.14,
       metalness: 0.96,
+      roughness: 0.14,
+      emissive: 0x3d2706,
+      emissiveIntensity: 0.25,
     })
 
     const champagneGoldMat = new THREE.MeshStandardMaterial({
       color: 0xfef08a,
-      emissive: 0x926116,
-      emissiveIntensity: 0.25,
-      roughness: 0.18,
-      metalness: 0.92,
+      metalness: 0.94,
+      roughness: 0.16,
+      emissive: 0x52360a,
+      emissiveIntensity: 0.2,
     })
 
-    const coreSphereMat = new THREE.MeshPhysicalMaterial({
-      color: 0x090d16,
-      emissive: 0x1a0f04,
-      emissiveIntensity: 0.3,
-      roughness: 0.18,
-      metalness: 0.85,
+    const obsidianMat = new THREE.MeshPhysicalMaterial({
+      color: 0x07090e,
+      emissive: 0x1f1304,
+      emissiveIntensity: 0.35,
+      roughness: 0.14,
+      metalness: 0.92,
       clearcoat: 1.0,
       clearcoatRoughness: 0.08,
       reflectivity: 0.95,
@@ -81,10 +81,13 @@ export function SweepingRibbons3D() {
       color: 0xf59e0b,
       wireframe: true,
       transparent: true,
-      opacity: 0.35,
+      opacity: 0.55,
     })
 
-    // Glowing Golden Satellite Bead Material
+    const seamMat = new THREE.MeshBasicMaterial({
+      color: 0xfde047,
+    })
+
     const beadMat = new THREE.MeshStandardMaterial({
       color: 0xfffbeb,
       emissive: 0xf59e0b,
@@ -93,86 +96,108 @@ export function SweepingRibbons3D() {
       metalness: 0.9,
     })
 
-    const haloMat = new THREE.MeshBasicMaterial({
-      color: 0xfef08a,
-      side: THREE.DoubleSide,
-      transparent: true,
-      opacity: 0.6,
+    const collarMat = new THREE.MeshStandardMaterial({
+      color: 0xe2e8f0,
+      metalness: 0.85,
+      roughness: 0.18,
     })
 
     // 4. Main Instrument Assembly
     const mainGroup = new THREE.Group()
     scene.add(mainGroup)
 
-    // A. Central Obsidian Core Sphere
-    const coreGeo = new THREE.SphereGeometry(4.6, 36, 36)
-    const coreMesh = new THREE.Mesh(coreGeo, coreSphereMat)
-    mainGroup.add(coreMesh)
+    // ── A. Central Coffee Bean Singularity Core ──
+    const coreGroup = new THREE.Group()
+    mainGroup.add(coreGroup)
 
-    // Wireframe Cage around Core
-    const cageGeo = new THREE.SphereGeometry(4.85, 18, 18)
+    // Solid Obsidian Coffee Bean Oval
+    const coreGeo = new THREE.SphereGeometry(4.2, 36, 36)
+    const coreMesh = new THREE.Mesh(coreGeo, obsidianMat)
+    coreMesh.scale.set(0.92, 1.24, 0.84)
+    coreGroup.add(coreMesh)
+
+    // Geometric Golden Wireframe Cage around the Coffee Bean
+    const cageGeo = new THREE.IcosahedronGeometry(4.4, 3)
     const cageMesh = new THREE.Mesh(cageGeo, wireMat)
-    mainGroup.add(cageMesh)
+    cageMesh.scale.set(0.92, 1.24, 0.84)
+    coreGroup.add(cageMesh)
 
-    // Helper: Create a satellite bead mesh with an elegant outer aura ring
-    const beadGeo = new THREE.SphereGeometry(0.55, 20, 20)
-    const haloGeo = new THREE.RingGeometry(0.7, 1.05, 24)
+    // Luminous Golden Coffee Bean Center Seam (Curved arc through the crevice)
+    const seamGeo = new THREE.TorusGeometry(4.25, 0.1, 16, 64, Math.PI)
+    const seamMesh = new THREE.Mesh(seamGeo, seamMat)
+    seamMesh.rotation.x = Math.PI / 2
+    seamMesh.scale.set(0.92, 0.84, 1.24)
+    coreGroup.add(seamMesh)
 
-    function createSatelliteBead(): THREE.Group {
-      const g = new THREE.Group()
-      const sphere = new THREE.Mesh(beadGeo, beadMat)
-      const halo = new THREE.Mesh(haloGeo, haloMat)
-      g.add(sphere)
-      g.add(halo)
-      return g
+    // Central Singularity Glowing Core Flare
+    const flareGeo = new THREE.SphereGeometry(0.8, 16, 16)
+    const flareMat = new THREE.MeshBasicMaterial({
+      color: 0xfffbeb,
+      transparent: true,
+      opacity: 0.95,
+    })
+    const flareOrb = new THREE.Mesh(flareGeo, flareMat)
+    coreGroup.add(flareOrb)
+
+    // ── B. Satellite Bead Factory (with Collar Rings matching reference) ──
+    const beadGeo = new THREE.SphereGeometry(0.5, 20, 20)
+    const collarGeo = new THREE.TorusGeometry(0.72, 0.06, 12, 28)
+
+    interface SatelliteNode {
+      group: THREE.Group
+      collar: THREE.Mesh
     }
 
-    // B. Concentric Gyroscope Rings (24K Gold)
-    // -------------------------------------------------------------
-    // RING 1: Inner Gimbal (Radius 8.2)
+    function createSatelliteNode(): SatelliteNode {
+      const g = new THREE.Group()
+      const sphere = new THREE.Mesh(beadGeo, beadMat)
+      const collar = new THREE.Mesh(collarGeo, collarMat)
+      g.add(sphere)
+      g.add(collar)
+      return { group: g, collar }
+    }
+
+    // ── C. Three Armillary Golden Orbital Rings ──
+    // Ring 1: Inner Gimbal (Radius 8.2)
     const ring1Group = new THREE.Group()
+    ring1Group.rotation.set(0.35, 0.45, 0.2)
     mainGroup.add(ring1Group)
-    const ring1Geo = new THREE.TorusGeometry(8.2, 0.26, 16, 72)
+    const ring1Geo = new THREE.TorusGeometry(8.2, 0.22, 24, 96)
     const ring1Mesh = new THREE.Mesh(ring1Geo, goldMetalMat)
     ring1Group.add(ring1Mesh)
 
-    // Beads mounted directly on Ring 1 track
-    const bead1 = createSatelliteBead()
-    const bead2 = createSatelliteBead()
-    ring1Group.add(bead1)
-    ring1Group.add(bead2)
+    const node1 = createSatelliteNode()
+    const node2 = createSatelliteNode()
+    ring1Group.add(node1.group)
+    ring1Group.add(node2.group)
 
-    // -------------------------------------------------------------
-    // RING 2: Middle Gimbal (Radius 11.4 - tilted)
+    // Ring 2: Middle Gimbal (Radius 11.2 - tilted)
     const ring2Group = new THREE.Group()
+    ring2Group.rotation.set(1.15, -0.35, 0.75)
     mainGroup.add(ring2Group)
-    ring2Group.rotation.x = Math.PI / 3.2
-    const ring2Geo = new THREE.TorusGeometry(11.4, 0.3, 16, 80)
+    const ring2Geo = new THREE.TorusGeometry(11.2, 0.25, 24, 96)
     const ring2Mesh = new THREE.Mesh(ring2Geo, champagneGoldMat)
     ring2Group.add(ring2Mesh)
 
-    // Beads mounted directly on Ring 2 track
-    const bead3 = createSatelliteBead()
-    const bead4 = createSatelliteBead()
-    ring2Group.add(bead3)
-    ring2Group.add(bead4)
+    const node3 = createSatelliteNode()
+    const node4 = createSatelliteNode()
+    ring2Group.add(node3.group)
+    ring2Group.add(node4.group)
 
-    // -------------------------------------------------------------
-    // RING 3: Outer Horizon Ring (Radius 14.6 - tilted)
+    // Ring 3: Outer Horizon Ring (Radius 14.4 - tilted)
     const ring3Group = new THREE.Group()
+    ring3Group.rotation.set(-0.65, 1.25, -0.35)
     mainGroup.add(ring3Group)
-    ring3Group.rotation.y = Math.PI / 4
-    const ring3Geo = new THREE.TorusGeometry(14.6, 0.34, 16, 96)
+    const ring3Geo = new THREE.TorusGeometry(14.4, 0.28, 24, 96)
     const ring3Mesh = new THREE.Mesh(ring3Geo, goldMetalMat)
     ring3Group.add(ring3Mesh)
 
-    // Beads mounted directly on Ring 3 track
-    const bead5 = createSatelliteBead()
-    const bead6 = createSatelliteBead()
-    ring3Group.add(bead5)
-    ring3Group.add(bead6)
+    const node5 = createSatelliteNode()
+    const node6 = createSatelliteNode()
+    ring3Group.add(node5.group)
+    ring3Group.add(node6.group)
 
-    // C. Soft Round Golden Stardust Particles
+    // ── D. Golden Stardust Dust Cloud ──
     function createCircleTexture() {
       const c = document.createElement('canvas')
       c.width = 32
@@ -188,23 +213,23 @@ export function SweepingRibbons3D() {
     }
 
     const circleTexture = createCircleTexture()
-    const starCount = 45
+    const starCount = 65
     const starGeo = new THREE.BufferGeometry()
     const starPos = new Float32Array(starCount * 3)
 
     for (let i = 0; i < starCount; i++) {
-      starPos[i * 3] = (Math.random() - 0.5) * 36
-      starPos[i * 3 + 1] = (Math.random() - 0.5) * 36
-      starPos[i * 3 + 2] = (Math.random() - 0.5) * 20
+      starPos[i * 3] = (Math.random() - 0.5) * 38
+      starPos[i * 3 + 1] = (Math.random() - 0.5) * 38
+      starPos[i * 3 + 2] = (Math.random() - 0.5) * 22
     }
     starGeo.setAttribute('position', new THREE.BufferAttribute(starPos, 3))
 
     const starMat = new THREE.PointsMaterial({
-      color: 0xfef08a,
+      color: 0xfde047,
       size: 0.85,
       map: circleTexture,
       transparent: true,
-      opacity: 0.5,
+      opacity: 0.6,
       blending: THREE.AdditiveBlending,
       depthWrite: false,
     })
@@ -224,8 +249,8 @@ export function SweepingRibbons3D() {
       const cy = rect.top + rect.height / 2
       const nx = (e.clientX - cx) / (window.innerWidth / 2)
       const ny = (e.clientY - cy) / (window.innerHeight / 2)
-      targetRotY = 0.35 + nx * 0.7
-      targetRotX = 0.2 + ny * 0.5
+      targetRotY = 0.35 + nx * 0.75
+      targetRotX = 0.2 + ny * 0.55
     }
 
     window.addEventListener('mousemove', handleMouseMove, { passive: true })
@@ -243,7 +268,7 @@ export function SweepingRibbons3D() {
     const resizeObserver = new ResizeObserver(handleResize)
     resizeObserver.observe(container)
 
-    // 7. Animation Loop: Silky Smooth Orbiting Along Fixed Ring Tracks
+    // 7. Animation Loop
     let animationFrameId: number
     const clock = new THREE.Clock()
 
@@ -254,37 +279,41 @@ export function SweepingRibbons3D() {
       currentRotX += (targetRotX - currentRotX) * 0.05
       currentRotY += (targetRotY - currentRotY) * 0.05
 
-      mainGroup.rotation.x = currentRotX + Math.sin(t * 0.3) * 0.06
-      mainGroup.rotation.y = currentRotY + t * 0.12
+      mainGroup.rotation.x = currentRotX + Math.sin(t * 0.3) * 0.05
+      mainGroup.rotation.y = currentRotY + t * 0.1
 
-      // Gimbal Differential Rotations (steady, smooth)
-      ring1Group.rotation.z = t * 0.4
-      ring2Group.rotation.y = -t * 0.3
-      ring3Group.rotation.z = t * 0.22
+      // Core rotation & subtle breathing
+      coreGroup.rotation.y = t * 0.15
+      coreGroup.rotation.z = Math.sin(t * 0.5) * 0.05
+      const flareScale = 1.0 + Math.sin(t * 3.2) * 0.15
+      flareOrb.scale.set(flareScale, flareScale, flareScale)
 
-      // Core wireframe slow pulse
-      cageMesh.rotation.y = -t * 0.15
-      const coreScale = 1 + Math.sin(t * 1.6) * 0.02
-      coreMesh.scale.set(coreScale, coreScale, coreScale)
+      // Ring Rotations
+      ring1Group.rotation.z = t * 0.35
+      ring2Group.rotation.y = -t * 0.25
+      ring3Group.rotation.z = t * 0.2
 
-      // ── BEAD GLIDE ANIMATION ─────────────────────────────────────────
-      // Every bead stays strictly on its own ring circumference (radius 8.2, 11.4, 14.6)
-      // They NEVER enter the center core (radius 4.6), moving silky smooth and neat.
+      // ── BEAD GLIDE ANIMATION WITH TANGENTIAL COLLAR ROTATIONS ──
+      // Ring 1 Beads (Radius 8.2)
+      const angle1 = t * 0.8
+      node1.group.position.set(Math.cos(angle1) * 8.2, Math.sin(angle1) * 8.2, 0)
+      node1.collar.rotation.z = angle1 + Math.PI / 2
+      node2.group.position.set(Math.cos(angle1 + Math.PI) * 8.2, Math.sin(angle1 + Math.PI) * 8.2, 0)
+      node2.collar.rotation.z = angle1 + Math.PI + Math.PI / 2
 
-      // Ring 1 Beads (Radius 8.2) — moving smoothly clockwise
-      const angle1 = t * 0.85
-      bead1.position.set(Math.cos(angle1) * 8.2, Math.sin(angle1) * 8.2, 0)
-      bead2.position.set(Math.cos(angle1 + Math.PI) * 8.2, Math.sin(angle1 + Math.PI) * 8.2, 0)
+      // Ring 2 Beads (Radius 11.2)
+      const angle2 = -t * 0.6
+      node3.group.position.set(Math.cos(angle2) * 11.2, Math.sin(angle2) * 11.2, 0)
+      node3.collar.rotation.z = angle2 + Math.PI / 2
+      node4.group.position.set(Math.cos(angle2 + Math.PI) * 11.2, Math.sin(angle2 + Math.PI) * 11.2, 0)
+      node4.collar.rotation.z = angle2 + Math.PI + Math.PI / 2
 
-      // Ring 2 Beads (Radius 11.4) — moving smoothly counter-clockwise
-      const angle2 = -t * 0.65
-      bead3.position.set(Math.cos(angle2) * 11.4, Math.sin(angle2) * 11.4, 0)
-      bead4.position.set(Math.cos(angle2 + Math.PI) * 11.4, Math.sin(angle2 + Math.PI) * 11.4, 0)
-
-      // Ring 3 Beads (Radius 14.6) — moving smoothly clockwise at majestic outer speed
-      const angle3 = t * 0.5 + 1.2
-      bead5.position.set(Math.cos(angle3) * 14.6, Math.sin(angle3) * 14.6, 0)
-      bead6.position.set(Math.cos(angle3 + Math.PI) * 14.6, Math.sin(angle3 + Math.PI) * 14.6, 0)
+      // Ring 3 Beads (Radius 14.4)
+      const angle3 = t * 0.45 + 1.2
+      node5.group.position.set(Math.cos(angle3) * 14.4, Math.sin(angle3) * 14.4, 0)
+      node5.collar.rotation.z = angle3 + Math.PI / 2
+      node6.group.position.set(Math.cos(angle3 + Math.PI) * 14.4, Math.sin(angle3 + Math.PI) * 14.4, 0)
+      node6.collar.rotation.z = angle3 + Math.PI + Math.PI / 2
 
       // Stardust slow ambient drift
       starPoints.rotation.y = t * 0.02
@@ -304,20 +333,24 @@ export function SweepingRibbons3D() {
       renderer.dispose()
       coreGeo.dispose()
       cageGeo.dispose()
+      seamGeo.dispose()
+      flareGeo.dispose()
       ring1Geo.dispose()
       ring2Geo.dispose()
       ring3Geo.dispose()
       beadGeo.dispose()
-      haloGeo.dispose()
+      collarGeo.dispose()
       starGeo.dispose()
       circleTexture.dispose()
 
       goldMetalMat.dispose()
       champagneGoldMat.dispose()
-      coreSphereMat.dispose()
+      obsidianMat.dispose()
       wireMat.dispose()
+      seamMat.dispose()
       beadMat.dispose()
-      haloMat.dispose()
+      collarMat.dispose()
+      flareMat.dispose()
       starMat.dispose()
     }
   }, [])
