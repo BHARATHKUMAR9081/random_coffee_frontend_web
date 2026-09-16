@@ -31,7 +31,7 @@ export function SweepingRibbons3D() {
     let height = container.clientHeight || 360
 
     const camera = new THREE.PerspectiveCamera(38, width / height, 0.1, 1000)
-    camera.position.set(0, 0.4, 46)
+    camera.position.set(0, 0.2, 37)
 
     const renderer = new THREE.WebGLRenderer({
       canvas,
@@ -111,7 +111,7 @@ export function SweepingRibbons3D() {
     masterGroup.add(everywhereSparkles)
 
     // ── 4. Shared Cup Geometries & Materials ──
-    const CUP_SCALE = 0.78 // Scaled down to fit two cups elegantly side by side
+    const CUP_SCALE = 0.98 // Scaled up to be heroically prominent
 
     const cupMat = new THREE.MeshStandardMaterial({
       color: 0xfbf8f2,
@@ -512,15 +512,15 @@ export function SweepingRibbons3D() {
         cheersPointLight.intensity = 3.5
       }
 
-      // Position Cup 1 (Left) and Cup 2 (Right)
-      // Base resting distance: x = -3.8 and x = +3.8
-      // Clink distance: x = -1.9 and x = +1.9
-      const cup1X = -3.8 + clinkProgress * 1.9 - recoil
-      const cup2X = 3.8 - clinkProgress * 1.9 + recoil
+      // Position Cup 1 (Left) and Cup 2 (Right) - Larger Heroic Proportions
+      // Base resting distance: x = -4.2 and x = +4.2
+      // Clink distance: x = -2.0 and x = +2.0
+      const cup1X = -4.2 + clinkProgress * 2.2 - recoil
+      const cup2X = 4.2 - clinkProgress * 2.2 + recoil
 
-      // Inward tilt during cheers: Cup 1 rotates clockwise (Z+), Cup 2 counter-clockwise (Z-)
-      const tiltZ1 = -0.06 + clinkProgress * 0.24 + recoil * 0.4
-      const tiltZ2 = 0.06 - clinkProgress * 0.24 - recoil * 0.4
+      // Inward tilt during cheers
+      const tiltZ1 = -0.06 + clinkProgress * 0.22 + recoil * 0.35
+      const tiltZ2 = 0.06 - clinkProgress * 0.22 - recoil * 0.35
 
       // Gentle floating bobbing
       const bob1 = Math.sin(t * 1.5) * 0.12
