@@ -40,13 +40,18 @@ export function SweepingRibbons3D() {
     scene.add(keyLight)
 
     // Back Rim Light: Golden edge illumination
-    const rimLight = new THREE.DirectionalLight(0xf59e0b, 4.2)
-    rimLight.position.set(-30, -15, -25)
+    const rimLight = new THREE.DirectionalLight(0xf59e0b, 3.8)
+    rimLight.position.set(-25, -10, -20)
     scene.add(rimLight)
 
-    // Central Singularity Point Light (inside the coffee bean)
-    const coreLight = new THREE.PointLight(0xf59e0b, 4.0, 40)
-    coreLight.position.set(0, 0, 0)
+    // Soft Warm Front Fill Light
+    const fillLight = new THREE.DirectionalLight(0xfff7ed, 2.2)
+    fillLight.position.set(-20, 15, 30)
+    scene.add(fillLight)
+
+    // Golden Halo Point Light directly behind the cup
+    const coreLight = new THREE.PointLight(0xf59e0b, 5.0, 35)
+    coreLight.position.set(0, 0, -2.5)
     scene.add(coreLight)
 
     // 3. Materials
@@ -66,26 +71,16 @@ export function SweepingRibbons3D() {
       emissiveIntensity: 0.2,
     })
 
-    const obsidianMat = new THREE.MeshPhysicalMaterial({
-      color: 0x07090e,
-      emissive: 0x1f1304,
-      emissiveIntensity: 0.35,
-      roughness: 0.14,
-      metalness: 0.92,
-      clearcoat: 1.0,
-      clearcoatRoughness: 0.08,
-      reflectivity: 0.95,
+    const cupMat = new THREE.MeshStandardMaterial({
+      color: 0xfcfbfa,
+      roughness: 0.38,
+      metalness: 0.02,
     })
 
-    const wireMat = new THREE.MeshBasicMaterial({
-      color: 0xf59e0b,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.55,
-    })
-
-    const seamMat = new THREE.MeshBasicMaterial({
-      color: 0xfde047,
+    const lidMat = new THREE.MeshStandardMaterial({
+      color: 0xf6f4ee,
+      roughness: 0.26,
+      metalness: 0.06,
     })
 
     const beadMat = new THREE.MeshStandardMaterial({
@@ -106,38 +101,54 @@ export function SweepingRibbons3D() {
     const mainGroup = new THREE.Group()
     scene.add(mainGroup)
 
-    // ── A. Central Coffee Bean Singularity Core ──
-    const coreGroup = new THREE.Group()
-    mainGroup.add(coreGroup)
+    // ── A. Floating 3D Coffee Cup with Lid ──
+    const cupGroup = new THREE.Group()
+    mainGroup.add(cupGroup)
 
-    // Solid Obsidian Coffee Bean Oval
-    const coreGeo = new THREE.SphereGeometry(4.2, 36, 36)
-    const coreMesh = new THREE.Mesh(coreGeo, obsidianMat)
-    coreMesh.scale.set(0.92, 1.24, 0.84)
-    coreGroup.add(coreMesh)
+    // Cup Body (Tapered Cylinder)
+    const cupBodyGeo = new THREE.CylinderGeometry(2.55, 1.85, 6.6, 64)
+    const cupBodyMesh = new THREE.Mesh(cupBodyGeo, cupMat)
+    cupGroup.add(cupBodyMesh)
 
-    // Geometric Golden Wireframe Cage around the Coffee Bean
-    const cageGeo = new THREE.IcosahedronGeometry(4.4, 3)
-    const cageMesh = new THREE.Mesh(cageGeo, wireMat)
-    cageMesh.scale.set(0.92, 1.24, 0.84)
-    coreGroup.add(cageMesh)
+    // Cup Base Lip
+    const cupBaseGeo = new THREE.CylinderGeometry(1.9, 1.82, 0.3, 64)
+    const cupBaseMesh = new THREE.Mesh(cupBaseGeo, cupMat)
+    cupBaseMesh.position.y = -3.35
+    cupGroup.add(cupBaseMesh)
 
-    // Luminous Golden Coffee Bean Center Seam (Curved arc through the crevice)
-    const seamGeo = new THREE.TorusGeometry(4.25, 0.1, 16, 64, Math.PI)
-    const seamMesh = new THREE.Mesh(seamGeo, seamMat)
-    seamMesh.rotation.x = Math.PI / 2
-    seamMesh.scale.set(0.92, 0.84, 1.24)
-    coreGroup.add(seamMesh)
+    // Cup Top Rim Lip
+    const cupRimGeo = new THREE.TorusGeometry(2.58, 0.09, 16, 64)
+    const cupRimMesh = new THREE.Mesh(cupRimGeo, cupMat)
+    cupRimMesh.rotation.x = Math.PI / 2
+    cupRimMesh.position.y = 3.3
+    cupGroup.add(cupRimMesh)
 
-    // Central Singularity Glowing Core Flare
-    const flareGeo = new THREE.SphereGeometry(0.8, 16, 16)
-    const flareMat = new THREE.MeshBasicMaterial({
-      color: 0xfffbeb,
-      transparent: true,
-      opacity: 0.95,
-    })
-    const flareOrb = new THREE.Mesh(flareGeo, flareMat)
-    coreGroup.add(flareOrb)
+    // Lid Base Collar (fits over the rim)
+    const lidBaseGeo = new THREE.CylinderGeometry(2.72, 2.74, 0.45, 64)
+    const lidBaseMesh = new THREE.Mesh(lidBaseGeo, lidMat)
+    lidBaseMesh.position.y = 3.52
+    cupGroup.add(lidBaseMesh)
+
+    // Lid Middle Shelf
+    const lidShelfGeo = new THREE.CylinderGeometry(2.6, 2.68, 0.35, 64)
+    const lidShelfMesh = new THREE.Mesh(lidShelfGeo, lidMat)
+    lidShelfMesh.position.y = 3.88
+    cupGroup.add(lidShelfMesh)
+
+    // Lid Raised Top Cap / Plateau
+    const lidCapGeo = new THREE.CylinderGeometry(2.38, 2.52, 0.35, 64)
+    const lidCapMesh = new THREE.Mesh(lidCapGeo, lidMat)
+    lidCapMesh.position.y = 4.18
+    cupGroup.add(lidCapMesh)
+
+    // Lid Sipping Spout / Tab detail
+    const spoutGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.12, 24)
+    const spoutMesh = new THREE.Mesh(spoutGeo, lidMat)
+    spoutMesh.position.set(0, 4.38, 1.82)
+    cupGroup.add(spoutMesh)
+
+    // Initial natural cup tilt matching reference
+    cupGroup.rotation.set(0.16, 0.22, -0.08)
 
     // ── B. Satellite Bead Factory (with Collar Rings matching reference) ──
     const beadGeo = new THREE.SphereGeometry(0.5, 20, 20)
@@ -282,11 +293,10 @@ export function SweepingRibbons3D() {
       mainGroup.rotation.x = currentRotX + Math.sin(t * 0.3) * 0.05
       mainGroup.rotation.y = currentRotY + t * 0.1
 
-      // Core rotation & subtle breathing
-      coreGroup.rotation.y = t * 0.15
-      coreGroup.rotation.z = Math.sin(t * 0.5) * 0.05
-      const flareScale = 1.0 + Math.sin(t * 3.2) * 0.15
-      flareOrb.scale.set(flareScale, flareScale, flareScale)
+      // Cup hovering & slow majestic rotation
+      cupGroup.position.y = Math.sin(t * 1.4) * 0.22
+      cupGroup.rotation.y = t * 0.12
+      cupGroup.rotation.z = -0.08 + Math.sin(t * 0.8) * 0.025
 
       // Ring Rotations
       ring1Group.rotation.z = t * 0.35
@@ -331,10 +341,13 @@ export function SweepingRibbons3D() {
       resizeObserver.disconnect()
 
       renderer.dispose()
-      coreGeo.dispose()
-      cageGeo.dispose()
-      seamGeo.dispose()
-      flareGeo.dispose()
+      cupBodyGeo.dispose()
+      cupBaseGeo.dispose()
+      cupRimGeo.dispose()
+      lidBaseGeo.dispose()
+      lidShelfGeo.dispose()
+      lidCapGeo.dispose()
+      spoutGeo.dispose()
       ring1Geo.dispose()
       ring2Geo.dispose()
       ring3Geo.dispose()
@@ -345,12 +358,10 @@ export function SweepingRibbons3D() {
 
       goldMetalMat.dispose()
       champagneGoldMat.dispose()
-      obsidianMat.dispose()
-      wireMat.dispose()
-      seamMat.dispose()
+      cupMat.dispose()
+      lidMat.dispose()
       beadMat.dispose()
       collarMat.dispose()
-      flareMat.dispose()
       starMat.dispose()
     }
   }, [])
