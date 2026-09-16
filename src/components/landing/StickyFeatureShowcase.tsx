@@ -1,5 +1,11 @@
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useRef, useEffect } from 'react'
+import {
+  motion,
+  useScroll,
+  useTransform,
+  useMotionValueEvent,
+  useReducedMotion,
+} from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
 import { InteractiveDotGrid } from './InteractiveDotGrid'
 
@@ -459,232 +465,399 @@ function MobileLayout() {
 
 export function StickyFeatureShowcase() {
   const [activeStep, setActiveStep] = useState(0)
-  const [isPaused, setIsPaused] = useState(false)
+  const shouldReduceMotion = useReducedMotion()
 
-  // Subtle auto-advance every 7 seconds (pauses on hover)
-  useEffect(() => {
-    if (isPaused) return
-    const timer = setInterval(() => {
-      setActiveStep((prev) => (prev + 1) % FEATURES.length)
-    }, 7000)
-    return () => clearInterval(timer)
-  }, [isPaused])
+  // sectionRef on the outer runway
+  const sectionRef = useRef<HTMLElement>(null)
 
-  const activeFeature = FEATURES[activeStep]
+  const { scrollYProgress } = useScroll({
+    target: sectionRef,
+    offset: ['start start', 'end end'],
+  })
+
+  // ── 1. Idea 1: Apple-Style Opaque Stacking Deck (Right Column) ─────────────
+  // Card 0: Base card. Scales down slightly & dims as Card 1 slides over it.
+  const cardScale0 = useTransform(scrollYProgress, [0.18, 0.44], [1, shouldReduceMotion ? 1 : 0.95])
+  const cardY0 = useTransform(scrollYProgress, [0.18, 0.44], [0, shouldReduceMotion ? 0 : -18])
+  const cardDim0 = useTransform(scrollYProgress, [0.18, 0.44], [0, 0.45])
+
+  // Card 1: Slides UP from y: 540px to 0px, solid opaque, covering Card 0.
+  const cardY1 = useTransform(
+    scrollYProgress,
+    [0, 0.18, 0.44, 0.58, 0.84],
+    [540, 540, 0, 0, shouldReduceMotion ? 0 : -18]
+  )
+  const cardScale1 = useTransform(scrollYProgress, [0.58, 0.84], [1, shouldReduceMotion ? 1 : 0.95])
+  const cardDim1 = useTransform(scrollYProgress, [0.58, 0.84], [0, 0.45])
+
+  // Card 2: Slides UP from y: 540px to 0px, solid opaque, covering Card 1.
+  const cardY2 = useTransform(
+    scrollYProgress,
+    [0, 0.58, 0.84, 1],
+    [540, 540, 0, 0]
+  )
+
+  // ── 2. Non-Overlapping Vertical Reel Track (Left Column) ───────────────────
+  // Translates each slide cleanly out of view so text NEVER overlaps in place
+  const reelY = useTransform(
+    scrollYProgress,
+    [0, 0.18, 0.44, 0.58, 0.84, 1],
+    [0, 0, -360, -360, -720, -720]
+  )
+
+  const slideOpacity0 = useTransform(scrollYProgress, [0, 0.18, 0.42], [1, 1, 0.05])
+  const slideOpacity1 = useTransform(scrollYProgress, [0.20, 0.44, 0.58, 0.82], [0.05, 1, 1, 0.05])
+  const slideOpacity2 = useTransform(scrollYProgress, [0.60, 0.84, 1], [0.05, 1, 1])
+
+  const slideOpacities = [slideOpacity0, slideOpacity1, slideOpacity2]
+
+  useMotionValueEvent(scrollYProgress, 'change', (v) => {
+    let next = 0
+    if (v >= 0.58) {
+      next = 2
+    } else if (v >= 0.22) {
+      next = 1
+    } else {
+      next = 0
+    }
+    setActiveStep(prev => (prev !== next ? next : prev))
+  })
+
+  function scrollToStep(i: number) {
+    if (!sectionRef.current) return
+    const rect = sectionRef.current.getBoundingClientRect()
+    const scrollTop = window.scrollY + rect.top
+    const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
+    const targetPercent = i === 0 ? 0.06 : i === 1 ? 0.51 : 0.94
+    window.scrollTo({
+      top: scrollTop + targetPercent * scrollableHeight,
+      behavior: 'smooth',
+    })
+  }
 
   return (
     <>
       {/* ── Mobile layout ── */}
       <MobileLayout />
 
-      {/* ── Desktop layout (Natural scroll flow, no scroll hijacking) ── */}
+      {/* ── Desktop layout ── */}
       <section
+        ref={sectionRef}
         id="capabilities-section"
-        onMouseEnter={() => setIsPaused(true)}
-        onMouseLeave={() => setIsPaused(false)}
-        className="hidden md:block relative bg-white text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200 py-16 lg:py-20 px-6 sm:px-10 lg:px-14 overflow-hidden"
+        className="scroll-story-section hidden md:block"
+        style={{
+          position: 'relative',
+          height: '380vh',
+          width: '100%',
+          backgroundColor: 'transparent',
+        }}
       >
-        {/* Subtle Warm Ambient Glow */}
-        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-orange-100/35 rounded-full blur-3xl pointer-events-none" />
+        <div
+          className="scroll-story-screen text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200"
+          style={{
+            position: 'sticky',
+            top: 0,
+            height: '100vh',
+            width: '100%',
+            overflow: 'hidden',
+            backgroundColor: '#FFFFFF',
+            zIndex: 30,
+          }}
+        >
+          {/* Subtle Warm Ambient Glow behind the dots */}
+          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-orange-100/35 rounded-full blur-3xl pointer-events-none" />
 
-        {/* Interactive Separating Dot Grid Canvas on White */}
-        <InteractiveDotGrid
-          dotColor="rgba(30, 41, 59, 0.16)"
-          glowColor="rgba(217, 119, 6, 0.95)"
-        />
+          {/* Interactive Separating Dot Grid Canvas on White */}
+          <InteractiveDotGrid
+            dotColor="rgba(30, 41, 59, 0.16)"
+            glowColor="rgba(217, 119, 6, 0.95)"
+          />
 
-        <div className="relative z-10 max-w-7xl mx-auto space-y-8">
-          {/* ── Top Header Bar ── */}
-          <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-4 border-b border-slate-200/80 gap-4">
-            <div>
-              <div className="flex items-center gap-2 mb-1.5">
-                <span className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]" />
-                <span className="font-sans text-xs font-semibold tracking-wider text-amber-700 uppercase">
-                  WHY RANDOMCOFFEE
-                </span>
-              </div>
-              <h2 className="font-display font-medium text-2xl lg:text-3xl text-slate-900 leading-tight">
-                Executive speed without the networking complexity
-              </h2>
-            </div>
+          <div
+            className="scroll-story-inner"
+            style={{
+              position: 'relative',
+              zIndex: 10,
+              paddingTop: '6rem',
+              paddingBottom: '2.5rem',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              height: '100%',
+              boxSizing: 'border-box',
+            }}
+          >
+            <div style={{ width: '100%', maxWidth: '76rem', margin: '0 auto', padding: '0 3rem' }}>
 
-            {/* Step Counter Pills */}
-            <div className="flex items-center gap-2 text-xs font-sans text-slate-500 shrink-0">
-              <span>Feature</span>
-              <span className="font-bold text-slate-900">{activeStep + 1}</span>
-              <span>of</span>
-              <span className="font-bold text-slate-900">{FEATURES.length}</span>
-            </div>
-          </div>
+              {/* ── Top header row ── */}
+              <div style={{
+                display: 'flex',
+                alignItems: 'flex-end',
+                justifyContent: 'space-between',
+                paddingBottom: '0.85rem',
+                marginBottom: '1.25rem',
+                borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
+              }}>
+                <div>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
+                    <span style={{ height: 7, width: 7, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b', display: 'inline-block' }} />
+                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: '#b45309', textTransform: 'uppercase' }}>
+                      WHY RANDOMCOFFEE
+                    </span>
+                  </div>
+                  <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 'clamp(1.15rem, 1.6vw, 1.45rem)', color: '#0f172a', lineHeight: 1.25, margin: 0 }}>
+                    Executive speed without the networking complexity
+                  </h2>
+                </div>
 
-          {/* ── 3-Tab Segmented Selector ── */}
-          <div className="grid grid-cols-3 gap-3 p-1.5 rounded-2xl bg-slate-100/80 border border-slate-200/90 shadow-inner">
-            {FEATURES.map((f, i) => {
-              const isCurrent = activeStep === i
-              return (
-                <button
-                  key={f.num}
-                  type="button"
-                  onClick={() => setActiveStep(i)}
-                  className={`relative flex items-center justify-between p-3.5 rounded-xl text-left transition-all duration-300 cursor-pointer overflow-hidden ${
-                    isCurrent
-                      ? 'bg-white text-slate-950 font-semibold shadow-md border border-amber-500/40 ring-1 ring-amber-500/20'
-                      : 'text-slate-600 hover:text-slate-950 hover:bg-white/60 border border-transparent'
-                  }`}
-                >
-                  <div className="flex items-center gap-2.5 min-w-0">
-                    <span
-                      className={`font-sans text-[11px] font-bold px-2 py-0.5 rounded transition-colors shrink-0 ${
-                        isCurrent ? 'bg-amber-500 text-black shadow-sm' : 'bg-slate-200 text-slate-700'
-                      }`}
+                {/* Progress indicator: 01 02 03 */}
+                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
+                  {FEATURES.map((f, i) => (
+                    <button
+                      key={f.num}
+                      type="button"
+                      onClick={() => scrollToStep(i)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 3,
+                        opacity: i === activeStep ? 1 : 0.4,
+                        transition: 'opacity 0.3s, transform 0.2s',
+                        background: 'none',
+                        border: 'none',
+                        padding: '4px 6px',
+                        cursor: 'pointer',
+                      }}
+                      className="hover:scale-105"
+                      aria-label={`Jump to step ${f.num}: ${f.subtitle}`}
                     >
-                      {f.num}
-                    </span>
-                    <div className="min-w-0">
-                      <div className="text-xs sm:text-sm font-display font-semibold truncate">
-                        {f.title}
-                      </div>
-                      <div className="text-[10.5px] font-sans text-slate-400 truncate">
-                        {f.tag}
-                      </div>
-                    </div>
-                  </div>
+                      <span style={{
+                        fontFamily: 'var(--font-display)',
+                        fontSize: 13,
+                        fontWeight: 700,
+                        color: i === activeStep ? '#d97706' : '#94a3b8',
+                        transition: 'color 0.3s',
+                      }}>
+                        {f.num}
+                      </span>
+                      <span style={{
+                        height: 2.5,
+                        width: i === activeStep ? 24 : 8,
+                        borderRadius: 99,
+                        background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#e2e8f0',
+                        transition: 'all 0.4s',
+                        display: 'block',
+                      }} />
+                      <span style={{
+                        fontFamily: 'var(--font-sans)',
+                        fontSize: 9,
+                        fontWeight: 500,
+                        letterSpacing: '0.06em',
+                        color: '#64748b',
+                        textTransform: 'uppercase',
+                        display: i === activeStep ? 'block' : 'none',
+                      }}>
+                        {f.subtitle}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
-                  {isCurrent && (
-                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 ml-2 animate-pulse" />
-                  )}
+              {/* ── Two-column body ── */}
+              <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '2.5rem', alignItems: 'center' }}>
 
-                  {/* Subtle auto-advance progress timer line on active tab */}
-                  {isCurrent && !isPaused && (
-                    <motion.div
-                      key={`timer-${activeStep}`}
-                      initial={{ width: '0%' }}
-                      animate={{ width: '100%' }}
-                      transition={{ duration: 7, ease: 'linear' }}
-                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500"
-                    />
-                  )}
-                </button>
-              )
-            })}
-          </div>
-
-          {/* ── Two-Column Command Showcase ── */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
-            {/* LEFT COLUMN: Feature Information */}
-            <div className="lg:col-span-5">
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`content-${activeStep}`}
-                  initial={{ opacity: 0, x: -14 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: 14 }}
-                  transition={{ duration: 0.3, ease: 'easeOut' }}
-                  className="rounded-3xl bg-slate-50/60 border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-5"
-                >
-                  {/* Step Tag */}
-                  <div className="flex items-center gap-2">
-                    <span className="font-sans text-[11px] font-bold px-2.5 py-0.5 rounded bg-amber-500 text-black">
-                      {activeFeature.num} / 03
-                    </span>
-                    <span className="font-sans text-[11px] tracking-wider uppercase font-semibold text-amber-700">
-                      {activeFeature.tag}
-                    </span>
-                  </div>
-
-                  {/* Title & Subtitle */}
-                  <div>
-                    <h3 className="font-display font-semibold text-2xl sm:text-3xl text-slate-900 leading-tight">
-                      {activeFeature.title}
-                    </h3>
-                    <p className="font-display font-medium text-sm text-amber-700 mt-1">
-                      {activeFeature.subtitle}
-                    </p>
-                  </div>
-
-                  {/* Description */}
-                  <p className="text-sm text-slate-600 leading-relaxed font-sans">
-                    {activeFeature.desc}
-                  </p>
-
-                  {/* 3 Metrics */}
-                  <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200">
-                    {activeFeature.metrics.map((m) => (
-                      <div key={m.label}>
-                        <div className="font-display font-bold text-slate-900 text-lg sm:text-xl">
-                          {m.value}
-                        </div>
-                        <div className="font-sans text-[10px] text-slate-500 tracking-wider uppercase mt-0.5 font-medium">
-                          {m.label}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-
-                  {/* Footnote */}
-                  <div className="flex items-start gap-2 text-xs text-slate-500 font-sans pt-1">
-                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5 animate-pulse" />
-                    <span>{activeFeature.footnote}</span>
-                  </div>
-
-                  {/* Controls */}
-                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/80">
-                    <div className="flex items-center gap-1.5">
-                      {FEATURES.map((_, i) => (
-                        <button
-                          key={i}
-                          type="button"
-                          onClick={() => setActiveStep(i)}
-                          className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
-                            activeStep === i ? 'w-6 bg-amber-500' : 'w-2 bg-slate-300 hover:bg-slate-400'
-                          }`}
-                          aria-label={`Go to slide ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-
-                    <div className="flex items-center gap-2">
-                      <button
-                        type="button"
-                        onClick={() =>
-                          setActiveStep((prev) => (prev > 0 ? prev - 1 : FEATURES.length - 1))
-                        }
-                        className="px-3 py-1 rounded-lg text-xs font-medium font-sans bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition cursor-pointer shadow-sm"
-                      >
-                        ← Prev
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => setActiveStep((prev) => (prev + 1) % FEATURES.length)}
-                        className="px-3 py-1 rounded-lg text-xs font-medium font-sans bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-sm"
-                      >
-                        Next →
-                      </button>
-                    </div>
-                  </div>
-                </motion.div>
-              </AnimatePresence>
-            </div>
-
-            {/* RIGHT COLUMN: Interactive Visual Stage */}
-            <div className="lg:col-span-7">
-              <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18] border border-slate-800">
-                <AnimatePresence mode="wait">
+                {/* LEFT COLUMN — vertical reel track (never overlaps in place) */}
+                <div style={{ position: 'relative', width: '100%', height: 360, overflow: 'hidden' }}>
                   <motion.div
-                    key={`panel-${activeStep}`}
-                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
-                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    style={{
+                      y: reelY,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      width: '100%',
+                      willChange: 'transform',
+                    }}
+                  >
+                    {FEATURES.map((f, idx) => (
+                      <motion.div
+                        key={f.num}
+                        style={{
+                          height: 360,
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          padding: '6px 0',
+                          boxSizing: 'border-box',
+                          opacity: slideOpacities[idx],
+                        }}
+                      >
+                        {/* Step tag */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            background: '#f59e0b',
+                            color: '#000',
+                          }}>
+                            {f.num} / 03
+                          </span>
+                          <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: 11,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            color: '#b45309',
+                            fontWeight: 600,
+                          }}>
+                            {f.tag}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <div>
+                          <h3 style={{
+                            fontFamily: 'var(--font-display)',
+                            fontWeight: 600,
+                            fontSize: 'clamp(1.35rem, 2vw, 1.75rem)',
+                            color: '#0f172a',
+                            lineHeight: 1.2,
+                            margin: 0,
+                          }}>
+                            {f.title}
+                          </h3>
+                          <p style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 13,
+                            color: '#b45309',
+                            fontWeight: 500,
+                            margin: '4px 0 0',
+                          }}>
+                            {f.subtitle}
+                          </p>
+                        </div>
+
+                        {/* Description */}
+                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
+                          {f.desc}
+                        </p>
+
+                        {/* Metrics */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: 8,
+                          paddingTop: 12,
+                          borderTop: '1px solid #e2e8f0',
+                        }}>
+                          {f.metrics.map(m => (
+                            <div key={m.label}>
+                              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
+                                {m.value}
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
+                                {m.label}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Footnote */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
+                          <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
+                          <span>{f.footnote}</span>
+                        </div>
+
+                        {/* Scroll hint */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 2 }}>
+                          {FEATURES.map((_, i) => (
+                            <span key={i} style={{
+                              height: 2.5,
+                              width: i === idx ? 22 : i < idx ? 12 : 5,
+                              borderRadius: 99,
+                              background: i === idx ? '#f59e0b' : i < idx ? '#fcd34d' : '#e2e8f0',
+                              transition: 'all 0.5s',
+                              display: 'inline-block',
+                            }} />
+                          ))}
+                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
+                            {idx === 2 ? '3 / 3 — explore room' : `${idx + 1} / 3 — scroll ↓`}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
+
+                {/* RIGHT COLUMN — Apple-Style Opaque Stacking Deck */}
+                <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18]">
+                  {/* Card 0: Benchmark (Base layer) */}
+                  <motion.div
+                    style={{
+                      y: cardY0,
+                      scale: cardScale0,
+                      position: 'absolute',
+                      inset: 0,
+                      zIndex: 10,
+                      pointerEvents: activeStep === 0 ? 'auto' : 'none',
+                      willChange: 'transform',
+                    }}
                     className="w-full h-full"
                   >
-                    {activeStep === 0 && <BenchmarkPanel />}
-                    {activeStep === 1 && <GlobePanel />}
-                    {activeStep === 2 && <VideoPanel />}
+                    <BenchmarkPanel />
+                    {/* Ambient depth dimming when Card 1 covers it */}
+                    <motion.div
+                      style={{ opacity: cardDim0 }}
+                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
+                    />
                   </motion.div>
-                </AnimatePresence>
+
+                  {/* Card 1: Globe / Mesh (Slides up over Card 0) */}
+                  <motion.div
+                    style={{
+                      y: cardY1,
+                      scale: cardScale1,
+                      position: 'absolute',
+                      inset: 0,
+                      zIndex: 20,
+                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
+                      pointerEvents: activeStep === 1 ? 'auto' : 'none',
+                      willChange: 'transform',
+                    }}
+                    className="w-full h-full rounded-2xl overflow-hidden"
+                  >
+                    <GlobePanel />
+                    {/* Ambient depth dimming when Card 2 covers it */}
+                    <motion.div
+                      style={{ opacity: cardDim1 }}
+                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
+                    />
+                  </motion.div>
+
+                  {/* Card 2: Video Room (Slides up over Card 1) */}
+                  <motion.div
+                    style={{
+                      y: cardY2,
+                      position: 'absolute',
+                      inset: 0,
+                      zIndex: 30,
+                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
+                      pointerEvents: activeStep === 2 ? 'auto' : 'none',
+                      willChange: 'transform',
+                    }}
+                    className="w-full h-full rounded-2xl overflow-hidden"
+                  >
+                    <VideoPanel />
+                  </motion.div>
+                </div>
+
               </div>
+
             </div>
           </div>
         </div>
