@@ -24,7 +24,8 @@ export function LandingPage() {
     if (section === 'roles') {
       const el = document.getElementById('executive-roles')
       if (el) {
-        el.scrollIntoView({ behavior: 'smooth', block: 'start' })
+        const targetTop = el.getBoundingClientRect().top + window.scrollY - 36
+        window.scrollTo({ top: Math.max(0, targetTop), behavior: 'smooth' })
       }
       return
     }
