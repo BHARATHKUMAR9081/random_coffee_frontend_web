@@ -467,7 +467,7 @@ export function StickyFeatureShowcase() {
   const [activeStep, setActiveStep] = useState(0)
   const shouldReduceMotion = useReducedMotion()
 
-  // sectionRef goes on the OUTER 480vh element — generous runway prevents early unpinning
+  // sectionRef on the outer runway
   const sectionRef = useRef<HTMLElement>(null)
 
   const { scrollYProgress } = useScroll({
@@ -475,56 +475,47 @@ export function StickyFeatureShowcase() {
     offset: ['start start', 'end end'],
   })
 
-  // ── 1. Real-Time Card Transforms (Right Column 3D Deck) ───────────────────
-  // Card 0 (Sub-Second Matching): visible at start, smoothly exits in real time as user scrolls
-  const cardOpacity0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [1, 1, 0])
-  const cardY0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [0, 0, shouldReduceMotion ? 0 : -45])
-  const cardScale0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [1, 1, shouldReduceMotion ? 1 : 0.94])
-  const cardRotateX0 = useTransform(scrollYProgress, [0, 0.08, 0.38], [0, 0, shouldReduceMotion ? 0 : -5])
+  // ── 1. Idea 1: Apple-Style Opaque Stacking Deck (Right Column) ─────────────
+  // Card 0: Base card. Scales down slightly & dims as Card 1 slides over it.
+  const cardScale0 = useTransform(scrollYProgress, [0.18, 0.44], [1, shouldReduceMotion ? 1 : 0.95])
+  const cardY0 = useTransform(scrollYProgress, [0.18, 0.44], [0, shouldReduceMotion ? 0 : -18])
+  const cardDim0 = useTransform(scrollYProgress, [0.18, 0.44], [0, 0.45])
 
-  // Card 1 (Global Executive Mesh): arrives from below in real time between 1 & 2, rests, then exits
-  const cardOpacity1 = useTransform(scrollYProgress, [0.08, 0.38, 0.62, 0.92], [0, 1, 1, 0])
+  // Card 1: Slides UP from y: 540px to 0px, solid opaque, covering Card 0.
   const cardY1 = useTransform(
     scrollYProgress,
-    [0.08, 0.38, 0.62, 0.92],
-    [shouldReduceMotion ? 0 : 65, 0, 0, shouldReduceMotion ? 0 : -45]
+    [0, 0.18, 0.44, 0.58, 0.84],
+    [540, 540, 0, 0, shouldReduceMotion ? 0 : -18]
   )
-  const cardScale1 = useTransform(
+  const cardScale1 = useTransform(scrollYProgress, [0.58, 0.84], [1, shouldReduceMotion ? 1 : 0.95])
+  const cardDim1 = useTransform(scrollYProgress, [0.58, 0.84], [0, 0.45])
+
+  // Card 2: Slides UP from y: 540px to 0px, solid opaque, covering Card 1.
+  const cardY2 = useTransform(
     scrollYProgress,
-    [0.08, 0.38, 0.62, 0.92],
-    [shouldReduceMotion ? 1 : 0.94, 1, 1, shouldReduceMotion ? 1 : 0.94]
+    [0, 0.58, 0.84, 1],
+    [540, 540, 0, 0]
   )
-  const cardRotateX1 = useTransform(
+
+  // ── 2. Non-Overlapping Vertical Reel Track (Left Column) ───────────────────
+  // Translates each slide cleanly out of view so text NEVER overlaps in place
+  const reelY = useTransform(
     scrollYProgress,
-    [0.08, 0.38, 0.62, 0.92],
-    [shouldReduceMotion ? 0 : 5, 0, 0, shouldReduceMotion ? 0 : -5]
+    [0, 0.18, 0.44, 0.58, 0.84, 1],
+    [0, 0, -360, -360, -720, -720]
   )
 
-  // Card 2 (Zero-Download WebRTC): arrives from below in real time between 2 & 3, rests until section unpins
-  const cardOpacity2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [0, 1, 1])
-  const cardY2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 0 : 65, 0, 0])
-  const cardScale2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 1 : 0.94, 1, 1])
-  const cardRotateX2 = useTransform(scrollYProgress, [0.62, 0.92, 1], [shouldReduceMotion ? 0 : 5, 0, 0])
+  const slideOpacity0 = useTransform(scrollYProgress, [0, 0.18, 0.42], [1, 1, 0.05])
+  const slideOpacity1 = useTransform(scrollYProgress, [0.20, 0.44, 0.58, 0.82], [0.05, 1, 1, 0.05])
+  const slideOpacity2 = useTransform(scrollYProgress, [0.60, 0.84, 1], [0.05, 1, 1])
 
-  // ── 2. Real-Time Text Transforms (Left Column) ─────────────────────────────
-  const textOpacity0 = useTransform(scrollYProgress, [0, 0.08, 0.36], [1, 1, 0])
-  const textY0 = useTransform(scrollYProgress, [0, 0.08, 0.36], [0, 0, shouldReduceMotion ? 0 : -25])
-
-  const textOpacity1 = useTransform(scrollYProgress, [0.10, 0.38, 0.62, 0.90], [0, 1, 1, 0])
-  const textY1 = useTransform(
-    scrollYProgress,
-    [0.10, 0.38, 0.62, 0.90],
-    [shouldReduceMotion ? 0 : 25, 0, 0, shouldReduceMotion ? 0 : -25]
-  )
-
-  const textOpacity2 = useTransform(scrollYProgress, [0.64, 0.92, 1], [0, 1, 1])
-  const textY2 = useTransform(scrollYProgress, [0.64, 0.92, 1], [shouldReduceMotion ? 0 : 25, 0, 0])
+  const slideOpacities = [slideOpacity0, slideOpacity1, slideOpacity2]
 
   useMotionValueEvent(scrollYProgress, 'change', (v) => {
     let next = 0
-    if (v >= 0.62) {
+    if (v >= 0.58) {
       next = 2
-    } else if (v >= 0.23) {
+    } else if (v >= 0.22) {
       next = 1
     } else {
       next = 0
@@ -537,18 +528,12 @@ export function StickyFeatureShowcase() {
     const rect = sectionRef.current.getBoundingClientRect()
     const scrollTop = window.scrollY + rect.top
     const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
-    const targetPercent = i === 0 ? 0.05 : i === 1 ? 0.50 : 0.95
+    const targetPercent = i === 0 ? 0.06 : i === 1 ? 0.51 : 0.94
     window.scrollTo({
       top: scrollTop + targetPercent * scrollableHeight,
       behavior: 'smooth',
     })
   }
-
-  const textConfigs = [
-    { f: FEATURES[0], opacity: textOpacity0, y: textY0, idx: 0 },
-    { f: FEATURES[1], opacity: textOpacity1, y: textY1, idx: 1 },
-    { f: FEATURES[2], opacity: textOpacity2, y: textY2, idx: 2 },
-  ]
 
   return (
     <>
@@ -562,7 +547,7 @@ export function StickyFeatureShowcase() {
         className="scroll-story-section hidden md:block"
         style={{
           position: 'relative',
-          height: '480vh',
+          height: '380vh',
           width: '100%',
           backgroundColor: 'transparent',
         }}
@@ -684,173 +669,188 @@ export function StickyFeatureShowcase() {
               {/* ── Two-column body ── */}
               <div style={{ display: 'grid', gridTemplateColumns: '5fr 7fr', gap: '2.5rem', alignItems: 'center' }}>
 
-                {/* LEFT COLUMN — real-time continuous scroll cross-fade */}
-                <div style={{ position: 'relative', width: '100%', minHeight: 330 }}>
-                  {textConfigs.map(({ f, opacity, y, idx }) => (
-                    <motion.div
-                      key={f.num}
-                      style={{
-                        opacity,
-                        y,
-                        position: 'absolute',
-                        inset: 0,
-                        pointerEvents: activeStep === idx ? 'auto' : 'none',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 12,
-                      }}
-                    >
-                      {/* Step tag */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-                        <span style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 11,
-                          fontWeight: 600,
-                          padding: '2px 8px',
-                          borderRadius: 4,
-                          background: '#f59e0b',
-                          color: '#000',
-                        }}>
-                          {f.num} / 03
-                        </span>
-                        <span style={{
-                          fontFamily: 'var(--font-sans)',
-                          fontSize: 11,
-                          letterSpacing: '0.08em',
-                          textTransform: 'uppercase',
-                          color: '#b45309',
-                          fontWeight: 600,
-                        }}>
-                          {f.tag}
-                        </span>
-                      </div>
-
-                      {/* Title */}
-                      <div>
-                        <h3 style={{
-                          fontFamily: 'var(--font-display)',
-                          fontWeight: 600,
-                          fontSize: 'clamp(1.35rem, 2vw, 1.75rem)',
-                          color: '#0f172a',
-                          lineHeight: 1.2,
-                          margin: 0,
-                        }}>
-                          {f.title}
-                        </h3>
-                        <p style={{
-                          fontFamily: 'var(--font-display)',
-                          fontSize: 13,
-                          color: '#b45309',
-                          fontWeight: 500,
-                          margin: '4px 0 0',
-                        }}>
-                          {f.subtitle}
-                        </p>
-                      </div>
-
-                      {/* Description */}
-                      <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
-                        {f.desc}
-                      </p>
-
-                      {/* Metrics */}
-                      <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(3, 1fr)',
-                        gap: 8,
-                        paddingTop: 12,
-                        borderTop: '1px solid #e2e8f0',
-                      }}>
-                        {f.metrics.map(m => (
-                          <div key={m.label}>
-                            <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
-                              {m.value}
-                            </div>
-                            <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
-                              {m.label}
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-
-                      {/* Footnote */}
-                      <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
-                        <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
-                        <span>{f.footnote}</span>
-                      </div>
-
-                      {/* Scroll hint */}
-                      <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 2 }}>
-                        {FEATURES.map((_, i) => (
-                          <span key={i} style={{
-                            height: 2.5,
-                            width: i === idx ? 22 : i < idx ? 12 : 5,
-                            borderRadius: 99,
-                            background: i === idx ? '#f59e0b' : i < idx ? '#fcd34d' : '#e2e8f0',
-                            transition: 'all 0.5s',
-                            display: 'inline-block',
-                          }} />
-                        ))}
-                        <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
-                          {idx === 2 ? '3 / 3 — explore room' : `${idx + 1} / 3 — scroll ↓`}
-                        </span>
-                      </div>
-                    </motion.div>
-                  ))}
-                </div>
-
-                {/* RIGHT COLUMN — visual 3D stacked deck driven in real time by scroll */}
-                <div className="w-full h-[520px] sm:h-[540px] relative" style={{ perspective: 1200 }}>
-                  {/* Card 0: Benchmark */}
+                {/* LEFT COLUMN — vertical reel track (never overlaps in place) */}
+                <div style={{ position: 'relative', width: '100%', height: 360, overflow: 'hidden' }}>
                   <motion.div
                     style={{
-                      opacity: cardOpacity0,
+                      y: reelY,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      width: '100%',
+                      willChange: 'transform',
+                    }}
+                  >
+                    {FEATURES.map((f, idx) => (
+                      <motion.div
+                        key={f.num}
+                        style={{
+                          height: 360,
+                          width: '100%',
+                          display: 'flex',
+                          flexDirection: 'column',
+                          justifyContent: 'space-between',
+                          padding: '6px 0',
+                          boxSizing: 'border-box',
+                          opacity: slideOpacities[idx],
+                        }}
+                      >
+                        {/* Step tag */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+                          <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: 11,
+                            fontWeight: 600,
+                            padding: '2px 8px',
+                            borderRadius: 4,
+                            background: '#f59e0b',
+                            color: '#000',
+                          }}>
+                            {f.num} / 03
+                          </span>
+                          <span style={{
+                            fontFamily: 'var(--font-sans)',
+                            fontSize: 11,
+                            letterSpacing: '0.08em',
+                            textTransform: 'uppercase',
+                            color: '#b45309',
+                            fontWeight: 600,
+                          }}>
+                            {f.tag}
+                          </span>
+                        </div>
+
+                        {/* Title */}
+                        <div>
+                          <h3 style={{
+                            fontFamily: 'var(--font-display)',
+                            fontWeight: 600,
+                            fontSize: 'clamp(1.35rem, 2vw, 1.75rem)',
+                            color: '#0f172a',
+                            lineHeight: 1.2,
+                            margin: 0,
+                          }}>
+                            {f.title}
+                          </h3>
+                          <p style={{
+                            fontFamily: 'var(--font-display)',
+                            fontSize: 13,
+                            color: '#b45309',
+                            fontWeight: 500,
+                            margin: '4px 0 0',
+                          }}>
+                            {f.subtitle}
+                          </p>
+                        </div>
+
+                        {/* Description */}
+                        <p style={{ fontSize: 13, color: '#475569', lineHeight: 1.6, margin: 0, fontFamily: 'var(--font-sans)' }}>
+                          {f.desc}
+                        </p>
+
+                        {/* Metrics */}
+                        <div style={{
+                          display: 'grid',
+                          gridTemplateColumns: 'repeat(3, 1fr)',
+                          gap: 8,
+                          paddingTop: 12,
+                          borderTop: '1px solid #e2e8f0',
+                        }}>
+                          {f.metrics.map(m => (
+                            <div key={m.label}>
+                              <div style={{ fontFamily: 'var(--font-display)', fontWeight: 700, fontSize: 'clamp(1.05rem, 1.5vw, 1.35rem)', color: '#0f172a' }}>
+                                {m.value}
+                              </div>
+                              <div style={{ fontFamily: 'var(--font-sans)', fontSize: 9.5, color: '#64748b', letterSpacing: '0.05em', textTransform: 'uppercase', marginTop: 2, fontWeight: 500 }}>
+                                {m.label}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+
+                        {/* Footnote */}
+                        <div style={{ display: 'flex', alignItems: 'flex-start', gap: 6, fontSize: 11.5, color: '#64748b', fontFamily: 'var(--font-sans)' }}>
+                          <span style={{ height: 7, width: 7, marginTop: 3, borderRadius: '50%', background: '#22c55e', flexShrink: 0, animation: 'pulse 2s infinite' }} />
+                          <span>{f.footnote}</span>
+                        </div>
+
+                        {/* Scroll hint */}
+                        <div style={{ display: 'flex', alignItems: 'center', gap: 6, paddingTop: 2 }}>
+                          {FEATURES.map((_, i) => (
+                            <span key={i} style={{
+                              height: 2.5,
+                              width: i === idx ? 22 : i < idx ? 12 : 5,
+                              borderRadius: 99,
+                              background: i === idx ? '#f59e0b' : i < idx ? '#fcd34d' : '#e2e8f0',
+                              transition: 'all 0.5s',
+                              display: 'inline-block',
+                            }} />
+                          ))}
+                          <span style={{ fontFamily: 'var(--font-sans)', fontSize: 10.5, color: '#94a3b8', marginLeft: 4 }}>
+                            {idx === 2 ? '3 / 3 — explore room' : `${idx + 1} / 3 — scroll ↓`}
+                          </span>
+                        </div>
+                      </motion.div>
+                    ))}
+                  </motion.div>
+                </div>
+
+                {/* RIGHT COLUMN — Apple-Style Opaque Stacking Deck */}
+                <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18]">
+                  {/* Card 0: Benchmark (Base layer) */}
+                  <motion.div
+                    style={{
                       y: cardY0,
                       scale: cardScale0,
-                      rotateX: cardRotateX0,
                       position: 'absolute',
                       inset: 0,
+                      zIndex: 10,
                       pointerEvents: activeStep === 0 ? 'auto' : 'none',
-                      transformStyle: 'preserve-3d',
-                      willChange: 'transform, opacity',
+                      willChange: 'transform',
                     }}
                     className="w-full h-full"
                   >
                     <BenchmarkPanel />
+                    {/* Ambient depth dimming when Card 1 covers it */}
+                    <motion.div
+                      style={{ opacity: cardDim0 }}
+                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
+                    />
                   </motion.div>
 
-                  {/* Card 1: Globe / Mesh */}
+                  {/* Card 1: Globe / Mesh (Slides up over Card 0) */}
                   <motion.div
                     style={{
-                      opacity: cardOpacity1,
                       y: cardY1,
                       scale: cardScale1,
-                      rotateX: cardRotateX1,
                       position: 'absolute',
                       inset: 0,
+                      zIndex: 20,
+                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
                       pointerEvents: activeStep === 1 ? 'auto' : 'none',
-                      transformStyle: 'preserve-3d',
-                      willChange: 'transform, opacity',
+                      willChange: 'transform',
                     }}
-                    className="w-full h-full"
+                    className="w-full h-full rounded-2xl overflow-hidden"
                   >
                     <GlobePanel />
+                    {/* Ambient depth dimming when Card 2 covers it */}
+                    <motion.div
+                      style={{ opacity: cardDim1 }}
+                      className="absolute inset-0 bg-black/60 pointer-events-none rounded-2xl z-20"
+                    />
                   </motion.div>
 
-                  {/* Card 2: Video Room */}
+                  {/* Card 2: Video Room (Slides up over Card 1) */}
                   <motion.div
                     style={{
-                      opacity: cardOpacity2,
                       y: cardY2,
-                      scale: cardScale2,
-                      rotateX: cardRotateX2,
                       position: 'absolute',
                       inset: 0,
+                      zIndex: 30,
+                      boxShadow: '0 -25px 50px -12px rgba(0,0,0,0.85)',
                       pointerEvents: activeStep === 2 ? 'auto' : 'none',
-                      transformStyle: 'preserve-3d',
-                      willChange: 'transform, opacity',
+                      willChange: 'transform',
                     }}
-                    className="w-full h-full"
+                    className="w-full h-full rounded-2xl overflow-hidden"
                   >
                     <VideoPanel />
                   </motion.div>
