@@ -1,10 +1,5 @@
-import { useState, useRef, useEffect } from 'react'
-import {
-  motion,
-  useScroll,
-  useMotionValueEvent,
-  AnimatePresence,
-} from 'framer-motion'
+import { useState, useEffect } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
 import { InteractiveDotGrid } from './InteractiveDotGrid'
 
@@ -464,313 +459,232 @@ function MobileLayout() {
 
 export function StickyFeatureShowcase() {
   const [activeStep, setActiveStep] = useState(0)
+  const [isPaused, setIsPaused] = useState(false)
 
-  // Section runway for scroll-driven progression
-  const sectionRef = useRef<HTMLElement>(null)
+  // Subtle auto-advance every 7 seconds (pauses on hover)
+  useEffect(() => {
+    if (isPaused) return
+    const timer = setInterval(() => {
+      setActiveStep((prev) => (prev + 1) % FEATURES.length)
+    }, 7000)
+    return () => clearInterval(timer)
+  }, [isPaused])
 
-  const { scrollYProgress } = useScroll({
-    target: sectionRef,
-    offset: ['start start', 'end end'],
-  })
-
-  // Synchronize active step with scroll progress
-  useMotionValueEvent(scrollYProgress, 'change', (v) => {
-    let next = 0
-    if (v >= 0.65) {
-      next = 2
-    } else if (v >= 0.32) {
-      next = 1
-    } else {
-      next = 0
-    }
-    setActiveStep((prev) => (prev !== next ? next : prev))
-  })
-
-  function scrollToStep(i: number) {
-    if (!sectionRef.current) return
-    const rect = sectionRef.current.getBoundingClientRect()
-    const scrollTop = window.scrollY + rect.top
-    const scrollableHeight = sectionRef.current.offsetHeight - window.innerHeight
-    const targetPercent = i === 0 ? 0.06 : i === 1 ? 0.48 : 0.92
-    window.scrollTo({
-      top: scrollTop + targetPercent * scrollableHeight,
-      behavior: 'smooth',
-    })
-    setActiveStep(i)
-  }
+  const activeFeature = FEATURES[activeStep]
 
   return (
     <>
       {/* ── Mobile layout ── */}
       <MobileLayout />
 
-      {/* ── Desktop layout ── */}
+      {/* ── Desktop layout (Natural scroll flow, no scroll hijacking) ── */}
       <section
-        ref={sectionRef}
         id="capabilities-section"
-        className="scroll-story-section hidden md:block"
-        style={{
-          position: 'relative',
-          height: '260vh',
-          width: '100%',
-          backgroundColor: 'transparent',
-        }}
+        onMouseEnter={() => setIsPaused(true)}
+        onMouseLeave={() => setIsPaused(false)}
+        className="hidden md:block relative bg-white text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200 py-16 lg:py-20 px-6 sm:px-10 lg:px-14 overflow-hidden"
       >
-        <div
-          className="scroll-story-screen text-slate-900 rounded-t-[3.5rem] shadow-[0_-25px_50px_-25px_rgba(0,0,0,0.06)] border-t border-slate-200"
-          style={{
-            position: 'sticky',
-            top: 0,
-            height: '100vh',
-            width: '100%',
-            overflow: 'hidden',
-            backgroundColor: '#FFFFFF',
-            zIndex: 30,
-          }}
-        >
-          {/* Subtle Warm Ambient Glow behind the dots */}
-          <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
-          <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-orange-100/35 rounded-full blur-3xl pointer-events-none" />
+        {/* Subtle Warm Ambient Glow */}
+        <div className="absolute top-1/4 -left-32 w-96 h-96 bg-amber-200/25 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute bottom-1/4 -right-32 w-96 h-96 bg-orange-100/35 rounded-full blur-3xl pointer-events-none" />
 
-          {/* Interactive Separating Dot Grid Canvas on White */}
-          <InteractiveDotGrid
-            dotColor="rgba(30, 41, 59, 0.16)"
-            glowColor="rgba(217, 119, 6, 0.95)"
-          />
+        {/* Interactive Separating Dot Grid Canvas on White */}
+        <InteractiveDotGrid
+          dotColor="rgba(30, 41, 59, 0.16)"
+          glowColor="rgba(217, 119, 6, 0.95)"
+        />
 
-          <div
-            className="scroll-story-inner"
-            style={{
-              position: 'relative',
-              zIndex: 10,
-              paddingTop: '6rem',
-              paddingBottom: '2.5rem',
-              display: 'flex',
-              flexDirection: 'column',
-              justifyContent: 'center',
-              height: '100%',
-              boxSizing: 'border-box',
-            }}
-          >
-            <div style={{ width: '100%', maxWidth: '76rem', margin: '0 auto', padding: '0 3rem' }}>
+        <div className="relative z-10 max-w-7xl mx-auto space-y-8">
+          {/* ── Top Header Bar ── */}
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between pb-4 border-b border-slate-200/80 gap-4">
+            <div>
+              <div className="flex items-center gap-2 mb-1.5">
+                <span className="h-2 w-2 rounded-full bg-amber-500 shadow-[0_0_8px_#f59e0b]" />
+                <span className="font-sans text-xs font-semibold tracking-wider text-amber-700 uppercase">
+                  WHY RANDOMCOFFEE
+                </span>
+              </div>
+              <h2 className="font-display font-medium text-2xl lg:text-3xl text-slate-900 leading-tight">
+                Executive speed without the networking complexity
+              </h2>
+            </div>
 
-              {/* ── Top header row ── */}
-              <div style={{
-                display: 'flex',
-                alignItems: 'flex-end',
-                justifyContent: 'space-between',
-                paddingBottom: '0.85rem',
-                marginBottom: '1.25rem',
-                borderBottom: '1px solid rgba(226, 232, 240, 0.9)',
-              }}>
-                <div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 7, marginBottom: 4 }}>
-                    <span style={{ height: 7, width: 7, borderRadius: '50%', background: '#f59e0b', boxShadow: '0 0 8px #f59e0b', display: 'inline-block' }} />
-                    <span style={{ fontFamily: 'var(--font-sans)', fontSize: 11, fontWeight: 600, letterSpacing: '0.08em', color: '#b45309', textTransform: 'uppercase' }}>
-                      WHY RANDOMCOFFEE
+            {/* Step Counter Pills */}
+            <div className="flex items-center gap-2 text-xs font-sans text-slate-500 shrink-0">
+              <span>Feature</span>
+              <span className="font-bold text-slate-900">{activeStep + 1}</span>
+              <span>of</span>
+              <span className="font-bold text-slate-900">{FEATURES.length}</span>
+            </div>
+          </div>
+
+          {/* ── 3-Tab Segmented Selector ── */}
+          <div className="grid grid-cols-3 gap-3 p-1.5 rounded-2xl bg-slate-100/80 border border-slate-200/90 shadow-inner">
+            {FEATURES.map((f, i) => {
+              const isCurrent = activeStep === i
+              return (
+                <button
+                  key={f.num}
+                  type="button"
+                  onClick={() => setActiveStep(i)}
+                  className={`relative flex items-center justify-between p-3.5 rounded-xl text-left transition-all duration-300 cursor-pointer overflow-hidden ${
+                    isCurrent
+                      ? 'bg-white text-slate-950 font-semibold shadow-md border border-amber-500/40 ring-1 ring-amber-500/20'
+                      : 'text-slate-600 hover:text-slate-950 hover:bg-white/60 border border-transparent'
+                  }`}
+                >
+                  <div className="flex items-center gap-2.5 min-w-0">
+                    <span
+                      className={`font-sans text-[11px] font-bold px-2 py-0.5 rounded transition-colors shrink-0 ${
+                        isCurrent ? 'bg-amber-500 text-black shadow-sm' : 'bg-slate-200 text-slate-700'
+                      }`}
+                    >
+                      {f.num}
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs sm:text-sm font-display font-semibold truncate">
+                        {f.title}
+                      </div>
+                      <div className="text-[10.5px] font-sans text-slate-400 truncate">
+                        {f.tag}
+                      </div>
+                    </div>
+                  </div>
+
+                  {isCurrent && (
+                    <span className="h-1.5 w-1.5 rounded-full bg-amber-500 shrink-0 ml-2 animate-pulse" />
+                  )}
+
+                  {/* Subtle auto-advance progress timer line on active tab */}
+                  {isCurrent && !isPaused && (
+                    <motion.div
+                      key={`timer-${activeStep}`}
+                      initial={{ width: '0%' }}
+                      animate={{ width: '100%' }}
+                      transition={{ duration: 7, ease: 'linear' }}
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-amber-400 to-amber-500"
+                    />
+                  )}
+                </button>
+              )
+            })}
+          </div>
+
+          {/* ── Two-Column Command Showcase ── */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center pt-2">
+            {/* LEFT COLUMN: Feature Information */}
+            <div className="lg:col-span-5">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={`content-${activeStep}`}
+                  initial={{ opacity: 0, x: -14 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  exit={{ opacity: 0, x: 14 }}
+                  transition={{ duration: 0.3, ease: 'easeOut' }}
+                  className="rounded-3xl bg-slate-50/60 border border-slate-200/80 p-6 sm:p-7 shadow-sm space-y-5"
+                >
+                  {/* Step Tag */}
+                  <div className="flex items-center gap-2">
+                    <span className="font-sans text-[11px] font-bold px-2.5 py-0.5 rounded bg-amber-500 text-black">
+                      {activeFeature.num} / 03
+                    </span>
+                    <span className="font-sans text-[11px] tracking-wider uppercase font-semibold text-amber-700">
+                      {activeFeature.tag}
                     </span>
                   </div>
-                  <h2 style={{ fontFamily: 'var(--font-display)', fontWeight: 500, fontSize: 'clamp(1.15rem, 1.6vw, 1.45rem)', color: '#0f172a', lineHeight: 1.25, margin: 0 }}>
-                    Executive speed without the networking complexity
-                  </h2>
-                </div>
 
-                {/* Progress indicator: 01 02 03 */}
-                <div style={{ display: 'flex', alignItems: 'center', gap: 16, flexShrink: 0 }}>
-                  {FEATURES.map((f, i) => (
-                    <button
-                      key={f.num}
-                      type="button"
-                      onClick={() => scrollToStep(i)}
-                      style={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        alignItems: 'center',
-                        gap: 3,
-                        opacity: i === activeStep ? 1 : 0.45,
-                        transition: 'opacity 0.3s, transform 0.2s',
-                        background: 'none',
-                        border: 'none',
-                        padding: '4px 6px',
-                        cursor: 'pointer',
-                      }}
-                      className="hover:scale-105"
-                      aria-label={`Jump to step ${f.num}: ${f.subtitle}`}
-                    >
-                      <span style={{
-                        fontFamily: 'var(--font-display)',
-                        fontSize: 13,
-                        fontWeight: 700,
-                        color: i === activeStep ? '#d97706' : '#94a3b8',
-                        transition: 'color 0.3s',
-                      }}>
-                        {f.num}
-                      </span>
-                      <span style={{
-                        height: 2.5,
-                        width: i === activeStep ? 24 : 8,
-                        borderRadius: 99,
-                        background: i === activeStep ? '#f59e0b' : i < activeStep ? '#fcd34d' : '#e2e8f0',
-                        transition: 'all 0.4s',
-                        display: 'block',
-                      }} />
-                      <span style={{
-                        fontFamily: 'var(--font-sans)',
-                        fontSize: 9,
-                        fontWeight: 500,
-                        letterSpacing: '0.06em',
-                        color: '#64748b',
-                        textTransform: 'uppercase',
-                        display: i === activeStep ? 'block' : 'none',
-                      }}>
-                        {f.subtitle}
-                      </span>
-                    </button>
-                  ))}
-                </div>
-              </div>
+                  {/* Title & Subtitle */}
+                  <div>
+                    <h3 className="font-display font-semibold text-2xl sm:text-3xl text-slate-900 leading-tight">
+                      {activeFeature.title}
+                    </h3>
+                    <p className="font-display font-medium text-sm text-amber-700 mt-1">
+                      {activeFeature.subtitle}
+                    </p>
+                  </div>
 
-              {/* ── Two-column body ── */}
-              <div style={{ display: 'grid', gridTemplateColumns: '5.2fr 6.8fr', gap: '2.5rem', alignItems: 'center' }}>
+                  {/* Description */}
+                  <p className="text-sm text-slate-600 leading-relaxed font-sans">
+                    {activeFeature.desc}
+                  </p>
 
-                {/* LEFT COLUMN — Stripe / Raycast Interactive Stepper Accordion */}
-                <div className="flex flex-col justify-between h-[520px] sm:h-[540px] gap-3">
-                  {FEATURES.map((f, idx) => {
-                    const isActive = activeStep === idx
-                    return (
-                      <div
-                        key={f.num}
-                        onClick={() => scrollToStep(idx)}
-                        className={`relative rounded-2xl transition-all duration-300 cursor-pointer border select-none overflow-hidden ${
-                          isActive
-                            ? 'bg-amber-500/[0.04] border-amber-500/40 shadow-[0_4px_24px_-6px_rgba(245,158,11,0.18)] ring-1 ring-amber-500/30'
-                            : 'bg-slate-50/70 hover:bg-slate-100/80 border-slate-200/80 hover:border-slate-300 opacity-65 hover:opacity-100'
-                        } p-3.5 sm:p-4 flex flex-col justify-between ${isActive ? 'flex-1' : 'shrink-0'}`}
-                      >
-                        {/* Active Ambient Glow */}
-                        {isActive && (
-                          <div className="absolute top-0 right-0 w-48 h-48 bg-amber-400/10 rounded-full blur-2xl pointer-events-none" />
-                        )}
-
-                        {/* Top Header Row */}
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2">
-                            <span
-                              className={`font-sans text-[11px] font-bold px-2 py-0.5 rounded transition-colors ${
-                                isActive
-                                  ? 'bg-amber-500 text-black shadow-[0_0_10px_rgba(245,158,11,0.4)]'
-                                  : 'bg-slate-200 text-slate-700'
-                              }`}
-                            >
-                              {f.num}
-                            </span>
-                            <span
-                              className={`font-sans text-[11px] tracking-wider uppercase font-semibold transition-colors ${
-                                isActive ? 'text-amber-700' : 'text-slate-500'
-                              }`}
-                            >
-                              {f.tag}
-                            </span>
-                          </div>
-
-                          <div className="flex items-center gap-1.5 text-xs">
-                            {isActive ? (
-                              <span className="flex items-center gap-1 text-[10.5px] font-sans text-amber-600 font-medium bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-                                <span className="h-1.5 w-1.5 rounded-full bg-amber-500 animate-pulse" />
-                                Active View
-                              </span>
-                            ) : (
-                              <span className="text-slate-400 text-[10.5px] font-sans group-hover:text-slate-600">
-                                Click to view →
-                              </span>
-                            )}
-                          </div>
+                  {/* 3 Metrics */}
+                  <div className="grid grid-cols-3 gap-3 pt-4 border-t border-slate-200">
+                    {activeFeature.metrics.map((m) => (
+                      <div key={m.label}>
+                        <div className="font-display font-bold text-slate-900 text-lg sm:text-xl">
+                          {m.value}
                         </div>
-
-                        {/* Title & Subtitle */}
-                        <div className={isActive ? 'mt-2' : 'mt-1'}>
-                          <h3
-                            className={`font-display font-semibold transition-all ${
-                              isActive
-                                ? 'text-lg sm:text-xl text-slate-900 leading-tight'
-                                : 'text-sm sm:text-base text-slate-800 leading-snug'
-                            }`}
-                          >
-                            {f.title}
-                          </h3>
-                          <p
-                            className={`font-display font-medium text-xs transition-colors ${
-                              isActive ? 'text-amber-700 mt-0.5' : 'text-slate-500'
-                            }`}
-                          >
-                            {f.subtitle}
-                          </p>
+                        <div className="font-sans text-[10px] text-slate-500 tracking-wider uppercase mt-0.5 font-medium">
+                          {m.label}
                         </div>
-
-                        {/* Expanded Details when Active */}
-                        {isActive && (
-                          <motion.div
-                            initial={{ opacity: 0, height: 0 }}
-                            animate={{ opacity: 1, height: 'auto' }}
-                            exit={{ opacity: 0, height: 0 }}
-                            transition={{ duration: 0.3, ease: 'easeOut' }}
-                            className="space-y-2.5 pt-2"
-                          >
-                            <p className="text-[12.5px] text-slate-600 leading-relaxed font-sans line-clamp-2">
-                              {f.desc}
-                            </p>
-
-                            {/* Metrics */}
-                            <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-200/80">
-                              {f.metrics.map((m) => (
-                                <div key={m.label}>
-                                  <div className="font-display font-bold text-slate-900 text-sm sm:text-base">
-                                    {m.value}
-                                  </div>
-                                  <div className="font-sans text-[9px] text-slate-500 tracking-wider uppercase mt-0.5 font-medium">
-                                    {m.label}
-                                  </div>
-                                </div>
-                              ))}
-                            </div>
-
-                            {/* Footnote */}
-                            <div className="flex items-start gap-1.5 text-[11px] text-slate-500 font-sans pt-0.5">
-                              <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 mt-1 animate-pulse" />
-                              <span className="line-clamp-1">{f.footnote}</span>
-                            </div>
-                          </motion.div>
-                        )}
-
-                        {/* Active Step Glowing Bottom Progress Bar */}
-                        {isActive && (
-                          <div className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-amber-400 via-amber-500 to-yellow-300 shadow-[0_0_8px_rgba(245,158,11,0.8)]" />
-                        )}
                       </div>
-                    )
-                  })}
-                </div>
+                    ))}
+                  </div>
 
-                {/* RIGHT COLUMN — Smooth Morphing Visual Stage */}
-                <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18] border border-slate-800">
-                  <AnimatePresence mode="wait">
-                    <motion.div
-                      key={`showcase-panel-${activeStep}`}
-                      initial={{ opacity: 0, scale: 0.98, y: 12 }}
-                      animate={{ opacity: 1, scale: 1, y: 0 }}
-                      exit={{ opacity: 0, scale: 0.98, y: -12 }}
-                      transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
-                      className="w-full h-full"
-                    >
-                      {activeStep === 0 && <BenchmarkPanel />}
-                      {activeStep === 1 && <GlobePanel />}
-                      {activeStep === 2 && <VideoPanel />}
-                    </motion.div>
-                  </AnimatePresence>
-                </div>
+                  {/* Footnote */}
+                  <div className="flex items-start gap-2 text-xs text-slate-500 font-sans pt-1">
+                    <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 shrink-0 mt-1.5 animate-pulse" />
+                    <span>{activeFeature.footnote}</span>
+                  </div>
 
+                  {/* Controls */}
+                  <div className="flex items-center justify-between pt-3 border-t border-slate-200/80">
+                    <div className="flex items-center gap-1.5">
+                      {FEATURES.map((_, i) => (
+                        <button
+                          key={i}
+                          type="button"
+                          onClick={() => setActiveStep(i)}
+                          className={`h-2 rounded-full transition-all duration-300 cursor-pointer ${
+                            activeStep === i ? 'w-6 bg-amber-500' : 'w-2 bg-slate-300 hover:bg-slate-400'
+                          }`}
+                          aria-label={`Go to slide ${i + 1}`}
+                        />
+                      ))}
+                    </div>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={() =>
+                          setActiveStep((prev) => (prev > 0 ? prev - 1 : FEATURES.length - 1))
+                        }
+                        className="px-3 py-1 rounded-lg text-xs font-medium font-sans bg-white hover:bg-slate-100 border border-slate-200 text-slate-700 transition cursor-pointer shadow-sm"
+                      >
+                        ← Prev
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => setActiveStep((prev) => (prev + 1) % FEATURES.length)}
+                        className="px-3 py-1 rounded-lg text-xs font-medium font-sans bg-slate-900 hover:bg-slate-800 text-white transition cursor-pointer shadow-sm"
+                      >
+                        Next →
+                      </button>
+                    </div>
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+
+            {/* RIGHT COLUMN: Interactive Visual Stage */}
+            <div className="lg:col-span-7">
+              <div className="w-full h-[520px] sm:h-[540px] relative rounded-2xl overflow-hidden shadow-2xl bg-[#080D18] border border-slate-800">
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`panel-${activeStep}`}
+                    initial={{ opacity: 0, scale: 0.98, y: 10 }}
+                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.98, y: -10 }}
+                    transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                    className="w-full h-full"
+                  >
+                    {activeStep === 0 && <BenchmarkPanel />}
+                    {activeStep === 1 && <GlobePanel />}
+                    {activeStep === 2 && <VideoPanel />}
+                  </motion.div>
+                </AnimatePresence>
               </div>
-
             </div>
           </div>
         </div>
