@@ -8,7 +8,6 @@ import {
 } from 'framer-motion'
 import { GlobalMeshCanvas3D } from './GlobalMeshCanvas3D'
 import { InteractiveDotGrid } from './InteractiveDotGrid'
-import { OrbitalCoffeeMatch3D } from './OrbitalCoffeeMatch3D'
 
 // ─── Feature data ─────────────────────────────────────────────────────────────
 
@@ -57,7 +56,140 @@ const FEATURES = [
 // ─── Right-side visual panels ──────────────────────────────────────────────
 
 function BenchmarkPanel() {
-  return <OrbitalCoffeeMatch3D />
+  return (
+    <div className="relative w-full h-[520px] sm:h-[540px] rounded-2xl bg-[#080D18] border border-slate-800 shadow-2xl p-4 sm:p-5 text-white select-none overflow-hidden flex flex-col justify-between">
+      {/* Top Status Header Bar */}
+      <div className="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-slate-800/80 text-xs font-sans shrink-0">
+        <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-amber-500/10 border border-amber-500/30 text-amber-400 font-medium text-[11px]">
+          <span className="h-1.5 w-1.5 rounded-full bg-amber-400 animate-pulse" />
+          Sub-Second Match Engine
+        </div>
+        <div className="flex items-center gap-3 text-slate-400 text-[11px]">
+          <span>Benchmark: 1,420 Execs Tested</span>
+          <span className="hidden sm:inline text-emerald-400 font-medium">• Latency: 18.4s</span>
+        </div>
+      </div>
+
+      {/* Main Center Display Stage */}
+      <div className="relative w-full flex-1 my-2.5 rounded-xl overflow-hidden bg-[#060913] border border-slate-800/60 p-3 sm:p-3.5 flex flex-col justify-between min-h-0">
+        {/* Subtle Background Grid */}
+        <div className="absolute inset-0 pointer-events-none opacity-20">
+          <div className="absolute left-1/4 top-0 bottom-0 border-r border-dashed border-slate-700" />
+          <div className="absolute left-2/4 top-0 bottom-0 border-r border-dashed border-slate-700" />
+          <div className="absolute left-3/4 top-0 bottom-0 border-r border-dashed border-slate-700" />
+          <div className="absolute top-1/2 left-0 right-0 border-b border-dashed border-slate-700" />
+        </div>
+
+        {/* Ambient Gradient Flare */}
+        <div className="absolute top-0 right-0 w-80 h-80 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Hero Row: RandomCoffee Deterministic Speed */}
+        <div className="relative z-10 rounded-xl bg-gradient-to-r from-amber-500/15 via-amber-500/5 to-transparent border border-amber-500/30 p-2.5 sm:p-3">
+          <div className="flex items-center justify-between mb-1.5">
+            <div className="flex items-center gap-2">
+              <span className="h-2 w-2 rounded-full bg-amber-400 animate-ping" />
+              <span className="text-amber-300 font-display font-medium text-xs sm:text-sm tracking-tight">
+                RandomCoffee Deterministic Engine
+              </span>
+              <span className="hidden sm:inline-block px-2 py-0.5 rounded-full bg-amber-400/20 text-amber-300 text-[10px] font-sans font-semibold tracking-wide">
+                99.8% Faster
+              </span>
+            </div>
+            <div className="text-right">
+              <span className="text-amber-400 font-display font-semibold text-lg sm:text-xl tracking-tight">
+                18.4s
+              </span>
+              <span className="text-slate-400 text-[9.5px] font-sans block">Median time to partner</span>
+            </div>
+          </div>
+
+          {/* Animated Glowing Progress Bar */}
+          <div className="relative h-2 w-full bg-slate-950 rounded-full overflow-hidden border border-amber-500/40 p-0.5">
+            <div
+              className="h-full bg-gradient-to-r from-amber-500 via-amber-400 to-yellow-200 rounded-full transition-all duration-700 relative shadow-[0_0_16px_rgba(245,158,11,0.8)]"
+              style={{ width: '16%' }}
+            >
+              <div className="absolute right-0 top-0 bottom-0 w-2 bg-white rounded-full animate-pulse shadow-[0_0_8px_#ffffff]" />
+            </div>
+          </div>
+        </div>
+
+        {/* Comparison Channel Rows */}
+        <div className="relative z-10 space-y-1.5 my-auto">
+          {[
+            {
+              channel: 'LinkedIn Cold InMail',
+              stat: '14 Days (1.2M sec)',
+              note: '4.8% response rate · $99/mo subscription',
+              width: '52%',
+            },
+            {
+              channel: 'Industry Summits & Conferences',
+              stat: '21 Days + $4,200',
+              note: 'Ticket, flight & hotel · High friction',
+              width: '74%',
+            },
+            {
+              channel: 'Retained Executive Headhunter',
+              stat: '60 Days avg cycle',
+              note: '30% first-year placement compensation',
+              width: '98%',
+            },
+          ].map((row) => (
+            <div
+              key={row.channel}
+              className="p-1.5 sm:p-2 rounded-lg bg-slate-950/60 border border-slate-800/80 hover:border-slate-700 transition-colors"
+            >
+              <div className="flex flex-wrap items-center justify-between text-xs font-sans mb-1 gap-1">
+                <span className="text-slate-200 font-medium text-[11px] sm:text-xs">{row.channel}</span>
+                <div className="flex items-center gap-2">
+                  <span className="text-slate-400 text-[10px] sm:text-[11px]">{row.note}</span>
+                  <span className="text-slate-200 font-semibold text-[11px] sm:text-xs">{row.stat}</span>
+                </div>
+              </div>
+              <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800/80">
+                <div
+                  className="h-full bg-slate-600/70 rounded-full transition-all duration-500"
+                  style={{ width: row.width }}
+                />
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* Bottom Metrics HUD Strip inside center stage */}
+        <div className="relative z-10 grid grid-cols-3 gap-2 pt-1.5 border-t border-slate-800/70 text-center">
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">184 Hrs</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Saved / Exec / Yr</div>
+          </div>
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">0%</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Cold Outreach Waste</div>
+          </div>
+          <div className="bg-slate-950/70 rounded-lg py-1 border border-slate-800/60">
+            <div className="text-amber-400 font-display font-semibold text-xs sm:text-sm">94.2%</div>
+            <div className="text-[9px] text-slate-400 font-sans tracking-normal">Pipeline Conversion</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Bottom Details Drawer */}
+      <div className="pt-2.5 border-t border-slate-800/80 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1.5 text-xs font-sans shrink-0">
+        <div className="flex items-center gap-2 flex-wrap">
+          <span className="text-amber-400 font-semibold">Audited ROI</span>
+          <span className="text-slate-600">·</span>
+          <span className="text-slate-300 text-[11.5px]">
+            94.2% of matched executive calls convert to active deal pipeline in 48 hours.
+          </span>
+        </div>
+        <div className="flex items-center gap-2 text-[11px] text-emerald-400 font-medium shrink-0">
+          <span className="h-1.5 w-1.5 rounded-full bg-emerald-400 shadow-[0_0_8px_#34d399] animate-pulse" />
+          Verified ROI Engine
+        </div>
+      </div>
+    </div>
+  )
 }
 
 function GlobePanel() {
