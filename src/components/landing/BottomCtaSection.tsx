@@ -66,7 +66,7 @@ export function BottomCtaSection({}: BottomCtaSectionProps = {}) {
               {/* Top badge inside 3D card */}
               <div className="absolute top-3.5 left-4 flex items-center gap-2 font-sans text-[10.5px] font-medium text-zinc-400 tracking-wider uppercase z-10 pointer-events-none">
                 <span className="h-2 w-2 rounded-full bg-gold-400 shadow-[0_0_8px_#d4af37]" />
-                Orbital Match Protocol
+                Coffee Match Engine
               </div>
 
               {/* 3D Gyro Engine Canvas */}
